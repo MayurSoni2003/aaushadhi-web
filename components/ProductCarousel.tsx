@@ -10,42 +10,25 @@ type Props = {
 
 export default function ProductCarousel({ products }: Props) {
   const [active, setActive] = useState(1);
+  const [animating, setAnimating] = useState(false);
 
-  const prev = () => {
-    setActive((p) =>
-      p === 0 ? products.length - 1 : p - 1
-    );
+  const navigate = (next: number) => {
+    if (animating) return;
+    setAnimating(true);
+    setActive(next);
+    setTimeout(() => setAnimating(false), 500);
   };
 
-  const next = () => {
-    setActive((p) =>
-      p === products.length - 1 ? 0 : p + 1
-    );
-  };
+  const prev = () =>
+    navigate(active === 0 ? products.length - 1 : active - 1);
 
-  const getVisibleProducts = () => {
-    const prevIndex =
-      active === 0
-        ? products.length - 1
-        : active - 1;
-
-    const nextIndex =
-      active === products.length - 1
-        ? 0
-        : active + 1;
-
-    return [
-      products[prevIndex],
-      products[active],
-      products[nextIndex],
-    ];
-  };
-
-  const visible = getVisibleProducts();
+  const next = () =>
+    navigate(active === products.length - 1 ? 0 : active + 1);
 
   return (
     <section className="py-12">
       <div className="relative max-w-5xl mx-auto px-4 md:px-12">
+        <div className="relative h-[520px] flex items-center"> 
         {/* Left arrow */}
         <button
           onClick={prev}
@@ -66,45 +49,42 @@ export default function ProductCarousel({ products }: Props) {
           </svg>
         </button>
 
-        {/* Cards */}
+        {/* Cards viewport */}
+        <div className="overflow-hidden px-16 w-full" onWheel={(e) => e.stopPropagation()}>
+          <div
+            className="flex items-end gap-6 transition-transform duration-500 ease-in-out"
+            style={{
+              // Shift the full strip so `active` card is centred.
+              // Each card slot is ~296px (270px + 24px gap); centre slot offset is 1 slot.
+              transform: `translateX(calc(50% - ${active * 294 + 160}px))`,
+            }}
+          >
+            {products.map((product, index) => {
+              const center = index === active;
+              const adjacent =
+                index === (active - 1 + products.length) % products.length ||
+                index === (active + 1) % products.length;
 
-      <div
-        className="
-        flex
-        justify-center
-        items-end
-        gap-6
-
-        px-16
-        overflow-hidden
-        "
-      >
-        {visible.map((product, index) => {
-
-          const center = index === 1;
-
-          return (
-            <div
-              key={`${product.id}-${index}`}
-              className={`
-              transition-all
-              duration-500
-
-              ${
-                center
-                  ? "scale-100 w-[320px]"
-                  : "scale-90 opacity-75 w-[270px]"
-              }
-              `}
-            >
-              <ProductCard
-                product={product}
-                featured={center}
-              />
-            </div>
-          );
-        })}
-      </div>
+              return (
+                <div
+                  key={product.id}   // ← stable key, not index-based
+                  className={`
+                    flex-shrink-0
+                    transition-all duration-500
+                    ${center
+                      ? "scale-100 opacity-100 w-[320px]"
+                      : adjacent
+                      ? "scale-90 opacity-75 w-[270px]"
+                      : "scale-75 opacity-0 w-[270px] pointer-events-none"
+                    }
+                  `}
+                >
+                  <ProductCard product={product} featured={center} />
+                </div>
+              );
+            })}
+          </div>
+        </div>
 
         {/* Right arrow */}
         <button
@@ -125,40 +105,22 @@ export default function ProductCarousel({ products }: Props) {
             <path d="M9 18l6-6-6-6" />
           </svg>
         </button>
+        </div>
       </div>
 
       {/* Dots */}
-
-      <div
-        className="
-        flex
-        justify-center
-        mt-8
-        gap-2
-        "
-      >
+      <div className="flex justify-center mt-8 gap-2">
         {products.map((_, i) => (
-
           <button
             key={i}
-            onClick={() => setActive(i)}
+            onClick={() => navigate(i)}
             className={`
-            transition-all
-
-            ${
-              i === active
-                ? "w-6 bg-olive"
-                : "w-2 bg-olive/30"
-            }
-
-            h-2
-            rounded-full
+              transition-all h-2 rounded-full
+              ${i === active ? "w-6 bg-olive" : "w-2 bg-olive/30"}
             `}
           />
-
         ))}
       </div>
-
     </section>
   );
 }
