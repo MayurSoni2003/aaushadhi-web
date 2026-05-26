@@ -1,62 +1,91 @@
 export default function Hero() {
   return (
-    <section className="relative z-10 px-4 md:px-8 pt-4 pb-10">
-      {/* Glassmorphism hero card — matches wireframe exactly */}
-      <div
-        className="mx-auto w-full max-w-4xl rounded-3xl px-8 md:px-16 py-10 md:py-14 text-center"
-        style={{
-          background: "rgba(255, 255, 255, 0.5)",
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
-          border: "1.5px solid rgba(255, 255, 255, 0.6)",
-          boxShadow:
-            "0 8px 40px rgba(0,0,0,0.04), 0 1px 3px rgba(255,255,255,0.4) inset",
-        }}
-      >
-        {/* Heading */}
-        <h1
-          className="text-3xl md:text-5xl lg:text-[3.4rem] font-bold text-olive leading-[1.15] mb-4"
-          style={{ fontFamily: "var(--font-playfair)", fontStyle: "italic" }}
-        >
-          Embrace Ayurvedic Wisdom
-        </h1>
+    <section className="relative z-10 px-4 md:px-8 pt-4 pb-16">
 
-        {/* Subtitle */}
-        <p className="text-text-muted text-sm md:text-base mb-8 max-w-xl mx-auto leading-relaxed">
-          Discover the healing power of nature&apos;s purity for holistic well-being.
-        </p>
+      {/* Wrapper controls overlap */}
+      <div className="max-w-4xl mx-auto relative">
 
-        {/* Search bar — rounded pill */}
+        {/* Hero glass box */}
+
         <div
-          id="hero-search-bar"
-          className="flex items-center gap-3 max-w-md mx-auto rounded-full px-5 py-3"
+          className=" rounded-3xl px-8 md:px-16 pt-10 md:pt-14 pb-16 md:pb-20 text-center"
           style={{
-            background: "rgba(255, 255, 255, 0.85)",
-            border: "1.5px solid rgba(92,107,46, 0.15)",
-            boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
+            background: "rgba(255,255,255,0.5)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+
+            border:
+              "1.5px solid rgba(255,255,255,0.6)",
+
+            boxShadow:
+              "0 8px 40px rgba(0,0,0,0.04), inset 0 1px 3px rgba(255,255,255,0.4)",
           }}
         >
-          <span className="text-text-muted text-sm flex-1 text-left select-none">
-            Search for powders, remedies...
-          </span>
-          {/* Search icon — olive circle with white magnifying glass */}
-          <div className="w-9 h-9 rounded-full bg-olive flex items-center justify-center flex-shrink-0">
+          <h1
+            className=" text-3xl md:text-5xl lg:text-[3.4rem] font-bold text-olive leading-[1.15] mb-4 "
+            style={{
+              fontFamily:
+                "var(--font-playfair)",
+              fontStyle: "italic",
+            }}
+          >
+            Embrace Ayurvedic Wisdom
+          </h1>
+
+          <p className="text-text-muted text-sm md:text-base max-w-xl mx-auto leading-relaxed">
+            Discover the healing power of nature&apos;s
+            purity for holistic well-being.
+          </p>
+        </div>
+
+        {/* Overlapping search */}
+
+        <div
+          className=" absolute left-1/2 -translate-x-1/2 -bottom-6 w-[85%] max-w-md"
+        >
+          <div
+            className=" flex items-center gap-3 rounded-full px-5 py-3 "
+            style={{
+              background:
+                "rgba(255,255,255,0.85)",
+
+              border:
+                "1.5px solid rgba(92,107,46,0.15)",
+
+              boxShadow:
+                "0 4px 16px rgba(0,0,0,0.05)",
+
+              backdropFilter: "blur(12px)",
+            }}
+          >
+            <span
+              className=" flex-1 text-left text-sm text-text-muted "
+            >
+              Search for powders, remedies...
+            </span>
+
             <svg
-              width="16"
-              height="16"
+              width="18"
+              height="18"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="white"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+              stroke="#6B6A16"
+              strokeWidth="2"
             >
-              <circle cx="11" cy="11" r="8" />
+              <circle
+                cx="11"
+                cy="11"
+                r="8"
+              />
+
               <path d="m21 21-4.35-4.35" />
             </svg>
+
           </div>
         </div>
+
       </div>
+
     </section>
   );
 }
