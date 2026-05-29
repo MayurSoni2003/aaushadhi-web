@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import type { Product } from "@/data/products";
+import type { CatalogProduct } from "@/data/catalog";
 import ProductCard from "@/components/ProductCard";
 
 type Props = {
-  products: Product[];
+  products: CatalogProduct[];
 };
 
 export default function ProductCarousel({ products }: Props) {

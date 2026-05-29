@@ -2,14 +2,14 @@ import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import ProductCarousel from "@/components/ProductCarousel";
 import Footer from "@/components/Footer";
-import { products } from "@/data/products";
+import { catalog } from "@/data/catalog";
 
 export default function Home() {
   return (
     <>
       {/* Full-page dreamy gradient background — everything sits on this */}
       <div
-        className="relative min-h-screen overflow-hidden"
+        className="relative min-h-screen overflow-clip"
         style={{
           background:
             "linear-gradient(170deg, #EDE3CA 0%, #F5EAD6 15%, #F2D4C0 35%, #ECC8B8 48%, #E0C8C4 55%, #D4CEDB 65%, #C8D6E2 78%, #D0DBE6 90%, #D6DDE8 100%)",
@@ -78,7 +78,7 @@ export default function Home() {
           <Navbar />
           <main>
             <Hero />
-            <ProductCarousel products={products} />
+            <ProductCarousel products={catalog.slice(0, 6)} />
           </main>
         </div>
       </div>

@@ -18,7 +18,7 @@ export const catalog: CatalogProduct[] = [
     benefits: ["Rich in Fiber", "Supports Digestion", "Helps in Weight Management"],
     price: 179,
     originalPrice: 249,
-    image: "/products/placeholder.svg",
+    image: "/products/ashwagandha.png",
   },
   {
     id: 2,
@@ -28,7 +28,7 @@ export const catalog: CatalogProduct[] = [
     benefits: ["Supports Digestive Health", "Relieves Constipation", "Promotes Gut Health"],
     price: 199,
     originalPrice: 299,
-    image: "/products/placeholder.svg",
+    image: "/products/amla.png",
   },
   {
     id: 3,
@@ -38,7 +38,7 @@ export const catalog: CatalogProduct[] = [
     benefits: ["Promotes Hair Growth", "Nourishes Scalp", "Prevents Premature Greying"],
     price: 189,
     originalPrice: 269,
-    image: "/products/placeholder.svg",
+    image: "/products/brahmi.png",
   },
   {
     id: 4,

@@ -1,8 +1,9 @@
 import Image from "next/image";
-import type { Product } from "@/data/products";
+import Link from "next/link";
+import type { CatalogProduct } from "@/data/catalog";
 
 type Props = {
-  product: Product;
+  product: CatalogProduct;
   featured?: boolean;
 };
 
@@ -79,14 +80,15 @@ export default function ProductCard({
         <p
           className="mt-3 text-text-muted text-sm leading-relaxed"
         >
-          {product.benefit}
+          {product.benefits[0]}
         </p>
 
         {/* CTA */}
 
         <div className="mt-auto pt-5">
-          <button
-            className="flex items-center gap-2 text-olive text-sm font-semibold transition-all duration-300 hover:gap-3"
+          <Link
+            href={`/products/${product.slug}`}
+            className="inline-flex items-center gap-2 text-olive text-sm font-semibold transition-all duration-300 hover:gap-3"
           >
             Explore
 
@@ -95,7 +97,7 @@ export default function ProductCard({
             >
               →
             </span>
-          </button>
+          </Link>
         </div>
       </div>
     </article>

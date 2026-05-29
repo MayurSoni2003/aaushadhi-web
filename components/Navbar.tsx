@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useCart } from "@/context/CartContext";
 
 const navLinks = [
-  { label: "Home", href: "#" },
+  { label: "Home", href: "/" },
   { label: "Remedies", href: "#" },
   { label: "Products", href: "/products" },
   { label: "Wellness Blog", href: "#" },
@@ -13,12 +14,13 @@ const navLinks = [
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { cartCount } = useCart();
 
   return (
-    <header className="relative z-50">
+    <header className="sticky top-0 z-50 bg-cream/80 backdrop-blur-md border-b border-olive/10">
       <nav className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
         {/* Logo */}
-        <Link href="#" className="flex items-center gap-2.5 group">
+        <Link href="/" className="flex items-center gap-2.5 group">
           {/* Leaf SVG icon */}
           <svg
             width="38"
@@ -72,37 +74,94 @@ export default function Navbar() {
           </div>
         </Link>
 
-        {/* Desktop Nav Links */}
-        <ul className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => (
-            <li key={link.label}>
-              <Link
-                href={link.href}
-                className="text-text-dark text-[15px] font-medium hover:text-olive transition-colors duration-200"
-              >
-                {link.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
+        {/* Desktop Nav Links + Cart */}
+        <div className="hidden md:flex items-center gap-8">
+          <ul className="flex items-center gap-8">
+            {navLinks.map((link) => (
+              <li key={link.label}>
+                <Link
+                  href={link.href}
+                  className="text-text-dark text-[15px] font-medium hover:text-olive transition-colors duration-200"
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
 
-        {/* Hamburger for mobile */}
-        <button
-          id="nav-hamburger"
-          className="md:hidden flex flex-col gap-1.5 p-2 rounded-lg hover:bg-white/30 transition-colors"
-          onClick={() => setMenuOpen((prev) => !prev)}
-          aria-label="Toggle menu"
-        >
-          <span
-            className={`block h-0.5 w-6 bg-text-dark rounded transition-all duration-300 ${menuOpen ? "rotate-45 translate-y-2" : ""}`}
-          />
-          <span
-            className={`block h-0.5 w-6 bg-text-dark rounded transition-all duration-300 ${menuOpen ? "opacity-0" : ""}`}
-          />
-          <span
-            className={`block h-0.5 w-6 bg-text-dark rounded transition-all duration-300 ${menuOpen ? "-rotate-45 -translate-y-2" : ""}`}
-          />
-        </button>
+          {/* Cart icon */}
+          <Link
+            href="/cart"
+            className="relative flex items-center gap-1.5 text-text-dark hover:text-olive transition-colors duration-200"
+          >
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="9" cy="21" r="1" />
+              <circle cx="20" cy="21" r="1" />
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+            </svg>
+            {cartCount > 0 && (
+              <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-olive text-white text-[10px] font-bold flex items-center justify-center">
+                {cartCount}
+              </span>
+            )}
+          </Link>
+        </div>
+
+        {/* Mobile: Cart + Hamburger */}
+        <div className="md:hidden flex items-center gap-3">
+          {/* Cart icon (mobile) */}
+          <Link
+            href="/cart"
+            className="relative flex items-center text-text-dark hover:text-olive transition-colors"
+          >
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="9" cy="21" r="1" />
+              <circle cx="20" cy="21" r="1" />
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+            </svg>
+            {cartCount > 0 && (
+              <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-olive text-white text-[10px] font-bold flex items-center justify-center">
+                {cartCount}
+              </span>
+            )}
+          </Link>
+
+          {/* Hamburger */}
+          <button
+            id="nav-hamburger"
+            className="flex flex-col gap-1.5 p-2 rounded-lg hover:bg-white/30 transition-colors"
+            onClick={() => setMenuOpen((prev) => !prev)}
+            aria-label="Toggle menu"
+          >
+            <span
+              className={`block h-0.5 w-6 bg-text-dark rounded transition-all duration-300 ${menuOpen ? "rotate-45 translate-y-2" : ""}`}
+            />
+            <span
+              className={`block h-0.5 w-6 bg-text-dark rounded transition-all duration-300 ${menuOpen ? "opacity-0" : ""}`}
+            />
+            <span
+              className={`block h-0.5 w-6 bg-text-dark rounded transition-all duration-300 ${menuOpen ? "-rotate-45 -translate-y-2" : ""}`}
+            />
+          </button>
+        </div>
       </nav>
 
       {/* Mobile Menu */}

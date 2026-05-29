@@ -40,48 +40,37 @@ export default function Hero() {
 
         {/* Overlapping search */}
 
-        <div
-          className=" absolute left-1/2 -translate-x-1/2 -bottom-6 w-[85%] max-w-md"
-        >
-          <div
-            className=" flex items-center gap-3 rounded-full px-5 py-3 "
+        <div className="absolute left-1/2 -translate-x-1/2 -bottom-6 w-[85%] max-w-md">
+          <form
+            action="/products"
+            className="flex items-center gap-3 rounded-full px-5 py-3"
             style={{
-              background:
-                "rgba(255,255,255,0.85)",
-
-              border:
-                "1.5px solid rgba(92,107,46,0.15)",
-
-              boxShadow:
-                "0 4px 16px rgba(0,0,0,0.05)",
-
+              background: "rgba(255,255,255,0.85)",
+              border: "1.5px solid rgba(92,107,46,0.15)",
+              boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
               backdropFilter: "blur(12px)",
             }}
           >
-            <span
-              className=" flex-1 text-left text-sm text-text-muted "
-            >
-              Search for powders, remedies...
-            </span>
-
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#6B6A16"
-              strokeWidth="2"
-            >
-              <circle
-                cx="11"
-                cy="11"
-                r="8"
-              />
-
-              <path d="m21 21-4.35-4.35" />
-            </svg>
-
-          </div>
+            <input
+              type="text"
+              name="q"
+              placeholder="Search for powders, remedies..."
+              className="flex-1 bg-transparent border-none outline-none text-sm text-text-dark placeholder-text-muted"
+            />
+            <button type="submit" aria-label="Search">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#6B6A16"
+                strokeWidth="2"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.35-4.35" />
+              </svg>
+            </button>
+          </form>
         </div>
 
       </div>

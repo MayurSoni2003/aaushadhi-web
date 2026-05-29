@@ -1,11 +1,18 @@
+"use client";
+
 import Image from "next/image";
+import Link from "next/link";
 import type { CatalogProduct } from "@/data/catalog";
+import { useCart } from "@/context/CartContext";
 
 type Props = {
   product: CatalogProduct;
 };
 
 export default function CatalogCard({ product }: Props) {
+  const { addToCart, updateQuantity, getQuantity } = useCart();
+  const qty = getQuantity(product.id);
+
   const discount = Math.round(
     ((product.originalPrice - product.price) / product.originalPrice) * 100
   );
@@ -24,7 +31,7 @@ export default function CatalogCard({ product }: Props) {
       }}
     >
       {/* Product image */}
-      <div className="relative aspect-square overflow-hidden bg-parchment/40">
+      <Link href={`/products/${product.slug}`} className="relative aspect-square overflow-hidden bg-parchment/40 block">
         <Image
           src={product.image}
           alt={product.name}
@@ -36,11 +43,11 @@ export default function CatalogCard({ product }: Props) {
 
         {/* Discount badge */}
         {discount > 0 && (
-          <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold text-white uppercase tracking-wider bg-olive/90">
+          <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold text-white uppercase tracking-wider bg-olive/90 z-10">
             {discount}% OFF
           </span>
         )}
-      </div>
+      </Link>
 
       {/* Card body */}
       <div className="px-4 py-4 flex flex-col gap-1.5 flex-1">
@@ -50,12 +57,14 @@ export default function CatalogCard({ product }: Props) {
         </p>
 
         {/* Name */}
-        <h3
-          className="text-text-dark font-bold text-[15px] leading-snug"
-          style={{ fontFamily: "var(--font-playfair)" }}
-        >
-          {product.name}
-        </h3>
+        <Link href={`/products/${product.slug}`} className="hover:text-olive transition-colors duration-200">
+          <h3
+            className="text-text-dark font-bold text-[15px] leading-snug hover:text-olive transition-colors"
+            style={{ fontFamily: "var(--font-playfair)" }}
+          >
+            {product.name}
+          </h3>
+        </Link>
 
         {/* Benefits (show first 2) */}
         <ul className="mt-1 space-y-0.5">
@@ -70,29 +79,57 @@ export default function CatalogCard({ product }: Props) {
           ))}
         </ul>
 
-        {/* Price row */}
-        <div className="mt-auto pt-3 flex items-baseline gap-2">
+        {/* Price row with "per 100g" */}
+        <div className="mt-auto pt-3 flex items-baseline gap-2 flex-wrap">
           <span className="text-olive font-bold text-lg">
             ₹{product.price}
           </span>
           <span className="text-text-muted text-sm line-through">
             ₹{product.originalPrice}
           </span>
+          <span className="text-text-muted text-[11px]">per 100g</span>
         </div>
 
-        {/* View Details button */}
-        <button
-          type="button"
-          className="
-            mt-2 w-full py-2 rounded-full text-[12px] font-semibold uppercase tracking-wider
-            border border-olive/30 text-olive
-            hover:bg-olive hover:text-white
-            transition-all duration-200
-            cursor-pointer
-          "
-        >
-          View Details
-        </button>
+        {/* Add to Cart / Quantity controls */}
+        {qty === 0 ? (
+          <button
+            type="button"
+            onClick={() => addToCart(product)}
+            className="
+              mt-2 w-full py-2.5 rounded-full text-[12px] font-semibold uppercase tracking-wider
+              bg-olive text-white
+              hover:bg-olive-light
+              active:scale-[0.97]
+              transition-all duration-200
+              cursor-pointer
+              shadow-sm
+            "
+          >
+            Add to Cart
+          </button>
+        ) : (
+          <div className="mt-2 flex items-center justify-between rounded-full border border-olive/20 overflow-hidden">
+            <button
+              type="button"
+              onClick={() => updateQuantity(product.id, qty - 1)}
+              className="px-4 py-2 text-olive font-bold text-lg hover:bg-olive/10 transition-colors cursor-pointer"
+              aria-label="Decrease quantity"
+            >
+              −
+            </button>
+            <span className="text-text-dark font-semibold text-sm">
+              {qty} × 100g
+            </span>
+            <button
+              type="button"
+              onClick={() => updateQuantity(product.id, qty + 1)}
+              className="px-4 py-2 text-olive font-bold text-lg hover:bg-olive/10 transition-colors cursor-pointer"
+              aria-label="Increase quantity"
+            >
+              +
+            </button>
+          </div>
+        )}
       </div>
     </article>
   );

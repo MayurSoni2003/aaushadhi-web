@@ -10,7 +10,13 @@ export const metadata: Metadata = {
     "Browse our complete collection of certified organic Ayurvedic herbal powders. 100% natural, lab-tested remedies for holistic wellness.",
 };
 
-export default function ProductsPage() {
+type Props = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export default async function ProductsPage({ searchParams }: Props) {
+  const resolvedParams = await searchParams;
+  const initialSearch = typeof resolvedParams.q === "string" ? resolvedParams.q : "";
   return (
     <>
       {/* Page wrapper with cream bg */}
@@ -37,7 +43,7 @@ export default function ProductsPage() {
           </div>
 
           {/* Product grid with Load More */}
-          <ProductGrid products={catalog} />
+          <ProductGrid products={catalog} initialSearch={initialSearch} />
         </main>
 
         <Footer />
