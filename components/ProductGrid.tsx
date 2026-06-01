@@ -1,28 +1,45 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import type { CatalogProduct } from "@/data/catalog";
+import type { StrapiProduct } from "@/lib/types";
 import CatalogCard from "@/components/CatalogCard";
 
 type Props = {
-  products: CatalogProduct[];
+  products: StrapiProduct[];
+  categories: { name: string; slug: string }[];
   initialSearch?: string;
 };
 
 const BATCH_SIZE = 8;
 
-export default function ProductGrid({ products, initialSearch = "" }: Props) {
+export default function ProductGrid({ products, categories, initialSearch = "" }: Props) {
   const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
   const [searchQuery, setSearchQuery] = useState(initialSearch);
+  const [activeCategory, setActiveCategory] = useState<string>("all");
 
   const filteredProducts = useMemo(() => {
-    if (!searchQuery.trim()) return products;
-    const lowerQuery = searchQuery.toLowerCase();
-    return products.filter((product) =>
-      product.name.toLowerCase().includes(lowerQuery) ||
-      product.category.toLowerCase().includes(lowerQuery)
-    );
-  }, [products, searchQuery]);
+    let filtered = products;
+
+    // Category filter
+    if (activeCategory !== "all") {
+      filtered = filtered.filter(
+        (product) => product.category?.slug === activeCategory
+      );
+    }
+
+    // Search filter
+    if (searchQuery.trim()) {
+      const lowerQuery = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (product) =>
+          product.productName.toLowerCase().includes(lowerQuery) ||
+          (product.category?.name ?? "").toLowerCase().includes(lowerQuery) ||
+          product.tagline.toLowerCase().includes(lowerQuery)
+      );
+    }
+
+    return filtered;
+  }, [products, searchQuery, activeCategory]);
 
   const visibleProducts = filteredProducts.slice(0, visibleCount);
   const hasMore = visibleCount < filteredProducts.length;
@@ -33,13 +50,18 @@ export default function ProductGrid({ products, initialSearch = "" }: Props) {
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-    setVisibleCount(BATCH_SIZE); // reset pagination when search changes
+    setVisibleCount(BATCH_SIZE);
+  };
+
+  const handleCategoryChange = (slug: string) => {
+    setActiveCategory(slug);
+    setVisibleCount(BATCH_SIZE);
   };
 
   return (
     <div>
       {/* Search Bar */}
-      <div className="mb-8 max-w-md mx-auto relative">
+      <div className="mb-6 max-w-md mx-auto relative">
         <input
           type="text"
           value={searchQuery}
@@ -69,6 +91,43 @@ export default function ProductGrid({ products, initialSearch = "" }: Props) {
           <path d="m21 21-4.35-4.35" />
         </svg>
       </div>
+
+      {/* Category filter tabs */}
+      {categories.length > 0 && (
+        <div className="mb-8 flex flex-wrap justify-center gap-2">
+          <button
+            type="button"
+            onClick={() => handleCategoryChange("all")}
+            className={`
+              px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-wider
+              transition-all duration-200 cursor-pointer
+              ${activeCategory === "all"
+                ? "bg-olive text-white shadow-md"
+                : "bg-white/60 text-text-muted border border-olive/15 hover:bg-olive/10 hover:text-olive"
+              }
+            `}
+          >
+            All
+          </button>
+          {categories.map((cat) => (
+            <button
+              key={cat.slug}
+              type="button"
+              onClick={() => handleCategoryChange(cat.slug)}
+              className={`
+                px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-wider
+                transition-all duration-200 cursor-pointer
+                ${activeCategory === cat.slug
+                  ? "bg-olive text-white shadow-md"
+                  : "bg-white/60 text-text-muted border border-olive/15 hover:bg-olive/10 hover:text-olive"
+                }
+              `}
+            >
+              {cat.name}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Product grid */}
       {filteredProducts.length > 0 ? (
@@ -116,7 +175,7 @@ export default function ProductGrid({ products, initialSearch = "" }: Props) {
         <div className="text-center py-20">
           <p className="text-text-muted text-lg mb-2">No products found</p>
           <p className="text-text-muted text-sm">
-            Try adjusting your search query.
+            Try adjusting your search query or category filter.
           </p>
         </div>
       )}

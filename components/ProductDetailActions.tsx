@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
-import type { CatalogProduct } from "@/data/catalog";
+import type { CartProduct } from "@/lib/types";
 
 type Props = {
-  product: CatalogProduct;
+  product: CartProduct;
 };
 
 export default function ProductDetailActions({ product }: Props) {

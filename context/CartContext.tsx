@@ -7,10 +7,10 @@ import {
   useCallback,
   type ReactNode,
 } from "react";
-import type { CatalogProduct } from "@/data/catalog";
+import type { CartProduct } from "@/lib/types";
 
 export type CartItem = {
-  product: CatalogProduct;
+  product: CartProduct;
   quantity: number; // units of 100g
 };
 
@@ -18,7 +18,7 @@ type CartContextType = {
   cartItems: CartItem[];
   cartCount: number;
   cartTotal: number;
-  addToCart: (product: CatalogProduct) => void;
+  addToCart: (product: CartProduct) => void;
   removeFromCart: (productId: number) => void;
   updateQuantity: (productId: number, qty: number) => void;
   clearCart: () => void;
@@ -30,7 +30,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
-  const addToCart = useCallback((product: CatalogProduct) => {
+  const addToCart = useCallback((product: CartProduct) => {
     setCartItems((prev) => {
       const existing = prev.find((item) => item.product.id === product.id);
       if (existing) {

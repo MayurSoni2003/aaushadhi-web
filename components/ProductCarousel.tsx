@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import type { CatalogProduct } from "@/data/catalog";
+import type { StrapiProduct } from "@/lib/types";
 import ProductCard from "@/components/ProductCard";
 
 type Props = {
-  products: CatalogProduct[];
+  products: StrapiProduct[];
 };
 
 export default function ProductCarousel({ products }: Props) {
@@ -67,7 +67,7 @@ export default function ProductCarousel({ products }: Props) {
 
               return (
                 <div
-                  key={product.id}   // ← stable key, not index-based
+                  key={product.id}
                   className={`
                     flex-shrink-0
                     transition-all duration-500

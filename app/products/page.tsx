@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductGrid from "@/components/ProductGrid";
-import { catalog } from "@/data/catalog";
+import { getProducts, getCategories } from "@/lib/strapi";
 
 export const metadata: Metadata = {
   title: "Our Products — Aaushadhi Wellness",
@@ -17,6 +17,12 @@ type Props = {
 export default async function ProductsPage({ searchParams }: Props) {
   const resolvedParams = await searchParams;
   const initialSearch = typeof resolvedParams.q === "string" ? resolvedParams.q : "";
+
+  const [products, categories] = await Promise.all([
+    getProducts(),
+    getCategories(),
+  ]);
+
   return (
     <>
       {/* Page wrapper with cream bg */}
@@ -43,7 +49,11 @@ export default async function ProductsPage({ searchParams }: Props) {
           </div>
 
           {/* Product grid with Load More */}
-          <ProductGrid products={catalog} initialSearch={initialSearch} />
+          <ProductGrid
+            products={products}
+            categories={categories.map((c) => ({ name: c.name, slug: c.slug }))}
+            initialSearch={initialSearch}
+          />
         </main>
 
         <Footer />

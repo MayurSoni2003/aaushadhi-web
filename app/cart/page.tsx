@@ -18,7 +18,7 @@ export default function CartPage() {
     const lines = cartItems.map((item, i) => {
       const totalGrams = item.quantity * 100;
       const lineTotal = item.product.price * item.quantity;
-      return `${i + 1}. ${item.product.name} × ${item.quantity} (${totalGrams}g) — ₹${lineTotal}`;
+      return `${i + 1}. ${item.product.productName} × ${item.quantity} (${totalGrams}g) — ₹${lineTotal}`;
     });
 
     const message = [
@@ -117,8 +117,8 @@ export default function CartPage() {
                     {/* Product image */}
                     <div className="relative w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden bg-parchment/40">
                       <Image
-                        src={item.product.image}
-                        alt={item.product.name}
+                        src={item.product.mainImageUrl}
+                        alt={item.product.productName}
                         fill
                         className="object-cover"
                         sizes="80px"
@@ -131,7 +131,7 @@ export default function CartPage() {
                         className="text-text-dark font-bold text-[15px] leading-snug truncate"
                         style={{ fontFamily: "var(--font-playfair)" }}
                       >
-                        {item.product.name}
+                        {item.product.productName}
                       </h3>
                       <p className="text-text-muted text-[12px] mt-0.5">
                         ₹{item.product.price} per 100g
@@ -222,7 +222,7 @@ export default function CartPage() {
                       className="flex justify-between text-sm"
                     >
                       <span className="text-text-muted truncate pr-2">
-                        {item.product.name} × {item.quantity}
+                        {item.product.productName} × {item.quantity}
                       </span>
                       <span className="text-text-dark font-medium flex-shrink-0">
                         ₹{item.product.price * item.quantity}

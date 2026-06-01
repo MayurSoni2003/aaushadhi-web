@@ -1,9 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { CatalogProduct } from "@/data/catalog";
+import type { StrapiProduct } from "@/lib/types";
+import { getStrapiImageUrl } from "@/lib/strapi";
 
 type Props = {
-  product: CatalogProduct;
+  product: StrapiProduct;
   featured?: boolean;
 };
 
@@ -11,6 +12,10 @@ export default function ProductCard({
   product,
   featured = false,
 }: Props) {
+  const imageUrl = getStrapiImageUrl(product.mainImage);
+  const categoryName = product.category?.name ?? "Wellness";
+  const firstBenefit = product.keyBenefits?.[0]?.title ?? product.tagline;
+
   return (
     <article
       className={`group relative overflow-hidden rounded-[28px] flex flex-col w-full flex-shrink-0 transition-all duration-500 ease-out
@@ -37,8 +42,8 @@ export default function ProductCard({
         className="relative aspect-square overflow-hidden rounded-[22px] m-4 bg-parchment/40"
       >
         <Image
-          src={product.image}
-          alt={product.name}
+          src={imageUrl}
+          alt={product.productName}
           fill
           quality={80}
           sizes="(max-width:768px)100vw,33vw"
@@ -57,7 +62,7 @@ export default function ProductCard({
         <p
           className="text-[11px] uppercase tracking-[0.18em] text-olive/75 font-medium mb-2"
         >
-          {product.category}
+          {categoryName}
         </p>
 
         {/* Name */}
@@ -72,7 +77,7 @@ export default function ProductCard({
             fontFamily:"var(--font-playfair)",
           }}
         >
-          {product.name}
+          {product.productName}
         </h3>
 
         {/* Benefit */}
@@ -80,7 +85,7 @@ export default function ProductCard({
         <p
           className="mt-3 text-text-muted text-sm leading-relaxed"
         >
-          {product.benefits[0]}
+          {firstBenefit}
         </p>
 
         {/* CTA */}

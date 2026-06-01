@@ -2,20 +2,36 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import type { CatalogProduct } from "@/data/catalog";
 import { useCart } from "@/context/CartContext";
+import { getStrapiImageUrl } from "@/lib/strapi";
+import type { StrapiProduct, CartProduct } from "@/lib/types";
 
 type Props = {
-  product: CatalogProduct;
+  product: StrapiProduct;
 };
+
+function toCartProduct(product: StrapiProduct): CartProduct {
+  return {
+    id: product.id,
+    productName: product.productName,
+    slug: product.slug,
+    price: product.price,
+    comparePrice: product.comparePrice,
+    mainImageUrl: getStrapiImageUrl(product.mainImage),
+  };
+}
 
 export default function CatalogCard({ product }: Props) {
   const { addToCart, updateQuantity, getQuantity } = useCart();
   const qty = getQuantity(product.id);
 
   const discount = Math.round(
-    ((product.originalPrice - product.price) / product.originalPrice) * 100
+    ((product.comparePrice - product.price) / product.comparePrice) * 100
   );
+
+  const imageUrl = getStrapiImageUrl(product.mainImage);
+  const categoryName = product.category?.name ?? "Wellness";
+  const benefits = product.keyBenefits ?? [];
 
   return (
     <article
@@ -33,8 +49,8 @@ export default function CatalogCard({ product }: Props) {
       {/* Product image */}
       <Link href={`/products/${product.slug}`} className="relative aspect-square overflow-hidden bg-parchment/40 block">
         <Image
-          src={product.image}
-          alt={product.name}
+          src={imageUrl}
+          alt={product.productName}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -53,7 +69,7 @@ export default function CatalogCard({ product }: Props) {
       <div className="px-4 py-4 flex flex-col gap-1.5 flex-1">
         {/* Category */}
         <p className="text-[10px] uppercase tracking-[0.18em] text-olive/70 font-medium">
-          {product.category}
+          {categoryName}
         </p>
 
         {/* Name */}
@@ -62,22 +78,31 @@ export default function CatalogCard({ product }: Props) {
             className="text-text-dark font-bold text-[15px] leading-snug hover:text-olive transition-colors"
             style={{ fontFamily: "var(--font-playfair)" }}
           >
-            {product.name}
+            {product.productName}
           </h3>
         </Link>
 
         {/* Benefits (show first 2) */}
-        <ul className="mt-1 space-y-0.5">
-          {product.benefits.slice(0, 2).map((benefit) => (
-            <li
-              key={benefit}
-              className="text-text-muted text-[12px] leading-relaxed flex items-start gap-1.5"
-            >
-              <span className="text-olive/60 mt-0.5 text-[10px]">●</span>
-              {benefit}
-            </li>
-          ))}
-        </ul>
+        {benefits.length > 0 && (
+          <ul className="mt-1 space-y-0.5">
+            {benefits.slice(0, 2).map((benefit) => (
+              <li
+                key={benefit.id}
+                className="text-text-muted text-[12px] leading-relaxed flex items-start gap-1.5"
+              >
+                <span className="text-olive/60 mt-0.5 text-[10px]">●</span>
+                {benefit.title}
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {/* Tagline fallback if no benefits */}
+        {benefits.length === 0 && (
+          <p className="mt-1 text-text-muted text-[12px] leading-relaxed line-clamp-2">
+            {product.tagline}
+          </p>
+        )}
 
         {/* Price row with "per 100g" */}
         <div className="mt-auto pt-3 flex items-baseline gap-2 flex-wrap">
@@ -85,7 +110,7 @@ export default function CatalogCard({ product }: Props) {
             ₹{product.price}
           </span>
           <span className="text-text-muted text-sm line-through">
-            ₹{product.originalPrice}
+            ₹{product.comparePrice}
           </span>
           <span className="text-text-muted text-[11px]">per 100g</span>
         </div>
@@ -94,7 +119,7 @@ export default function CatalogCard({ product }: Props) {
         {qty === 0 ? (
           <button
             type="button"
-            onClick={() => addToCart(product)}
+            onClick={() => addToCart(toCartProduct(product))}
             className="
               mt-2 w-full py-2.5 rounded-full text-[12px] font-semibold uppercase tracking-wider
               bg-olive text-white

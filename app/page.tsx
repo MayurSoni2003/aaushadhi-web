@@ -2,9 +2,12 @@ import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import ProductCarousel from "@/components/ProductCarousel";
 import Footer from "@/components/Footer";
-import { catalog } from "@/data/catalog";
+import { getProducts } from "@/lib/strapi";
 
-export default function Home() {
+export default async function Home() {
+  const products = await getProducts();
+  const featured = products.slice(0, 6);
+
   return (
     <>
       {/* Full-page dreamy gradient background — everything sits on this */}
@@ -78,7 +81,7 @@ export default function Home() {
           <Navbar />
           <main>
             <Hero />
-            <ProductCarousel products={catalog.slice(0, 6)} />
+            <ProductCarousel products={featured} />
           </main>
         </div>
       </div>
