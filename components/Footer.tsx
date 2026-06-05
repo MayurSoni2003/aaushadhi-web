@@ -1,9 +1,18 @@
+import Image from "next/image";
+
 export default function Footer() {
   return (
     <footer className="bg-parchment border-t border-earth/20 py-10 px-6">
       <div className="max-w-7xl mx-auto flex flex-col items-center gap-6">
         {/* Brand */}
-        <div className="text-center">
+        <div className="text-center flex flex-col items-center">
+          <Image
+            src="/aaushadhi_logo.svg"
+            alt="Aaushadhi Logo"
+            width={120}
+            height={48}
+            className="mb-3 object-contain"
+          />
           <p
             className="text-olive font-bold text-xl"
             style={{ fontFamily: "var(--font-playfair)" }}
