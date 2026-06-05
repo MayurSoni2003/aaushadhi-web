@@ -10,6 +10,7 @@ const WHATSAPP_NUMBER = "918269431640";
 
 type Props = {
   product: StrapiProduct;
+  priority?: boolean;
 };
 
 function toCartProduct(product: StrapiProduct): CartProduct {
@@ -23,7 +24,7 @@ function toCartProduct(product: StrapiProduct): CartProduct {
   };
 }
 
-export default function CatalogCard({ product }: Props) {
+export default function CatalogCard({ product, priority = false }: Props) {
   const { addToCart, updateQuantity, getQuantity } = useCart();
   const qty = getQuantity(product.id);
 
@@ -57,6 +58,7 @@ export default function CatalogCard({ product }: Props) {
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
           className="object-cover transition-transform duration-500 group-hover:scale-105"
           quality={80}
+          priority={priority}
         />
 
         {/* Discount badge */}

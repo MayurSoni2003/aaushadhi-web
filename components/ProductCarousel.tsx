@@ -79,7 +79,7 @@ export default function ProductCarousel({ products }: Props) {
                     }
                   `}
                 >
-                  <ProductCard product={product} featured={center} />
+                  <ProductCard product={product} featured={center} priority={index <= 2} />
                 </div>
               );
             })}

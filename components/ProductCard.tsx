@@ -6,11 +6,13 @@ import { getStrapiImageUrl } from "@/lib/strapi";
 type Props = {
   product: StrapiProduct;
   featured?: boolean;
+  priority?: boolean;
 };
 
 export default function ProductCard({
   product,
   featured = false,
+  priority = false,
 }: Props) {
   const imageUrl = getStrapiImageUrl(product.mainImage);
   const categoryName = product.category?.name ?? "Wellness";
@@ -48,6 +50,7 @@ export default function ProductCard({
           quality={80}
           sizes="(max-width:768px)100vw,33vw"
           className="object-cover transition-transform duration-700 group-hover:scale-105"
+          priority={priority}
         />
 
       </div>

@@ -8,6 +8,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductDetailActions from "@/components/ProductDetailActions";
 import FAQAccordion from "@/components/FAQAccordion";
+import ProductGallery from "@/components/ProductGallery";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -159,6 +160,12 @@ export default async function ProductPage({ params }: Props) {
   const cartProduct = toCartProduct(product);
   const categoryName = product.category?.name ?? "Wellness";
 
+  const mainImageObj = { url: imageUrl, alt: product.productName };
+  const galleryImagesArr = (product.galleryImages || []).map((img) => ({
+    url: getStrapiImageUrl(img),
+    alt: product.productName,
+  }));
+
   // Check which optional sections have data
   const hasAyurvedicProfile = product.ayurvedicProfile &&
     (product.ayurvedicProfile.rasa || product.ayurvedicProfile.guna || product.ayurvedicProfile.virya || product.ayurvedicProfile.vipaka || product.ayurvedicProfile.doshaKarma);
@@ -213,22 +220,11 @@ export default async function ProductPage({ params }: Props) {
             ═══════════════════════════════════════════════════ */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-start mb-16">
           {/* Image Column */}
-          <div className="relative aspect-square w-full rounded-3xl overflow-hidden bg-parchment/40" style={{ border: "1px solid rgba(92,107,46,0.1)", boxShadow: "0 8px 30px rgba(0,0,0,0.04)" }}>
-            <Image
-              src={imageUrl}
-              alt={product.productName}
-              fill
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover"
-              quality={90}
-              priority
-            />
-            {discount > 0 && (
-              <span className="absolute top-5 left-5 px-4 py-1.5 rounded-full text-xs font-bold text-white uppercase tracking-wider bg-olive/90 z-10 shadow-md">
-                {discount}% OFF
-              </span>
-            )}
-          </div>
+          <ProductGallery
+            mainImage={mainImageObj}
+            galleryImages={galleryImagesArr}
+            discount={discount}
+          />
 
           {/* Details Column */}
           <div className="flex flex-col">

@@ -133,8 +133,8 @@ export default function ProductGrid({ products, categories, initialSearch = "" }
       {filteredProducts.length > 0 ? (
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-            {visibleProducts.map((product) => (
-              <CatalogCard key={product.id} product={product} />
+            {visibleProducts.map((product, idx) => (
+              <CatalogCard key={product.id} product={product} priority={idx < 4} />
             ))}
           </div>
 
