@@ -15,11 +15,13 @@ async function fetchStrapi<T>(
     );
   }
 
+  const isDev = process.env.NODE_ENV === "development";
+
   const res = await fetch(url.toString(), {
     headers: {
       Authorization: `Bearer ${STRAPI_TOKEN}`,
     },
-    next: { revalidate: 60 }, // ISR: revalidate every 60 seconds
+    ...(isDev ? { cache: "no-store" } : { next: { revalidate: 60 } }), // Bypass cache in dev, ISR in prod
   });
 
   if (!res.ok) {

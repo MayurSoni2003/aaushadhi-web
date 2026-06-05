@@ -10,7 +10,7 @@ export default function Footer() {
             src="/aaushadhi_logo.svg"
             alt="Aaushadhi Logo"
             width={120}
-            height={48}
+            height={120}
             className="mb-3 object-contain"
           />
           <p

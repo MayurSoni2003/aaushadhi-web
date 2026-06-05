@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 
 type ImageType = {
@@ -16,6 +16,10 @@ type Props = {
 
 export default function ProductGallery({ mainImage, galleryImages, discount }: Props) {
   const [activeImage, setActiveImage] = useState(mainImage.url);
+
+  useEffect(() => {
+    setActiveImage(mainImage.url);
+  }, [mainImage.url]);
 
   // Collect all images including main image as the first one, removing duplicates just in case
   const allImages = [mainImage, ...galleryImages].filter(
@@ -64,14 +68,14 @@ export default function ProductGallery({ mainImage, galleryImages, discount }: P
           <>
             <button
               onClick={goToPrevious}
-              className="absolute top-1/2 -translate-y-1/2 left-4 w-10 h-10 rounded-full bg-white/80 hover:bg-white text-olive flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-sm border border-olive/10 cursor-pointer"
+              className="absolute top-1/2 -translate-y-1/2 left-4 w-10 h-10 rounded-full bg-white/80 hover:bg-white text-olive flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 shadow-sm border border-olive/10 cursor-pointer"
               aria-label="Previous image"
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
             </button>
             <button
               onClick={goToNext}
-              className="absolute top-1/2 -translate-y-1/2 right-4 w-10 h-10 rounded-full bg-white/80 hover:bg-white text-olive flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-sm border border-olive/10 cursor-pointer"
+              className="absolute top-1/2 -translate-y-1/2 right-4 w-10 h-10 rounded-full bg-white/80 hover:bg-white text-olive flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 shadow-sm border border-olive/10 cursor-pointer"
               aria-label="Next image"
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
