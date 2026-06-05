@@ -130,6 +130,8 @@ export function getStrapiImageUrl(
   if (!image?.url) return PLACEHOLDER_IMAGE;
   // If the URL is already absolute, return as-is
   if (image.url.startsWith("http")) return image.url;
-  // Otherwise prepend the Strapi base URL
-  return `${STRAPI_URL}${image.url}`;
+  // Otherwise prepend the Strapi base URL, avoiding double slashes
+  const baseUrl = STRAPI_URL.endsWith("/") ? STRAPI_URL.slice(0, -1) : STRAPI_URL;
+  const imagePath = image.url.startsWith("/") ? image.url : `/${image.url}`;
+  return `${baseUrl}${imagePath}`;
 }
