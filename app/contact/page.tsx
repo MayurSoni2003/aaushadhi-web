@@ -196,7 +196,7 @@ export default function ContactPage() {
 
             {/* ═══════════════ Contact Channels ═══════════════ */}
             <section className="px-4 md:px-8 py-10" id="contact-channels">
-              <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-5 md:gap-6">
+              <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
                 {/* WhatsApp — primary channel */}
                 <ChannelCard
                   icon={
@@ -241,6 +241,38 @@ export default function ContactPage() {
                   description="Sometimes a voice is all you need. Call us for quick guidance on our products or to place an order directly."
                   accentColor="#8B5E3C"
                   delay="160ms"
+                />
+
+                {/* Facebook */}
+                <ChannelCard
+                  icon={
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+                    </svg>
+                  }
+                  label="Follow us"
+                  value="Facebook"
+                  href="https://www.facebook.com/share/1EL3uvziQP/?mibextid=wwXIfr"
+                  description="Join our community on Facebook for updates, wellness tips, and special offers."
+                  accentColor="#1877F2"
+                  delay="240ms"
+                />
+
+                {/* Instagram */}
+                <ChannelCard
+                  icon={
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                    </svg>
+                  }
+                  label="Connect with us"
+                  value="Instagram"
+                  href="https://www.instagram.com/aaushadhi_wellness/"
+                  description="Follow us on Instagram for a visual journey into natural healing and organic remedies."
+                  accentColor="#E1306C"
+                  delay="320ms"
                 />
               </div>
             </section>

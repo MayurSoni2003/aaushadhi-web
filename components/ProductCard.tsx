@@ -96,7 +96,7 @@ export default function ProductCard({
         <div className="mt-auto pt-5">
           <Link
             href={`/products/${product.slug}`}
-            className="inline-flex items-center gap-2 text-olive text-sm font-semibold transition-all duration-300 hover:gap-3"
+            className="inline-flex items-center gap-2 text-olive text-sm font-semibold transition-all duration-300 group-hover:gap-3 after:absolute after:inset-0"
           >
             Explore
 
