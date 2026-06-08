@@ -25,6 +25,28 @@ export default function ProductCarousel({ products }: Props) {
   const next = () =>
     navigate(active === products.length - 1 ? 0 : active + 1);
 
+  // Swipe handling
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [touchEndX, setTouchEndX] = useState<number | null>(null);
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEndX(null);
+    setTouchStartX(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEndX(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStartX || !touchEndX) return;
+    const distance = touchStartX - touchEndX;
+    
+    if (distance > minSwipeDistance) next();
+    if (distance < -minSwipeDistance) prev();
+  };
+
   return (
     <section className="py-12">
       <div className="relative max-w-5xl mx-auto px-4 md:px-12">
@@ -50,7 +72,13 @@ export default function ProductCarousel({ products }: Props) {
         </button>
 
         {/* Cards viewport */}
-        <div className="overflow-hidden px-16 w-full" onWheel={(e) => e.stopPropagation()}>
+        <div 
+          className="overflow-hidden px-16 w-full touch-pan-y" 
+          onWheel={(e) => e.stopPropagation()}
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+        >
           <div
             className="flex items-end gap-6 transition-transform duration-500 ease-in-out"
             style={{
