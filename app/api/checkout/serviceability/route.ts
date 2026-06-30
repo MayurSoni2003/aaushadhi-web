@@ -1,0 +1,116 @@
+import { NextRequest, NextResponse } from "next/server";
+import { verifyIdToken } from "@/lib/firebase-admin";
+import {
+  checkServiceability,
+  getCheapestCourier,
+  getPincodeDetails,
+  calculateTotalWeight,
+} from "@/lib/icarry";
+import type { ServiceabilityResponse } from "@/lib/checkout-types";
+
+/**
+ * POST /api/checkout/serviceability
+ *
+ * 1. Verify Firebase ID token (phone auth).
+ * 2. Check if the pincode is serviceable via iCarry api_check_pincode.
+ * 3. Get the cheapest courier rate via iCarry api_get_estimate.
+ * 4. Look up city/state from India Post API for address auto-fill.
+ *
+ * Body: { pincode, paymentMethod, items: { quantity, price }[], idToken }
+ */
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { pincode, paymentMethod, items, idToken } = body;
+
+    // ─── Validate inputs ───
+    if (!pincode || !/^\d{6}$/.test(pincode)) {
+      return NextResponse.json<ServiceabilityResponse>(
+        { success: false, error: "Please enter a valid 6-digit pincode" },
+        { status: 400 }
+      );
+    }
+
+    if (!idToken) {
+      return NextResponse.json<ServiceabilityResponse>(
+        { success: false, error: "Phone verification required" },
+        { status: 401 }
+      );
+    }
+
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return NextResponse.json<ServiceabilityResponse>(
+        { success: false, error: "Cart is empty" },
+        { status: 400 }
+      );
+    }
+
+    // ─── Verify Firebase ID token ───
+    try {
+      await verifyIdToken(idToken);
+    } catch {
+      return NextResponse.json<ServiceabilityResponse>(
+        { success: false, error: "Phone verification expired. Please verify again." },
+        { status: 401 }
+      );
+    }
+
+    // ─── Step 1: Check serviceability via iCarry ───
+    const serviceability = await checkServiceability(pincode);
+    if (!serviceability.serviceable) {
+      return NextResponse.json<ServiceabilityResponse>({
+        success: false,
+        error: "Sorry, delivery is not available to this pincode at the moment.",
+      });
+    }
+
+    // ─── Step 2: Get pincode location details (India Post) ───
+    const locationDetails = await getPincodeDetails(pincode);
+    if (!locationDetails) {
+      return NextResponse.json<ServiceabilityResponse>(
+        { success: false, error: "Invalid pincode. Please check and try again." },
+        { status: 400 }
+      );
+    }
+
+    // ─── Step 3: Get cheapest courier from iCarry ───
+    const totalWeight = calculateTotalWeight(items);
+    const isCod = paymentMethod === "cod";
+
+    // Calculate order value from items
+    const orderValue = items.reduce(
+      (sum: number, item: { price?: number; quantity: number }) =>
+        sum + (item.price || 399) * item.quantity,
+      0
+    );
+
+    const cheapest = await getCheapestCourier(pincode, totalWeight, isCod, orderValue);
+
+    if (!cheapest) {
+      return NextResponse.json<ServiceabilityResponse>({
+        success: false,
+        error: "Sorry, delivery is not available to this pincode at the moment.",
+      });
+    }
+
+    return NextResponse.json<ServiceabilityResponse>({
+      success: true,
+      data: {
+        serviceable: true,
+        city: locationDetails.city,
+        state: locationDetails.state,
+        country: locationDetails.country,
+        shippingCost: parseFloat(cheapest.courier_cost),
+        estimatedDays: "5-7 business days",
+        courierName: cheapest.courier_name,
+        courierId: cheapest.courier_id,
+      },
+    });
+  } catch (error) {
+    console.error("Serviceability check error:", error);
+    return NextResponse.json<ServiceabilityResponse>(
+      { success: false, error: "Unable to check delivery availability. Please try again." },
+      { status: 500 }
+    );
+  }
+}

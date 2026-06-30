@@ -2,11 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { getStrapiImageUrl } from "@/lib/strapi";
 import type { StrapiProduct, CartProduct } from "@/lib/types";
-
-const WHATSAPP_NUMBER = "918269431640";
 
 type Props = {
   product: StrapiProduct;
@@ -26,6 +25,7 @@ function toCartProduct(product: StrapiProduct): CartProduct {
 
 export default function CatalogCard({ product, priority = false }: Props) {
   const { addToCart, updateQuantity, getQuantity } = useCart();
+  const router = useRouter();
   const qty = getQuantity(product.id);
 
   const discount = Math.round(
@@ -140,22 +140,13 @@ export default function CatalogCard({ product, priority = false }: Props) {
             <button
               type="button"
               onClick={() => {
-                const cp = toCartProduct(product);
-                const message = [
-                  "*Aaushadhi Wellness — New Order*",
-                  "",
-                  `1. ${cp.productName} × 1 (100g) — ₹${cp.price}`,
-                  "",
-                  `*Total: ₹${cp.price}*`,
-                  "",
-                  "Please confirm availability and delivery details.",
-                ].join("\n");
-                window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, "_blank");
+                addToCart(toCartProduct(product));
+                router.push("/checkout");
               }}
               className="
                 flex-1 py-1.5 md:py-2.5 rounded-full text-[9px] md:text-[11px] font-semibold uppercase tracking-wider
-                bg-[#25D366] text-white
-                hover:bg-[#20BD5A]
+                bg-earth text-white
+                hover:bg-earth/90
                 active:scale-[0.97]
                 transition-all duration-200
                 cursor-pointer
@@ -190,25 +181,11 @@ export default function CatalogCard({ product, priority = false }: Props) {
             </div>
             <button
               type="button"
-              onClick={() => {
-                const cp = toCartProduct(product);
-                const totalGrams = qty * 100;
-                const lineTotal = cp.price * qty;
-                const message = [
-                  "*Aaushadhi Wellness — New Order*",
-                  "",
-                  `1. ${cp.productName} × ${qty} (${totalGrams}g) — ₹${lineTotal}`,
-                  "",
-                  `*Total: ₹${lineTotal}*`,
-                  "",
-                  "Please confirm availability and delivery details.",
-                ].join("\n");
-                window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, "_blank");
-              }}
+              onClick={() => router.push("/checkout")}
               className="
                 w-full py-1.5 md:py-2.5 rounded-full text-[9px] md:text-[11px] font-semibold uppercase tracking-wider
-                bg-[#25D366] text-white
-                hover:bg-[#20BD5A]
+                bg-earth text-white
+                hover:bg-earth/90
                 active:scale-[0.97]
                 transition-all duration-200
                 cursor-pointer
