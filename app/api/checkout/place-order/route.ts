@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyIdToken } from "@/lib/firebase-admin";
+import { getSession } from "@/lib/session";
 import { bookShipment, calculateTotalWeight } from "@/lib/icarry";
 import type {
   PlaceOrderRequest,
@@ -35,24 +35,12 @@ function generateOrderId(): string {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { idToken, ...orderData } = body as PlaceOrderRequest & {
-      idToken: string;
-    };
+    const orderData = body as PlaceOrderRequest;
 
-    // ─── Verify Firebase ID token ───
-    if (!idToken) {
+    const session = await getSession();
+    if (!session) {
       return NextResponse.json<PlaceOrderResponse>(
-        { success: false, error: "Phone verification required" },
-        { status: 401 }
-      );
-    }
-
-    let decodedToken;
-    try {
-      decodedToken = await verifyIdToken(idToken);
-    } catch {
-      return NextResponse.json<PlaceOrderResponse>(
-        { success: false, error: "Phone verification expired. Please verify again." },
+        { success: false, error: "Authentication required" },
         { status: 401 }
       );
     }
@@ -101,7 +89,7 @@ export async function POST(request: NextRequest) {
         paymentMethod,
         paymentStatus,
         customerName,
-        customerPhone: customerPhone || decodedToken.phone_number || "",
+        customerPhone: customerPhone || "",
         customerEmail: customerEmail || null,
         subtotal,
         shippingCost,

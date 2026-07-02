@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from "react";
 import type { DeliveryEstimate, PaymentMethod } from "@/lib/checkout-types";
 
 type Props = {
-  idToken: string;
   cartItems: { quantity: number }[];
   onComplete: (data: {
     pincode: string;
@@ -19,7 +18,7 @@ type Props = {
   }) => void;
 };
 
-export default function AddressForm({ idToken, cartItems, onComplete }: Props) {
+export default function AddressForm({ cartItems, onComplete }: Props) {
   const [pincode, setPincode] = useState("");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -50,7 +49,6 @@ export default function AddressForm({ idToken, cartItems, onComplete }: Props) {
             pincode: pin,
             paymentMethod: "cod" as PaymentMethod, // Default check with COD
             items: cartItems,
-            idToken,
           }),
         });
 
@@ -72,7 +70,7 @@ export default function AddressForm({ idToken, cartItems, onComplete }: Props) {
         setChecking(false);
       }
     },
-    [idToken, cartItems]
+    [cartItems]
   );
 
   useEffect(() => {

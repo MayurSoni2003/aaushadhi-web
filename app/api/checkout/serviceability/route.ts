@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyIdToken } from "@/lib/firebase-admin";
+import { getSession } from "@/lib/session";
 import {
   checkServiceability,
   getCheapestCourier,
@@ -21,7 +21,7 @@ import type { ServiceabilityResponse } from "@/lib/checkout-types";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { pincode, paymentMethod, items, idToken } = body;
+    const { pincode, paymentMethod, items } = body;
 
     // ─── Validate inputs ───
     if (!pincode || !/^\d{6}$/.test(pincode)) {
@@ -31,9 +31,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!idToken) {
+    const session = await getSession();
+    if (!session) {
       return NextResponse.json<ServiceabilityResponse>(
-        { success: false, error: "Phone verification required" },
+        { success: false, error: "Authentication required" },
         { status: 401 }
       );
     }
@@ -45,15 +46,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ─── Verify Firebase ID token ───
-    try {
-      await verifyIdToken(idToken);
-    } catch {
-      return NextResponse.json<ServiceabilityResponse>(
-        { success: false, error: "Phone verification expired. Please verify again." },
-        { status: 401 }
-      );
-    }
 
     // ─── Step 1: Check serviceability via iCarry ───
     const serviceability = await checkServiceability(pincode);

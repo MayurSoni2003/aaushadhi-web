@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 import StepIndicator from "./StepIndicator";
-import MobileVerification from "./MobileVerification";
+import EmailVerification from "../auth/EmailVerification";
 import AddressForm from "./AddressForm";
 import PaymentSelector from "./PaymentSelector";
 import OrderSummary from "./OrderSummary";
@@ -18,13 +19,17 @@ import type {
 export default function CheckoutFlow() {
   const router = useRouter();
   const { cartItems, cartTotal, clearCart } = useCart();
+  const { customer, isLoading } = useAuth();
 
   // Step state
   const [step, setStep] = useState<CheckoutStep>(1);
 
-  // Step 1 data
-  const [phone, setPhone] = useState("");
-  const [idToken, setIdToken] = useState<string | null>(null);
+  // Auto-skip step 1 if user is logged in
+  useEffect(() => {
+    if (!isLoading && customer && step === 1) {
+      setStep(2);
+    }
+  }, [isLoading, customer, step]);
 
   // Step 2 data
   const [addressData, setAddressData] = useState<{
@@ -44,11 +49,9 @@ export default function CheckoutFlow() {
   const [placing, setPlacing] = useState(false);
   const [orderError, setOrderError] = useState("");
 
-  // ─── Step 1: Phone verified ───
-  const handlePhoneVerified = useCallback(
-    (verifiedPhone: string, token: string) => {
-      setPhone(verifiedPhone);
-      setIdToken(token);
+  // ─── Step 1: Email verified ───
+  const handleEmailVerified = useCallback(
+    () => {
       setStep(2);
     },
     []
@@ -65,7 +68,7 @@ export default function CheckoutFlow() {
 
   // ─── Step 3: Place order ───
   const handlePlaceOrder = async () => {
-    if (!addressData || !idToken) return;
+    if (!addressData) return;
 
     if (paymentMethod === "online") {
       setOrderError(
@@ -92,10 +95,9 @@ export default function CheckoutFlow() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          idToken,
           customerName: addressData.fullName,
-          customerPhone: phone,
-          customerEmail: addressData.email || undefined,
+          customerPhone: "", // Phone is optional in new schema, but you could add it back to AddressForm if needed.
+          customerEmail: addressData.email || customer?.email || undefined,
           shippingAddress: {
             addressLine1: addressData.addressLine1,
             addressLine2: addressData.addressLine2 || undefined,
@@ -179,15 +181,26 @@ export default function CheckoutFlow() {
               boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
             }}
           >
-            {/* Step 1: Mobile Verification */}
-            {step === 1 && (
-              <MobileVerification onVerified={handlePhoneVerified} />
+            {/* Step 1: Email Verification */}
+            {step === 1 && !isLoading && !customer && (
+              <EmailVerification onVerified={handleEmailVerified} />
+            )}
+            
+            {step === 1 && isLoading && (
+              <div className="py-12 flex justify-center">
+                <span className="text-olive flex items-center gap-2">
+                  <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" opacity="0.3" />
+                    <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                  </svg>
+                  Checking session...
+                </span>
+              </div>
             )}
 
             {/* Step 2: Address Form */}
-            {step === 2 && idToken && (
+            {step === 2 && (
               <AddressForm
-                idToken={idToken}
                 cartItems={cartItems.map((item) => ({
                   quantity: item.quantity,
                 }))}

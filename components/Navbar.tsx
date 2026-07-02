@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -18,6 +19,7 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { cartCount } = useCart();
+  const { customer, login, logout, isLoading } = useAuth();
   const pathname = usePathname();
 
   useEffect(() => setMounted(true), []);
@@ -144,6 +146,53 @@ export default function Navbar() {
                     </span>
                   )}
                 </Link>
+              </li>
+
+              {/* Mobile Auth Link */}
+              <li
+                className={`transition-all ease-out ${
+                  menuOpen
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-4"
+                }`}
+                style={{
+                  transitionDuration: "400ms",
+                  transitionDelay: menuOpen ? `${100 + (navLinks.length + 1) * 60}ms` : "0ms",
+                }}
+              >
+                {!isLoading && (
+                  customer ? (
+                    <button
+                      onClick={() => {
+                        logout();
+                        closeMenu();
+                      }}
+                      className="w-full text-left group flex items-center justify-between py-4 px-2 rounded-2xl transition-all duration-200 text-red-600 hover:bg-red-50"
+                    >
+                      <span
+                        className="text-[22px] font-bold tracking-tight"
+                        style={{ fontFamily: "var(--font-playfair)" }}
+                      >
+                        Logout
+                      </span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        login();
+                        closeMenu();
+                      }}
+                      className="w-full text-left group flex items-center justify-between py-4 px-2 rounded-2xl transition-all duration-200 text-text-dark hover:text-olive hover:bg-olive/5"
+                    >
+                      <span
+                        className="text-[22px] font-bold tracking-tight"
+                        style={{ fontFamily: "var(--font-playfair)" }}
+                      >
+                        Login
+                      </span>
+                    </button>
+                  )
+                )}
               </li>
             </ul>
 
@@ -280,6 +329,27 @@ export default function Navbar() {
                 </li>
               ))}
             </ul>
+
+            {/* Desktop Auth */}
+            {!isLoading && (
+              <div className="border-l border-olive/20 pl-6 flex items-center">
+                {customer ? (
+                  <button
+                    onClick={logout}
+                    className="text-[13px] font-bold uppercase tracking-wider text-olive hover:text-red-600 transition-colors duration-200"
+                  >
+                    Logout
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => login()}
+                    className="text-[13px] font-bold uppercase tracking-wider text-olive hover:text-olive-light transition-colors duration-200"
+                  >
+                    Login
+                  </button>
+                )}
+              </div>
+            )}
 
             {/* Cart icon */}
             <Link
