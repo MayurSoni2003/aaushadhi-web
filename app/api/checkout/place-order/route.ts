@@ -126,11 +126,11 @@ export async function POST(request: NextRequest) {
     });
 
     if (!strapiRes.ok) {
-      const errorText = await strapiRes.text();
+      const errorText = await strapiRes.text().catch(() => "");
       console.error("Strapi order creation failed:", errorText);
       return NextResponse.json<PlaceOrderResponse>(
-        { success: false, error: "Failed to create order. Please try again." },
-        { status: 500 }
+        { success: false, error: "System is currently in maintenance mode." },
+        { status: 503 }
       );
     }
 
@@ -177,7 +177,7 @@ export async function POST(request: NextRequest) {
                 orderStatus: "processing",
               },
             }),
-          });
+          }).catch(() => {});
         }
       } catch (bookingError) {
         // Log but don't fail the order — shipment can be booked manually
@@ -197,8 +197,8 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Place order error:", error);
     return NextResponse.json<PlaceOrderResponse>(
-      { success: false, error: "Something went wrong. Please try again." },
-      { status: 500 }
+      { success: false, error: "System is currently in maintenance mode." },
+      { status: 503 }
     );
   }
 }

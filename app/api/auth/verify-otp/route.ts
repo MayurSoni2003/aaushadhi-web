@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!fetchRes.ok) {
-      return NextResponse.json<AuthResponse>({ success: false, error: "Internal server error" }, { status: 500 });
+      return NextResponse.json<AuthResponse>({ success: false, error: "System is currently in maintenance mode." }, { status: 503 });
     }
 
     const fetchJson = await fetchRes.json();
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
       await fetch(`${STRAPI_URL}/api/otp-sessions/${documentId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
-      });
+      }).catch(() => {});
       return NextResponse.json<AuthResponse>({ success: false, error: "OTP has expired. Please request a new code." }, { status: 400 });
     }
 
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
       await fetch(`${STRAPI_URL}/api/otp-sessions/${documentId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
-      });
+      }).catch(() => {});
       return NextResponse.json<AuthResponse>({ success: false, error: "Too many failed attempts. Please request a new code." }, { status: 429 });
     }
 
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify({
           data: { attempts: attempts + 1 },
         }),
-      });
+      }).catch(() => {});
       return NextResponse.json<AuthResponse>({ success: false, error: "Invalid OTP code." }, { status: 401 });
     }
 
@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
     await fetch(`${STRAPI_URL}/api/otp-sessions/${documentId}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
-    });
+    }).catch(() => {});
 
     // 6. Fetch or Create Customer
     const customerQuery = new URLSearchParams({
@@ -109,6 +109,10 @@ export async function POST(request: NextRequest) {
         Authorization: `Bearer ${STRAPI_TOKEN}`,
       },
     });
+
+    if (!customerRes.ok) {
+      return NextResponse.json<AuthResponse>({ success: false, error: "System is currently in maintenance mode." }, { status: 503 });
+    }
 
     const customerJson = await customerRes.json();
     let customer: StrapiCustomer;
@@ -143,7 +147,7 @@ export async function POST(request: NextRequest) {
             Authorization: `Bearer ${STRAPI_TOKEN}`,
           },
           body: JSON.stringify(updatePayload),
-        });
+        }).catch(() => {});
         
         customer.firstName = customer.firstName || firstName;
         customer.lastName = customer.lastName || lastName;
@@ -169,8 +173,8 @@ export async function POST(request: NextRequest) {
       });
 
       if (!createRes.ok) {
-        console.error("Failed to create customer:", await createRes.text());
-        return NextResponse.json<AuthResponse>({ success: false, error: "Failed to create user profile" }, { status: 500 });
+        console.error("Failed to create customer:", await createRes.text().catch(() => ""));
+        return NextResponse.json<AuthResponse>({ success: false, error: "System is currently in maintenance mode." }, { status: 503 });
       }
 
       const createData = await createRes.json();
@@ -187,6 +191,6 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error("Verify OTP error:", error);
-    return NextResponse.json<AuthResponse>({ success: false, error: "Internal server error" }, { status: 500 });
+    return NextResponse.json<AuthResponse>({ success: false, error: "System is currently in maintenance mode." }, { status: 503 });
   }
 }

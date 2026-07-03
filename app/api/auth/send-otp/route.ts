@@ -32,8 +32,8 @@ export async function POST(request: NextRequest) {
     });
 
     if (!fetchRes.ok) {
-      console.error("Failed to fetch OTP sessions:", await fetchRes.text());
-      return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
+      console.error("Failed to fetch OTP sessions:", await fetchRes.text().catch(() => ""));
+      return NextResponse.json({ success: false, error: "System is currently in maintenance mode." }, { status: 503 });
     }
 
     const fetchJson = await fetchRes.json();
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
           headers: {
             Authorization: `Bearer ${STRAPI_TOKEN}`,
           },
-        });
+        }).catch(() => {}); // Ignore errors here if backend is shaky
       }
     }
 
@@ -90,8 +90,8 @@ export async function POST(request: NextRequest) {
     });
 
     if (!createRes.ok) {
-      console.error("Failed to create OTP session:", await createRes.text());
-      return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
+      console.error("Failed to create OTP session:", await createRes.text().catch(() => ""));
+      return NextResponse.json({ success: false, error: "System is currently in maintenance mode." }, { status: 503 });
     }
 
     // 4. Send Email via Resend
@@ -118,6 +118,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, message: "OTP sent successfully" });
   } catch (error) {
     console.error("Send OTP error:", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ success: false, error: "System is currently in maintenance mode." }, { status: 503 });
   }
 }

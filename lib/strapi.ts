@@ -17,18 +17,25 @@ async function fetchStrapi<T>(
 
   const isDev = process.env.NODE_ENV === "development";
 
-  const res = await fetch(url.toString(), {
-    headers: {
-      Authorization: `Bearer ${STRAPI_TOKEN}`,
-    },
-    ...(isDev ? { cache: "no-store" } : { next: { revalidate: 60 } }), // Bypass cache in dev, ISR in prod
-  });
+  try {
+    const res = await fetch(url.toString(), {
+      headers: {
+        Authorization: `Bearer ${STRAPI_TOKEN}`,
+      },
+      ...(isDev ? { cache: "no-store" } : { next: { revalidate: 60 } }), // Bypass cache in dev, ISR in prod
+    });
 
-  if (!res.ok) {
-    throw new Error(`Strapi fetch failed: ${res.status} ${res.statusText}`);
+    if (!res.ok) {
+      console.warn(`[fetchStrapi] Failed: ${res.status} ${res.statusText} at ${path}`);
+      return { data: [], meta: { pagination: { total: 0 } } } as unknown as T;
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error(`[fetchStrapi] Unreachable backend at ${path}:`, error);
+    // Return empty payload to prevent Next.js from crashing
+    return { data: [], meta: { pagination: { total: 0 } } } as unknown as T;
   }
-
-  return res.json();
 }
 
 // ─── Products ────────────────────────────────────────────────

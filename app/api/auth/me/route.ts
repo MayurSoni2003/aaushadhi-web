@@ -25,10 +25,10 @@ export async function GET() {
         "Content-Type": "application/json",
         Authorization: `Bearer ${STRAPI_TOKEN}`,
       },
-    });
+    }).catch(() => {});
 
-    if (!fetchRes.ok) {
-      return NextResponse.json<AuthResponse>({ success: false, error: "Failed to fetch user data" }, { status: 500 });
+    if (!fetchRes || !fetchRes.ok) {
+      return NextResponse.json<AuthResponse>({ success: false, error: "System is currently in maintenance mode." }, { status: 503 });
     }
 
     const fetchJson = await fetchRes.json();
@@ -44,6 +44,6 @@ export async function GET() {
 
   } catch (error) {
     console.error("Auth /me error:", error);
-    return NextResponse.json<AuthResponse>({ success: false, error: "Internal server error" }, { status: 500 });
+    return NextResponse.json<AuthResponse>({ success: false, error: "System is currently in maintenance mode." }, { status: 503 });
   }
 }
