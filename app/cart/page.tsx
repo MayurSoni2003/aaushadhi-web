@@ -4,9 +4,13 @@ import Link from "next/link";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
 
 export default function CartPage() {
+  const router = useRouter();
+  const { requireAuth } = useAuth();
   const { cartItems, cartTotal, updateQuantity, removeFromCart, clearCart } =
     useCart();
 
@@ -210,14 +214,15 @@ export default function CartPage() {
                 </div>
 
                 {/* Checkout button */}
-                <Link
-                  href="/checkout"
+                <button
+                  type="button"
+                  onClick={() => requireAuth(() => router.push("/checkout"))}
                   className="
                     w-full py-3.5 rounded-full flex items-center justify-center gap-2.5
                     bg-olive text-white text-sm font-bold uppercase tracking-wider
                     hover:bg-olive-light active:scale-[0.97]
                     transition-all duration-200
-                    shadow-md text-center
+                    shadow-md text-center cursor-pointer
                   "
                 >
                   <svg
@@ -235,7 +240,7 @@ export default function CartPage() {
                     <path d="M16 10a4 4 0 0 1-8 0" />
                   </svg>
                   Proceed to Checkout
-                </Link>
+                </button>
 
                 <p className="mt-3 text-text-muted text-[11px] text-center leading-relaxed">
                   You&apos;ll verify your mobile number and enter your delivery

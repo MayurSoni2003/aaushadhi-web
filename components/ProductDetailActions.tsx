@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
@@ -13,17 +14,22 @@ export default function ProductDetailActions({ product }: Props) {
   const { addToCart, updateQuantity, getQuantity } = useCart();
   const router = useRouter();
   const qty = getQuantity(product.id);
+  const [isBuyingNow, setIsBuyingNow] = useState(false);
 
   const handleBuyNow = () => {
+    setIsBuyingNow(true);
     if (qty === 0) {
       addToCart(product);
     }
-    router.push("/checkout");
+    router.push("/cart");
   };
+
+  // If we are currently routing via "Buy Now", freeze the UI in the initial state
+  const displayQty = isBuyingNow ? 0 : qty;
 
   return (
     <div className="mt-8">
-      {qty === 0 ? (
+      {displayQty === 0 ? (
         <div className="flex flex-col sm:flex-row gap-3">
           <button
             type="button"
@@ -43,31 +49,36 @@ export default function ProductDetailActions({ product }: Props) {
           <button
             type="button"
             onClick={handleBuyNow}
-            className="
+            disabled={isBuyingNow}
+            className={`
               w-full sm:w-auto px-12 py-4 rounded-full text-sm font-bold uppercase tracking-wider
-              bg-earth text-white flex items-center justify-center gap-2.5
-              hover:bg-earth/90
-              active:scale-[0.98]
-              transition-all duration-200
-              cursor-pointer
-              shadow-md
-            "
+              text-white flex items-center justify-center gap-2.5
+              transition-all duration-200 shadow-md
+              ${isBuyingNow ? "bg-earth/70 cursor-wait" : "bg-earth hover:bg-earth/90 active:scale-[0.98] cursor-pointer"}
+            `}
           >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <path d="M16 10a4 4 0 0 1-8 0" />
-            </svg>
-            Buy Now
+            {isBuyingNow ? (
+              <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" opacity="0.3" />
+                <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+              </svg>
+            ) : (
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <path d="M16 10a4 4 0 0 1-8 0" />
+              </svg>
+            )}
+            {isBuyingNow ? "Going to Cart..." : "Buy Now"}
           </button>
         </div>
       ) : (

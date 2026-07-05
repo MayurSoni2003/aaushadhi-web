@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import StepIndicator from "./StepIndicator";
-import EmailVerification from "../auth/EmailVerification";
 import AddressForm from "./AddressForm";
 import PaymentSelector from "./PaymentSelector";
 import OrderSummary from "./OrderSummary";
@@ -21,20 +20,14 @@ export default function CheckoutFlow() {
   const { cartItems, cartTotal, clearCart } = useCart();
   const { customer, isLoading } = useAuth();
 
-  // Step state
+  // Step state defaults to 1 since auth is handled before checkout
   const [step, setStep] = useState<CheckoutStep>(1);
 
-  // Auto-skip step 1 if user is logged in
-  useEffect(() => {
-    if (!isLoading && customer && step === 1) {
-      setStep(2);
-    }
-  }, [isLoading, customer, step]);
-
-  // Step 2 data
+  // Step 1 data
   const [addressData, setAddressData] = useState<{
     pincode: string;
     fullName: string;
+    mobile?: string;
     email: string;
     addressLine1: string;
     addressLine2: string;
@@ -44,29 +37,22 @@ export default function CheckoutFlow() {
     deliveryEstimate: DeliveryEstimate;
   } | null>(null);
 
-  // Step 3 data
+  // Step 2 data
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cod");
   const [placing, setPlacing] = useState(false);
   const [orderError, setOrderError] = useState("");
 
-  // ─── Step 1: Email verified ───
-  const handleEmailVerified = useCallback(
-    () => {
+
+  // ─── Step 1: Address complete ───
+  const handleAddressComplete = useCallback(
+    (data: NonNullable<typeof addressData>) => {
+      setAddressData(data);
       setStep(2);
     },
     []
   );
 
-  // ─── Step 2: Address complete ───
-  const handleAddressComplete = useCallback(
-    (data: NonNullable<typeof addressData>) => {
-      setAddressData(data);
-      setStep(3);
-    },
-    []
-  );
-
-  // ─── Step 3: Place order ───
+  // ─── Step 2: Place order ───
   const handlePlaceOrder = async () => {
     if (!addressData) return;
 
@@ -96,7 +82,7 @@ export default function CheckoutFlow() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           customerName: addressData.fullName,
-          customerPhone: "", // Phone is optional in new schema, but you could add it back to AddressForm if needed.
+          customerPhone: addressData.mobile || "", // Pass mobile from address form
           customerEmail: addressData.email || customer?.email || undefined,
           shippingAddress: {
             addressLine1: addressData.addressLine1,
@@ -108,10 +94,7 @@ export default function CheckoutFlow() {
           },
           items,
           paymentMethod,
-          courierName: addressData.deliveryEstimate.courierName,
-          courierId: addressData.deliveryEstimate.courierId,
           shippingCost: addressData.deliveryEstimate.shippingCost,
-          courierEstimate: addressData.deliveryEstimate.estimatedDays,
         }),
       });
 
@@ -181,26 +164,11 @@ export default function CheckoutFlow() {
               boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
             }}
           >
-            {/* Step 1: Email Verification */}
-            {step === 1 && !isLoading && !customer && (
-              <EmailVerification onVerified={handleEmailVerified} />
-            )}
-            
-            {step === 1 && isLoading && (
-              <div className="py-12 flex justify-center">
-                <span className="text-olive flex items-center gap-2">
-                  <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" opacity="0.3" />
-                    <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-                  </svg>
-                  Checking session...
-                </span>
-              </div>
-            )}
 
-            {/* Step 2: Address Form */}
-            {step === 2 && (
+
+            {step === 1 && (
               <AddressForm
+                cartTotal={cartTotal}
                 cartItems={cartItems.map((item) => ({
                   quantity: item.quantity,
                 }))}
@@ -208,8 +176,8 @@ export default function CheckoutFlow() {
               />
             )}
 
-            {/* Step 3: Payment & Place Order */}
-            {step === 3 && addressData && (
+            {/* Step 2: Payment & Place Order */}
+            {step === 2 && addressData && (
               <div className="max-w-lg mx-auto space-y-6">
                 {/* Checkout icon */}
                 <div className="flex justify-center mb-2">
@@ -269,7 +237,7 @@ export default function CheckoutFlow() {
                     </div>
                     <button
                       type="button"
-                      onClick={() => setStep(2)}
+                      onClick={() => setStep(1)}
                       className="text-olive text-xs font-semibold hover:underline cursor-pointer flex-shrink-0"
                     >
                       Change

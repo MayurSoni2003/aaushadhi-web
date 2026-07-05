@@ -1,13 +1,12 @@
 "use client";
 
 type Props = {
-  currentStep: 1 | 2 | 3;
+  currentStep: 1 | 2;
 };
 
 const steps = [
-  { number: 1 as const, label: "Verify Mobile" },
-  { number: 2 as const, label: "Delivery Address" },
-  { number: 3 as const, label: "Payment & Order" },
+  { number: 1 as const, label: "Delivery Address" },
+  { number: 2 as const, label: "Payment & Order" },
 ];
 
 export default function StepIndicator({ currentStep }: Props) {

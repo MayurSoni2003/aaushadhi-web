@@ -26,8 +26,6 @@ export type DeliveryEstimate = {
   country: string;
   shippingCost: number;
   estimatedDays: string; // e.g., "3-5 business days"
-  courierName: string;
-  courierId: string | number; // iCarry courier identifier for booking
 };
 
 // ─── Payment Method ──
@@ -39,6 +37,8 @@ export type OrderStatus =
   | "confirmed"
   | "processing"
   | "shipped"
+  | "in_transit"
+  | "out_for_delivery"
   | "delivered"
   | "cancelled"
   | "returned";
@@ -47,23 +47,19 @@ export type OrderStatus =
 export type PaymentStatus = "pending" | "paid" | "failed" | "refunded";
 
 // ─── Checkout Step ──
-export type CheckoutStep = 1 | 2 | 3;
+export type CheckoutStep = 1 | 2;
 
 // ─── Checkout State (client-side form state) ──
 export type CheckoutState = {
   step: CheckoutStep;
-  // Step 1: Mobile verification
-  phoneNumber: string;
-  isPhoneVerified: boolean;
-  firebaseIdToken: string | null;
-  // Step 2: Address & delivery
+  // Step 1: Address & delivery
   pincode: string;
   deliveryEstimate: DeliveryEstimate | null;
   fullName: string;
   email: string;
   addressLine1: string;
   addressLine2: string;
-  // Step 3: Payment
+  // Step 2: Payment
   paymentMethod: PaymentMethod;
 };
 
@@ -87,10 +83,7 @@ export type PlaceOrderRequest = {
   shippingAddress: ShippingAddress;
   items: OrderItemData[];
   paymentMethod: PaymentMethod;
-  courierName: string;
-  courierId: string | number;
   shippingCost: number;
-  courierEstimate: string;
   notes?: string;
 };
 
@@ -121,14 +114,14 @@ export type StrapiOrder = {
   totalAmount: number;
   shippingAddress: ShippingAddress;
   orderItem: OrderItemData[];
-  courierName: string;
-  courierEstimate: string;
   icarryShipmentId: string | null;
   trackingId: string | null;
   trackingUrl: string | null;
   labelUrl: string | null;
+  courierName: string | null;
   paymentGatewayOrderId: string | null;
   paymentGatewayPaymentId: string | null;
+  paymentGatewaySignature: string | null;
   notes: string | null;
   createdAt: string;
   updatedAt: string;

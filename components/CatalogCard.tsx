@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -27,6 +28,17 @@ export default function CatalogCard({ product, priority = false }: Props) {
   const { addToCart, updateQuantity, getQuantity } = useCart();
   const router = useRouter();
   const qty = getQuantity(product.id);
+  const [isBuyingNow, setIsBuyingNow] = useState(false);
+
+  const handleBuyNow = () => {
+    setIsBuyingNow(true);
+    if (qty === 0) {
+      addToCart(toCartProduct(product));
+    }
+    router.push("/cart");
+  };
+
+  const displayQty = isBuyingNow ? 0 : qty;
 
   const discount = Math.round(
     ((product.comparePrice - product.price) / product.comparePrice) * 100
@@ -120,7 +132,7 @@ export default function CatalogCard({ product, priority = false }: Props) {
         </div>
 
         {/* Add to Cart / Quantity controls */}
-        {qty === 0 ? (
+        {displayQty === 0 ? (
           <div className="mt-1.5 md:mt-2 flex flex-col sm:flex-row gap-1.5 md:gap-2">
             <button
               type="button"
@@ -139,21 +151,15 @@ export default function CatalogCard({ product, priority = false }: Props) {
             </button>
             <button
               type="button"
-              onClick={() => {
-                addToCart(toCartProduct(product));
-                router.push("/checkout");
-              }}
-              className="
+              onClick={handleBuyNow}
+              disabled={isBuyingNow}
+              className={`
                 flex-1 py-1.5 md:py-2.5 rounded-full text-[9px] md:text-[11px] font-semibold uppercase tracking-wider
-                bg-earth text-white
-                hover:bg-earth/90
-                active:scale-[0.97]
-                transition-all duration-200
-                cursor-pointer
-                shadow-sm
-              "
+                text-white shadow-sm transition-all duration-200
+                ${isBuyingNow ? "bg-earth/70 cursor-wait" : "bg-earth hover:bg-earth/90 active:scale-[0.97] cursor-pointer"}
+              `}
             >
-              Buy Now
+              {isBuyingNow ? "..." : "Buy Now"}
             </button>
           </div>
         ) : (
@@ -181,18 +187,15 @@ export default function CatalogCard({ product, priority = false }: Props) {
             </div>
             <button
               type="button"
-              onClick={() => router.push("/checkout")}
-              className="
+              onClick={handleBuyNow}
+              disabled={isBuyingNow}
+              className={`
                 w-full py-1.5 md:py-2.5 rounded-full text-[9px] md:text-[11px] font-semibold uppercase tracking-wider
-                bg-earth text-white
-                hover:bg-earth/90
-                active:scale-[0.97]
-                transition-all duration-200
-                cursor-pointer
-                shadow-sm
-              "
+                text-white shadow-sm transition-all duration-200
+                ${isBuyingNow ? "bg-earth/70 cursor-wait" : "bg-earth hover:bg-earth/90 active:scale-[0.97] cursor-pointer"}
+              `}
             >
-              Buy Now
+              {isBuyingNow ? "..." : "Buy Now"}
             </button>
           </div>
         )}

@@ -6,14 +6,12 @@
  * Endpoints used:
  *   1. POST /api_login                — Authenticate and get api_token
  *   2. POST /api_check_pincode        — Check pincode serviceability
- *   3. POST /api_get_estimate          — Get shipping rate estimates
- *   4. POST /api_add_shipment_surface  — Book a surface shipment
+ *   3. POST /api_add_shipment_surface  — Book a surface shipment (Draft mode)
  */
 
 const ICARRY_BASE_URL = "https://www.icarry.in";
 const ICARRY_USERNAME = process.env.ICARRY_API_USERNAME || "";
 const ICARRY_API_KEY = process.env.ICARRY_API_KEY || "";
-const WAREHOUSE_PINCODE = process.env.WAREHOUSE_PINCODE || "302020";
 
 // Default package dimensions for herbal powder pouches (100g units)
 const DEFAULT_PACKAGE = {
@@ -70,23 +68,49 @@ async function getToken(): Promise<string> {
   return cachedToken!;
 }
 
+// ─── iCarry State Codes Mapping ──────────────────────────────
+const IARRY_STATE_CODES: Record<string, string> = {
+  "Andaman and Nicobar Islands": "AN",
+  "Andhra Pradesh": "AP",
+  "Arunachal Pradesh": "AR",
+  "Assam": "AS",
+  "Bihar": "BI",
+  "Chandigarh": "CH",
+  "Dadra and Nagar Haveli": "DA",
+  "Daman and Diu": "DM",
+  "Delhi": "DE",
+  "Goa": "GO",
+  "Gujarat": "GU",
+  "Haryana": "HA",
+  "Himachal Pradesh": "HP",
+  "Jammu and Kashmir": "JA",
+  "Karnataka": "KA",
+  "Kerala": "KE",
+  "Lakshadweep Islands": "LI",
+  "Madhya Pradesh": "MP",
+  "Maharashtra": "MA",
+  "Manipur": "MN",
+  "Meghalaya": "ME",
+  "Mizoram": "MI",
+  "Nagaland": "NA",
+  "Odisha": "OD",
+  "Puducherry": "PO",
+  "Punjab": "PU",
+  "Rajasthan": "RA",
+  "Sikkim": "SI",
+  "Tamil Nadu": "TN",
+  "Tripura": "TR",
+  "Uttar Pradesh": "UP",
+  "West Bengal": "WB",
+  "Telangana": "TS",
+  "Jharkhand": "JH",
+  "Uttarakhand": "UK",
+  "Chattisgarh": "CG",
+  "Chhattisgarh": "CG", // Adding standard alternative spelling
+  "Ladakh": "LA",
+};
+
 // ─── Types ───────────────────────────────────────────────────
-
-export type ICarryCourier = {
-  courier_id: string | number;
-  courier_name: string;
-  courier_group_name: string;
-  freight_cost: string;
-  cod_cost: string;
-  rto_cost: string;
-  courier_cost: string; // Total cost (freight + cod)
-};
-
-export type ICarryEstimateResponse = {
-  success: number;
-  error?: string;
-  estimate?: ICarryCourier[];
-};
 
 export type ICarryBookingResponse = {
   success?: string;
@@ -149,90 +173,9 @@ export async function checkServiceability(
   return { serviceable: true, codAvailable };
 }
 
-// ─── Get Shipping Estimate ───────────────────────────────────
-
-/**
- * Get shipping estimates for a domestic shipment.
- * Returns available couriers with rates and ETAs.
- *
- * Endpoint: POST /api_get_estimate?api_token=<token>
- * Body: { origin_pincode, destination_pincode, weight, length, breadth, height,
- *         origin_country_code, destination_country_code, shipment_mode,
- *         shipment_type, shipment_value }
- * Response: { success, error, estimate: [...] }
- */
-export async function getEstimate(
-  destinationPincode: string,
-  totalWeightGrams: number,
-  isCod: boolean,
-  orderValue: number
-): Promise<ICarryCourier[]> {
-  const token = await getToken();
-
-  const url = `${ICARRY_BASE_URL}/api_get_estimate?api_token=${token}`;
-
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      origin_pincode: parseInt(WAREHOUSE_PINCODE, 10),
-      destination_pincode: parseInt(destinationPincode, 10),
-      weight: totalWeightGrams,
-      length: DEFAULT_PACKAGE.length,
-      breadth: DEFAULT_PACKAGE.breadth,
-      height: DEFAULT_PACKAGE.height,
-      origin_country_code: "IN",
-      destination_country_code: "IN",
-      shipment_mode: "S", // Surface — cheaper for powders
-      shipment_type: isCod ? "C" : "P",
-      shipment_value: orderValue,
-    }),
-  });
-
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`iCarry estimate failed: ${res.status} ${text}`);
-  }
-
-  const data: ICarryEstimateResponse = await res.json();
-
-  if (data.success !== 1 || !data.estimate || !Array.isArray(data.estimate)) {
-    return [];
-  }
-
-  return data.estimate;
-}
-
-/**
- * Get the cheapest available courier for a destination.
- * Returns null if the pincode is not serviceable.
- */
-export async function getCheapestCourier(
-  destinationPincode: string,
-  totalWeightGrams: number,
-  isCod: boolean,
-  orderValue: number
-): Promise<ICarryCourier | null> {
-  const couriers = await getEstimate(
-    destinationPincode,
-    totalWeightGrams,
-    isCod,
-    orderValue
-  );
-
-  if (couriers.length === 0) return null;
-
-  // Sort by total courier_cost ascending and pick the cheapest
-  couriers.sort(
-    (a, b) => parseFloat(a.courier_cost) - parseFloat(b.courier_cost)
-  );
-  return couriers[0];
-}
-
 // ─── Book Shipment ───────────────────────────────────────────
 
 type BookShipmentParams = {
-  courierId: string | number;
   consigneeName: string;
   consigneePhone: string;
   consigneeAddress: string;
@@ -248,11 +191,11 @@ type BookShipmentParams = {
 };
 
 /**
- * Book a shipment with the selected courier.
+ * Book a draft shipment without assigning a courier.
  *
  * Endpoint: POST /api_add_shipment_surface?api_token=<token>
  * Body uses PHP-style nested keys for consignee and parcel objects.
- * Response: { success, error, shipment_id, awb, tracking_url, ... }
+ * Response: { success, error, shipment_id, ... }
  */
 export async function bookShipment(
   params: BookShipmentParams
@@ -268,20 +211,26 @@ export async function bookShipment(
   body.append("pickup_address_id", String(params.pickupAddressId));
   body.append("client_order_id", params.orderId);
 
-  // Courier selection
-  body.append("courier_id", String(params.courierId));
+  // Draft mode - do not book/assign courier automatically
+  body.append("save_only", "1");
 
   // Consignee details
+  const cleanPhone = params.consigneePhone.replace(/\D/g, "").slice(-10);
   body.append("consignee[name]", params.consigneeName);
-  body.append("consignee[mobile]", params.consigneePhone);
+  body.append("consignee[mobile]", cleanPhone);
   body.append("consignee[address]", params.consigneeAddress);
   body.append("consignee[city]", params.consigneeCity);
   body.append("consignee[pincode]", params.consigneePincode);
-  body.append("consignee[state]", params.consigneeState);
+  
+  // Map full state name to 2-letter code if possible
+  const stateName = params.consigneeState.trim();
+  const stateCode = IARRY_STATE_CODES[stateName] || IARRY_STATE_CODES[stateName.replace("State", "").trim()] || stateName;
+  body.append("consignee[state]", stateCode);
+  
   body.append("consignee[country_code]", "IN");
 
   // Parcel details
-  body.append("parcel[type]", params.isCod ? "COD" : "Prepaid");
+  body.append("parcel[type]", params.isCod ? "C" : "P");
   body.append("parcel[value]", String(params.orderValue));
   body.append("parcel[currency]", "INR");
   body.append("parcel[contents]", params.productDescription);
@@ -302,7 +251,14 @@ export async function bookShipment(
     throw new Error(`iCarry booking failed: ${res.status} ${text}`);
   }
 
-  return res.json();
+  const data = await res.json();
+
+  // The iCarry API often returns 200 OK even for failures, with an error message in the body
+  if (data.error) {
+    throw new Error(`iCarry API returned error: ${data.error}`);
+  }
+
+  return data;
 }
 
 // ─── Get Pincode Details (India Post API) ────────────────────

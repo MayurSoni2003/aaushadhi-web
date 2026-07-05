@@ -53,10 +53,7 @@ export async function POST(request: NextRequest) {
       shippingAddress,
       items,
       paymentMethod,
-      courierName,
-      courierId,
       shippingCost,
-      courierEstimate,
       notes,
     } = orderData;
 
@@ -72,7 +69,8 @@ export async function POST(request: NextRequest) {
       (sum: number, item: OrderItemData) => sum + item.price * item.quantity,
       0
     );
-    const totalAmount = subtotal + shippingCost;
+    const serverShippingCost = subtotal < 499 ? 80 : 0;
+    const totalAmount = subtotal + serverShippingCost;
 
     // ─── Generate order ID ───
     const orderId = generateOrderId();
@@ -88,13 +86,14 @@ export async function POST(request: NextRequest) {
         orderStatus,
         paymentMethod,
         paymentStatus,
-        customerName,
-        customerPhone: customerPhone || "",
         customerEmail: customerEmail || null,
         subtotal,
-        shippingCost,
+        shippingCost: serverShippingCost,
         totalAmount,
+        customer: session.customerId,
         shippingAddress: {
+          name: customerName,
+          mobile: customerPhone,
           addressLine1: shippingAddress.addressLine1,
           addressLine2: shippingAddress.addressLine2 || "",
           city: shippingAddress.city,
@@ -110,8 +109,6 @@ export async function POST(request: NextRequest) {
           quantity: item.quantity,
           imageUrl: item.imageUrl,
         })),
-        courierName,
-        courierEstimate,
         notes: notes || null,
       },
     };
@@ -134,6 +131,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const strapiResponseJson = await strapiRes.json();
+    const documentId = strapiResponseJson.data.documentId;
+
     // ─── Book shipment on iCarry (COD orders only for now) ───
     if (paymentMethod === "cod") {
       try {
@@ -146,7 +146,6 @@ export async function POST(request: NextRequest) {
           .join(", ");
 
         const bookingResult = await bookShipment({
-          courierId,
           consigneeName: customerName,
           consigneePhone: customerPhone,
           consigneeAddress: `${shippingAddress.addressLine1}${shippingAddress.addressLine2 ? ", " + shippingAddress.addressLine2 : ""}`,
@@ -161,9 +160,9 @@ export async function POST(request: NextRequest) {
           pickupAddressId: ICARRY_PICKUP_ADDRESS_ID,
         });
 
-        // Update order with tracking details if booking succeeded
-        if (bookingResult.shipment_id || bookingResult.awb) {
-          await fetch(`${STRAPI_URL}/api/orders/${orderId}`, {
+        // Update order with shipment ID (Draft booking)
+        if (bookingResult.shipment_id) {
+          const updateRes = await fetch(`${STRAPI_URL}/api/orders/${documentId}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -171,13 +170,14 @@ export async function POST(request: NextRequest) {
             },
             body: JSON.stringify({
               data: {
-                icarryShipmentId: bookingResult.shipment_id || null,
-                trackingId: bookingResult.awb || null,
-                trackingUrl: bookingResult.tracking_url || null,
-                orderStatus: "processing",
+                icarryShipmentId: String(bookingResult.shipment_id),
               },
             }),
-          }).catch(() => {});
+          });
+          if (!updateRes.ok) {
+            const errorText = await updateRes.text().catch(() => "");
+            console.error("Failed to update Strapi with shipment ID:", updateRes.status, errorText);
+          }
         }
       } catch (bookingError) {
         // Log but don't fail the order — shipment can be booked manually

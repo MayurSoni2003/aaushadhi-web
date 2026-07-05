@@ -129,7 +129,7 @@ export async function getCategories(): Promise<StrapiCategory[]> {
 
 // ─── Image URL helper ────────────────────────────────────────
 
-const PLACEHOLDER_IMAGE = "/products/placeholder.svg";
+const PLACEHOLDER_IMAGE = "/placeholder.svg";
 
 export function getStrapiImageUrl(
   image: { url: string } | null | undefined

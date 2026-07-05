@@ -5,6 +5,7 @@ import {
   useContext,
   useState,
   useCallback,
+  useEffect,
   type ReactNode,
 } from "react";
 import type { CartProduct } from "@/lib/types";
@@ -29,6 +30,27 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Load from localStorage on mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("aaushadhi_cart");
+      if (stored) {
+        setCartItems(JSON.parse(stored));
+      }
+    } catch (error) {
+      console.error("Failed to load cart from localStorage", error);
+    }
+    setIsInitialized(true);
+  }, []);
+
+  // Save to localStorage when cart changes
+  useEffect(() => {
+    if (isInitialized) {
+      localStorage.setItem("aaushadhi_cart", JSON.stringify(cartItems));
+    }
+  }, [cartItems, isInitialized]);
 
   const addToCart = useCallback((product: CartProduct) => {
     setCartItems((prev) => {

@@ -1,27 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
-import {
+import{
   checkServiceability,
-  getCheapestCourier,
   getPincodeDetails,
-  calculateTotalWeight,
 } from "@/lib/icarry";
 import type { ServiceabilityResponse } from "@/lib/checkout-types";
 
 /**
  * POST /api/checkout/serviceability
  *
- * 1. Verify Firebase ID token (phone auth).
+ * 1. Verify user session.
  * 2. Check if the pincode is serviceable via iCarry api_check_pincode.
- * 3. Get the cheapest courier rate via iCarry api_get_estimate.
- * 4. Look up city/state from India Post API for address auto-fill.
+ * 3. Look up city/state from India Post API for address auto-fill.
+ * 4. Calculate static shipping cost.
  *
- * Body: { pincode, paymentMethod, items: { quantity, price }[], idToken }
+ * Body: { pincode, items: { quantity, price }[] }
  */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { pincode, paymentMethod, items } = body;
+    const { pincode, items } = body;
 
     // ─── Validate inputs ───
     if (!pincode || !/^\d{6}$/.test(pincode)) {
@@ -65,10 +63,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ─── Step 3: Get cheapest courier from iCarry ───
-    const totalWeight = calculateTotalWeight(items);
-    const isCod = paymentMethod === "cod";
-
+    // ─── Step 3: Calculate static shipping cost ───
     // Calculate order value from items
     const orderValue = items.reduce(
       (sum: number, item: { price?: number; quantity: number }) =>
@@ -76,14 +71,7 @@ export async function POST(request: NextRequest) {
       0
     );
 
-    const cheapest = await getCheapestCourier(pincode, totalWeight, isCod, orderValue);
-
-    if (!cheapest) {
-      return NextResponse.json<ServiceabilityResponse>({
-        success: false,
-        error: "Sorry, delivery is not available to this pincode at the moment.",
-      });
-    }
+    const shippingCost = orderValue < 499 ? 80 : 0;
 
     return NextResponse.json<ServiceabilityResponse>({
       success: true,
@@ -92,10 +80,8 @@ export async function POST(request: NextRequest) {
         city: locationDetails.city,
         state: locationDetails.state,
         country: locationDetails.country,
-        shippingCost: parseFloat(cheapest.courier_cost),
+        shippingCost,
         estimatedDays: "5-7 business days",
-        courierName: cheapest.courier_name,
-        courierId: cheapest.courier_id,
       },
     });
   } catch (error) {

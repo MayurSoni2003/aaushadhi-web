@@ -182,7 +182,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 7. Create encrypted session cookie
-    await createSession({ customerId: customer.id, email: customer.email! });
+    await createSession({ customerId: customer.id, customerDocumentId: customer.documentId, email: customer.email! });
 
     return NextResponse.json<AuthResponse>({
       success: true,

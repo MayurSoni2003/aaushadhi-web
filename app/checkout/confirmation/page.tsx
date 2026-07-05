@@ -282,10 +282,10 @@ function ConfirmationContent() {
             Delivery Details
           </p>
           <p className="text-sm text-text-dark font-medium">
-            {order.courierName}
+            {order.courierName || "Standard Delivery"}
           </p>
           <p className="text-xs text-text-muted mt-1">
-            Estimated: {order.courierEstimate}
+            Estimated: 3-5 business days
           </p>
           {order.trackingId && (
             <div className="mt-2">

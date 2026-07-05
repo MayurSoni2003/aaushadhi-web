@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { authService } from "@/services/auth";
 import type { StrapiCustomer } from "@/lib/auth-types";
 import LoginModal from "@/components/auth/LoginModal";
@@ -11,6 +12,7 @@ interface AuthContextType {
   login: (onSuccess?: () => void) => void;
   logout: () => Promise<void>;
   refreshCustomer: () => Promise<void>;
+  requireAuth: (action: () => void) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,6 +20,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [customer, setCustomer] = useState<StrapiCustomer | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
   
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -59,12 +62,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await authService.logout();
       setCustomer(null);
+      router.push("/");
     } catch (error) {
       console.error("Logout failed:", error);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [router]);
 
   const handleModalClose = () => {
     setIsModalOpen(false);
@@ -81,12 +85,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const requireAuth = useCallback((action: () => void) => {
+    if (customer) {
+      action();
+    } else {
+      login(action);
+    }
+  }, [customer, login]);
+
   const value = {
     customer,
     isLoading,
     login,
     logout,
     refreshCustomer,
+    requireAuth,
   };
 
   return (

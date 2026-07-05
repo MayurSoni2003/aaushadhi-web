@@ -8,6 +8,7 @@ const encodedKey = new TextEncoder().encode(secretKey);
 
 export type SessionPayload = {
   customerId: number;
+  customerDocumentId: string;
   email: string;
 };
 
