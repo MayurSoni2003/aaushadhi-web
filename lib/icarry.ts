@@ -110,6 +110,93 @@ const IARRY_STATE_CODES: Record<string, string> = {
   "Ladakh": "LA",
 };
 
+// ─── iCarry Status Mapping ─────────────────────────────────────
+export function mapIcarryStatus(icarryStatus: string | number): { status?: string; needsManualReview?: boolean } {
+  const statusStr = String(icarryStatus);
+  switch (statusStr) {
+    case "1":
+    case "24":
+    case "25":
+      return { status: "confirmed" };
+    case "2":
+      return { status: "processing" };
+    case "3":
+      return { status: "shipped" };
+    case "7":
+      return { status: "cancelled" };
+    case "16":
+      return { status: "cancelled", needsManualReview: true };
+    case "21":
+      return { status: "delivered" };
+    case "22":
+      return { status: "in_transit" };
+    case "23":
+    case "27":
+      return { status: "returned" };
+    case "26":
+      return { status: "out_for_delivery" };
+    default:
+      // Unknown or problematic status (like Damaged, Lost)
+      return { needsManualReview: true };
+  }
+}
+
+// ─── Centralized Authenticated Fetch ───────────────────────────
+
+/**
+ * A wrapper for iCarry API requests that automatically handles authentication,
+ * appends the api_token, and retries the request once if the token is invalid/expired.
+ */
+async function fetchICarry(
+  endpoint: string,
+  options: RequestInit = {},
+  isRetry = false
+): Promise<Response> {
+  const token = await getToken();
+  
+  // Append api_token to the endpoint URL
+  const urlObj = new URL(`${ICARRY_BASE_URL}${endpoint}`);
+  urlObj.searchParams.set("api_token", token);
+  
+  const res = await fetch(urlObj.toString(), options);
+  
+  // If we get an error response, try parsing it to see if it's a token issue.
+  // iCarry sometimes returns 200 OK but with an error payload.
+  let isTokenExpired = false;
+  let data: any = null;
+  
+  if (res.status === 401 || res.status === 403) {
+    isTokenExpired = true;
+  } else if (res.ok) {
+    // Clone response to read body without consuming it
+    const clonedRes = res.clone();
+    try {
+      data = await clonedRes.json();
+      if (
+        data && 
+        data.error && 
+        (typeof data.error === 'string' && (data.error.toLowerCase().includes("token") || data.error.toLowerCase().includes("auth")))
+      ) {
+        isTokenExpired = true;
+      }
+    } catch {
+      // Not JSON, ignore
+    }
+  }
+
+  // If token seems invalid and this is not a retry, clear token and retry once
+  if (isTokenExpired && !isRetry) {
+    console.warn("iCarry token expired or invalid, refetching and retrying...");
+    cachedToken = null;
+    tokenExpiresAt = 0;
+    return fetchICarry(endpoint, options, true);
+  }
+
+  // If we pre-read the data and it has a generic error that we couldn't handle, we don't throw here.
+  // The caller will handle it based on their specific API contract.
+  return res;
+}
+
 // ─── Types ───────────────────────────────────────────────────
 
 export type ICarryBookingResponse = {
@@ -134,23 +221,28 @@ export type ICarryServiceabilityResponse = {
   }>;
 };
 
+export type ICarrySyncStatusResponse = {
+  success?: string;
+  error?: string;
+  msg?: Array<{
+    shipment_id: string;
+    status: string;
+    date_delivered: string;
+    date_picked: string;
+  }>;
+};
+
 // ─── Check Serviceability by Pincode ─────────────────────────
 
 /**
  * Check if a pincode is serviceable by iCarry couriers.
  *
- * Endpoint: POST /api_check_pincode?api_token=<token>
- * Body: { pincode }
- * Response: { success: 1|0, msg: [{ service, prepaid, cod, pickup }] }
+ * Endpoint: POST /api_check_pincode
  */
 export async function checkServiceability(
   pincode: string
 ): Promise<{ serviceable: boolean; codAvailable: boolean }> {
-  const token = await getToken();
-
-  const url = `${ICARRY_BASE_URL}/api_check_pincode?api_token=${token}`;
-
-  const res = await fetch(url, {
+  const res = await fetchICarry("/api_check_pincode", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ pincode }),
@@ -193,18 +285,11 @@ type BookShipmentParams = {
 /**
  * Book a draft shipment without assigning a courier.
  *
- * Endpoint: POST /api_add_shipment_surface?api_token=<token>
- * Body uses PHP-style nested keys for consignee and parcel objects.
- * Response: { success, error, shipment_id, ... }
+ * Endpoint: POST /api_add_shipment_surface
  */
 export async function bookShipment(
   params: BookShipmentParams
 ): Promise<ICarryBookingResponse> {
-  const token = await getToken();
-
-  const url = `${ICARRY_BASE_URL}/api_add_shipment_surface?api_token=${token}`;
-
-  // iCarry uses PHP-style nested keys: consignee[name], parcel[type], etc.
   const body = new URLSearchParams();
 
   // Pickup address (must be pre-configured in iCarry dashboard)
@@ -241,7 +326,7 @@ export async function bookShipment(
   body.append("parcel[dimensions][height]", String(DEFAULT_PACKAGE.height));
   body.append("parcel[dimensions][unit]", "cm");
 
-  const res = await fetch(url, {
+  const res = await fetchICarry("/api_add_shipment_surface", {
     method: "POST",
     body,
   });
@@ -258,6 +343,120 @@ export async function bookShipment(
     throw new Error(`iCarry API returned error: ${data.error}`);
   }
 
+  return data;
+}
+
+// ─── Sync Shipments ──────────────────────────────────────────
+
+/**
+ * Fetch status of multiple shipments from iCarry.
+ * 
+ * Endpoint: POST /api_shipment_status_sync
+ */
+export async function syncShipments(shipmentIds: string[]): Promise<ICarrySyncStatusResponse> {
+  const body = new URLSearchParams();
+  
+  // Array parameters need to be appended individually
+  shipmentIds.forEach(id => {
+    body.append("shipment_ids[]", id);
+  });
+
+  const res = await fetchICarry("/api_shipment_status_sync", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body,
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`iCarry sync shipments failed: ${res.status} ${text}`);
+  }
+
+  const data = await res.json();
+  
+  if (data.error) {
+    throw new Error(`iCarry API returned error: ${data.error}`);
+  }
+  
+  return data;
+}
+
+// ─── Get Shipment Label Details ──────────────────────────────
+
+export type ICarryShipmentLabelResponse = {
+  success: number | string;
+  awb?: string;
+  courier_name?: string;
+  courier_id?: string | number;
+  barcode_img?: string;
+  tracking_url?: string;
+  [key: string]: any;
+};
+
+/**
+ * Fetch shipment label details to enrich tracking information (AWB, Courier Name, Courier ID).
+ * 
+ * Endpoint: POST /api_print_shipment_label
+ */
+export async function getShipmentLabel(shipmentId: string): Promise<ICarryShipmentLabelResponse> {
+  const body = new URLSearchParams();
+  body.append("shipment_id", shipmentId);
+
+  const res = await fetchICarry("/api_print_shipment_label", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body,
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`iCarry print label failed: ${res.status} ${text}`);
+  }
+
+  const data = await res.json();
+  return data;
+}
+
+// ─── Cancel Shipment ───────────────────────────────────────────
+
+export type ICarryCancelResponse = {
+  success?: string;
+  error?: string;
+  shipment_id?: string;
+};
+
+/**
+ * Cancel an existing iCarry shipment.
+ * 
+ * Endpoint: POST /api_cancel_shipment
+ */
+export async function cancelShipment(shipmentId: string): Promise<ICarryCancelResponse> {
+  const body = new URLSearchParams();
+  body.append("shipment_id", shipmentId);
+
+  const res = await fetchICarry("/api_cancel_shipment", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body,
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`iCarry cancel shipment failed: ${res.status} ${text}`);
+  }
+
+  const data = await res.json();
+  
+  if (data.error) {
+    throw new Error(`iCarry API returned error: ${data.error}`);
+  }
+  
   return data;
 }
 
