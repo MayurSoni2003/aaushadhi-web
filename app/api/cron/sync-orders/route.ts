@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { syncShipments, getShipmentLabel, mapIcarryStatus } from "@/lib/icarry";
+import { saveOrderWithHistory } from "@/lib/orders";
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
 const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN || "";
@@ -26,6 +27,7 @@ export async function GET(request: NextRequest) {
     query.append("filters[orderStatus][$notIn][1]", "cancelled");
     query.append("filters[orderStatus][$notIn][2]", "returned");
     query.append("pagination[limit]", "100"); // Process up to 100 orders per run
+    query.append("populate", "statusHistory"); // Ensure statusHistory is fetched
 
     const strapiRes = await fetch(`${STRAPI_URL}/api/orders?${query.toString()}`, {
       method: "GET",
@@ -84,30 +86,22 @@ export async function GET(request: NextRequest) {
         continue;
       }
 
-      // We only care about order status, so we use mapIcarryStatus.
       const mapping = mapIcarryStatus(item.status);
+      const newStatus = mapping.status || order.orderStatus;
       
       const updates: Record<string, any> = {};
-      let hasChanges = false;
-
-      // Check if orderStatus needs updating
-      if (mapping.status && order.orderStatus !== mapping.status) {
-        updates.orderStatus = mapping.status;
-        hasChanges = true;
-      }
-
+      
       // Check if icarryStatusCode needs updating
       const parsedStatusCode = parseInt(item.status, 10);
+      // Check if icarryStatusCode needs updating
       if (order.icarryStatusCode !== parsedStatusCode && !isNaN(parsedStatusCode)) {
         updates.icarryStatusCode = parsedStatusCode;
-        hasChanges = true;
       }
 
       // Check if needsManualReview needs updating
       const newNeedsManualReview = mapping.needsManualReview || false;
       if (order.needsManualReview !== newNeedsManualReview && newNeedsManualReview) {
         updates.needsManualReview = true;
-        hasChanges = true;
       }
 
       // Determine if tracking enrichment is needed
@@ -150,20 +144,16 @@ export async function GET(request: NextRequest) {
       // This represents the last time we successfully fetched data for this order
       if (Object.keys(updates).length > 0) {
         try {
-          const updateRes = await fetch(`${STRAPI_URL}/api/orders/${order.documentId}`, {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${STRAPI_TOKEN}`,
-            },
-            body: JSON.stringify({ data: updates }),
-          });
-          
-          if (updateRes.ok) {
-            updatedCount++;
-          } else {
-            console.error(`Failed to update order ${order.documentId}`, await updateRes.text());
-          }
+          await saveOrderWithHistory(
+            order.documentId,
+            order.orderStatus,
+            order.statusHistory,
+            newStatus,
+            "cron",
+            `Status synchronized from iCarry (Status Code: ${item.status})`,
+            updates
+          );
+          updatedCount++;
         } catch (e) {
           console.error(`Exception updating order ${order.documentId}`, e);
         }

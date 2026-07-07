@@ -6,6 +6,7 @@ import type {
   PlaceOrderResponse,
   OrderItemData,
 } from "@/lib/checkout-types";
+import { saveOrderWithHistory } from "@/lib/orders";
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
 const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN || "";
@@ -76,62 +77,60 @@ export async function POST(request: NextRequest) {
     const orderId = generateOrderId();
 
     // ─── Determine initial statuses ───
-    const orderStatus = paymentMethod === "cod" ? "confirmed" : "pending";
+    const initialOrderStatus = paymentMethod === "cod" ? "confirmed" : "pending";
     const paymentStatus = paymentMethod === "cod" ? "pending" : "pending";
 
-    // ─── Create order in Strapi ───
-    const strapiPayload = {
-      data: {
-        orderId,
-        orderStatus,
-        paymentMethod,
-        paymentStatus,
-        customerEmail: customerEmail || null,
-        subtotal,
-        shippingCost: serverShippingCost,
-        totalAmount,
-        customer: session.customerId,
-        shippingAddress: {
-          name: customerName,
-          mobile: customerPhone,
-          addressLine1: shippingAddress.addressLine1,
-          addressLine2: shippingAddress.addressLine2 || "",
-          city: shippingAddress.city,
-          state: shippingAddress.state,
-          pincode: shippingAddress.pincode,
-          country: shippingAddress.country || "India",
-        },
-        orderItem: items.map((item: OrderItemData) => ({
-          product: item.product, // Strapi relation ID
-          productName: item.productName,
-          slug: item.slug,
-          price: item.price,
-          quantity: item.quantity,
-          imageUrl: item.imageUrl,
-        })),
-        notes: notes || null,
+    // ─── Create order in Strapi with initial history ───
+    const payloadData = {
+      orderId,
+      // orderStatus is handled by the helper
+      paymentMethod,
+      paymentStatus,
+      customerEmail: customerEmail || null,
+      subtotal,
+      shippingCost: serverShippingCost,
+      totalAmount,
+      customer: session.customerId,
+      shippingAddress: {
+        name: customerName,
+        mobile: customerPhone,
+        addressLine1: shippingAddress.addressLine1,
+        addressLine2: shippingAddress.addressLine2 || "",
+        city: shippingAddress.city,
+        state: shippingAddress.state,
+        pincode: shippingAddress.pincode,
+        country: shippingAddress.country || "India",
       },
+      orderItem: items.map((item: OrderItemData) => ({
+        product: item.product, // Strapi relation ID
+        productName: item.productName,
+        slug: item.slug,
+        price: item.price,
+        quantity: item.quantity,
+        imageUrl: item.imageUrl,
+      })),
+      notes: notes || null,
     };
 
-    const strapiRes = await fetch(`${STRAPI_URL}/api/orders`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${STRAPI_TOKEN}`,
-      },
-      body: JSON.stringify(strapiPayload),
-    });
-
-    if (!strapiRes.ok) {
-      const errorText = await strapiRes.text().catch(() => "");
-      console.error("Strapi order creation failed:", errorText);
+    let strapiResponseJson;
+    try {
+      strapiResponseJson = await saveOrderWithHistory(
+        null, // No documentId for creation
+        null, // No current status
+        null, // No current history
+        initialOrderStatus,
+        "system",
+        "Order placed",
+        payloadData
+      );
+    } catch (err: any) {
+      console.error("Strapi order creation failed:", err);
       return NextResponse.json<PlaceOrderResponse>(
         { success: false, error: "System is currently in maintenance mode." },
         { status: 503 }
       );
     }
 
-    const strapiResponseJson = await strapiRes.json();
     const documentId = strapiResponseJson.data.documentId;
 
     // ─── Book shipment on iCarry (COD orders only for now) ───
@@ -189,7 +188,7 @@ export async function POST(request: NextRequest) {
       success: true,
       data: {
         orderId,
-        orderStatus: orderStatus as "confirmed" | "pending",
+        orderStatus: initialOrderStatus as "confirmed" | "pending",
         paymentMethod: paymentMethod as "cod" | "online",
         totalAmount,
       },

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { syncShipments, cancelShipment, mapIcarryStatus } from "@/lib/icarry";
+import { saveOrderWithHistory } from "@/lib/orders";
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
 const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN || "";
@@ -19,7 +20,7 @@ export async function POST(
 
     // 1. Fetch order from Strapi
     const orderRes = await fetch(
-      `${STRAPI_URL}/api/orders/${documentId}?populate=customer`,
+      `${STRAPI_URL}/api/orders/${documentId}?populate[customer]=true&populate[statusHistory]=true`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -84,21 +85,27 @@ export async function POST(
 
     // Update Strapi with the live synced status first to ensure the database is perfectly up-to-date
     // (even if cancellation is subsequently rejected)
-    const now = new Date().toISOString();
-    await fetch(`${STRAPI_URL}/api/orders/${documentId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${STRAPI_TOKEN}`,
-      },
-      body: JSON.stringify({
-        data: {
-          orderStatus: currentStatus,
+    let latestHistory = order.statusHistory;
+    try {
+      const updateRes = await saveOrderWithHistory(
+        documentId,
+        order.orderStatus,
+        order.statusHistory,
+        currentStatus,
+        "system",
+        "Live sync before cancellation",
+        { 
           icarryStatusCode: syncedIcarryStatusCode,
-          lastSyncedAt: now,
-        },
-      }),
-    });
+          lastSyncedAt: new Date().toISOString()
+        }
+      );
+      if (updateRes && updateRes.data) {
+        latestHistory = updateRes.data.statusHistory;
+      }
+    } catch (e: any) {
+      console.error("Failed to update pre-cancellation synced status in Strapi", e);
+      // We log but proceed with the live memory status
+    }
 
     // 5. Enforce cancellation rules based on the newly synced status
     const cancellableStatuses = ["pending", "confirmed", "processing"];
@@ -118,22 +125,19 @@ export async function POST(
     }
 
     // 7. Update Strapi orderStatus to cancelled
-    const finalUpdateRes = await fetch(`${STRAPI_URL}/api/orders/${documentId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${STRAPI_TOKEN}`,
-      },
-      body: JSON.stringify({
-        data: {
-          orderStatus: "cancelled",
-          lastSyncedAt: new Date().toISOString(),
-        },
-      }),
-    });
-
-    if (!finalUpdateRes.ok) {
-      console.error("Failed to update order status to cancelled in Strapi");
+    try {
+      await saveOrderWithHistory(
+        documentId,
+        currentStatus, // this is the status from before this cancellation step
+        latestHistory,
+        "cancelled",
+        "customer",
+        "Cancelled by customer",
+        { lastSyncedAt: new Date().toISOString() },
+        true // allowRegression
+      );
+    } catch (e: any) {
+      console.error("Failed to update order status to cancelled in Strapi:", e);
       return NextResponse.json({ error: "Order was cancelled but failed to update local database" }, { status: 500 });
     }
 

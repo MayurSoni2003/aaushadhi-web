@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { mapIcarryStatus } from "@/lib/icarry";
+import { saveOrderWithHistory } from "@/lib/orders";
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
 const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN || "";
@@ -37,7 +38,7 @@ export async function POST(request: NextRequest) {
 
     // 3. Find the order in Strapi by AWB
     const findRes = await fetch(
-      `${STRAPI_URL}/api/orders?filters[trackingAwb][$eq]=${encodeURIComponent(String(awb))}`,
+      `${STRAPI_URL}/api/orders?filters[trackingAwb][$eq]=${encodeURIComponent(String(awb))}&populate=statusHistory`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -62,13 +63,8 @@ export async function POST(request: NextRequest) {
     const updates: Record<string, any> = {};
     let hasChanges = false;
 
-    // 4. Map the new status
     const mapping = mapIcarryStatus(status);
-
-    if (mapping.status && order.orderStatus !== mapping.status) {
-      updates.orderStatus = mapping.status;
-      hasChanges = true;
-    }
+    const newStatus = mapping.status || order.orderStatus;
 
     const parsedStatusCode = parseInt(String(status), 10);
     if (!isNaN(parsedStatusCode) && order.icarryStatusCode !== parsedStatusCode) {
@@ -82,21 +78,22 @@ export async function POST(request: NextRequest) {
       hasChanges = true;
     }
 
-    // 5. Update Strapi if changes exist
-    if (hasChanges) {
+    // 5. Update Strapi if changes exist or if status changes
+    if (hasChanges || newStatus !== order.orderStatus) {
       updates.lastSyncedAt = new Date().toISOString();
 
-      const updateRes = await fetch(`${STRAPI_URL}/api/orders/${order.documentId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${STRAPI_TOKEN}`,
-        },
-        body: JSON.stringify({ data: updates }),
-      });
-
-      if (!updateRes.ok) {
-        throw new Error(`Failed to update order in Strapi: ${updateRes.statusText}`);
+      try {
+        await saveOrderWithHistory(
+          order.documentId,
+          order.orderStatus,
+          order.statusHistory,
+          newStatus,
+          "webhook",
+          `Updated by Shipment Status Webhook (Status Code: ${status})`,
+          updates
+        );
+      } catch (e: any) {
+        throw new Error(`Failed to update order in Strapi: ${e.message}`);
       }
     }
 
