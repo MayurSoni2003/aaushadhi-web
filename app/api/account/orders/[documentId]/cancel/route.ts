@@ -121,7 +121,13 @@ export async function POST(
       await cancelShipment(order.icarryShipmentId);
     } catch (e: any) {
       console.error("Failed to cancel shipment with iCarry:", e);
-      return NextResponse.json({ error: e.message || "Courier cancellation failed" }, { status: 502 });
+      // If iCarry returns "Shipment id not found", it usually means the shipment is still a Draft
+      // (not yet booked with a courier) or was deleted. We should proceed to cancel it locally anyway.
+      if (e.message && e.message.toLowerCase().includes("not found")) {
+        console.warn(`iCarry could not find shipment ${order.icarryShipmentId} (likely a draft). Proceeding with local cancellation.`);
+      } else {
+        return NextResponse.json({ error: e.message || "Courier cancellation failed" }, { status: 502 });
+      }
     }
 
     // 7. Update Strapi orderStatus to cancelled

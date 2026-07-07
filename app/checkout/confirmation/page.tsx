@@ -101,34 +101,58 @@ function ConfirmationContent() {
     );
   }
 
+  const isCancelled = order.orderStatus === "cancelled";
+
   return (
     <div className="max-w-2xl mx-auto">
-      {/* Success header */}
+      {/* Success/Cancelled header */}
       <div className="text-center mb-8">
         <div
-          className="mx-auto w-20 h-20 rounded-full bg-olive/10 flex items-center justify-center mb-5 animate-scale-in"
+          className={`mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-5 animate-scale-in ${
+            isCancelled ? "bg-red-50" : "bg-olive/10"
+          }`}
         >
-          <svg
-            width="36"
-            height="36"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#5C6B2E"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
+          {isCancelled ? (
+            <svg
+              width="36"
+              height="36"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#EF4444"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          ) : (
+            <svg
+              width="36"
+              height="36"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#5C6B2E"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          )}
         </div>
         <h1
-          className="text-2xl md:text-3xl font-bold text-olive mb-2"
+          className={`text-2xl md:text-3xl font-bold mb-2 ${
+            isCancelled ? "text-red-600" : "text-olive"
+          }`}
           style={{ fontFamily: "var(--font-playfair)" }}
         >
-          Order Placed Successfully!
+          {isCancelled ? "Order Cancelled" : "Order Placed Successfully!"}
         </h1>
         <p className="text-text-muted text-sm">
-          Thank you for your order,{" "}
+          {isCancelled
+            ? "This order has been cancelled, "
+            : "Thank you for your order, "}
           <span className="font-medium text-text-dark">
             {order.customerName}
           </span>

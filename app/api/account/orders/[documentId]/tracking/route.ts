@@ -1,0 +1,90 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getSession } from "@/lib/session";
+import { trackShipment } from "@/lib/icarry";
+
+const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN || "";
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ documentId: string }> }
+) {
+  try {
+    const session = await getSession();
+    if (!session || !session.customerDocumentId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { documentId } = await params;
+
+    // 1. Fetch order from Strapi
+    const orderRes = await fetch(
+      `${STRAPI_URL}/api/orders/${documentId}?populate[customer]=true`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${STRAPI_TOKEN}`,
+        },
+        cache: "no-store",
+      }
+    );
+
+    if (!orderRes.ok) {
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+
+    const orderData = await orderRes.json();
+    const order = orderData.data;
+
+    if (!order) {
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+
+    // 2. Verify ownership
+    const orderCustomerId = order.customer?.documentId;
+    if (orderCustomerId !== session.customerDocumentId) {
+      return NextResponse.json({ error: "Forbidden: You do not own this order" }, { status: 403 });
+    }
+
+    // 3. Verify iCarry shipment exists
+    if (!order.icarryShipmentId) {
+      return NextResponse.json({ error: "Order does not have an active shipment" }, { status: 400 });
+    }
+
+    // 4. Fetch tracking from iCarry
+    let trackingData;
+    try {
+      trackingData = await trackShipment(order.icarryShipmentId);
+    } catch (e: any) {
+      console.error("Failed to track shipment with iCarry:", e);
+      return NextResponse.json({ error: "Failed to fetch live tracking from courier" }, { status: 502 });
+    }
+
+    // 5. Normalize and sort the response
+    // We remove the top-level success/error fields to keep the payload clean,
+    // but preserve courier_name and AWB for backend extensibility.
+    const { 
+      success, 
+      error, 
+      ...safeTrackingData 
+    } = trackingData;
+
+    // Ensure the details array is always in chronological order (oldest to newest)
+    if (safeTrackingData.details && Array.isArray(safeTrackingData.details)) {
+      safeTrackingData.details.sort((a, b) => {
+        const timeA = new Date(a.datetime).getTime();
+        const timeB = new Date(b.datetime).getTime();
+        return timeA - timeB; // Oldest first
+      });
+    }
+
+    return NextResponse.json({
+      success: true,
+      tracking: safeTrackingData
+    });
+
+  } catch (error: any) {
+    console.error("Order Tracking Error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}

@@ -232,6 +232,25 @@ export type ICarrySyncStatusResponse = {
   }>;
 };
 
+export type ICarryTrackResponse = {
+  success?: number;
+  error?: string;
+  courier_name?: string;
+  status?: string;
+  picked_datetime?: string;
+  delivered_datetime?: string;
+  eta_datetime?: string;
+  location?: string;
+  receiver?: string;
+  datetime?: string;
+  awb?: string;
+  details?: Array<{
+    datetime: string;
+    location: string;
+    notes: string;
+  }>;
+};
+
 // ─── Check Serviceability by Pincode ─────────────────────────
 
 /**
@@ -319,12 +338,6 @@ export async function bookShipment(
   body.append("parcel[value]", String(params.orderValue));
   body.append("parcel[currency]", "INR");
   body.append("parcel[contents]", params.productDescription);
-  body.append("parcel[weight][weight]", String(params.totalWeightGrams));
-  body.append("parcel[weight][unit]", "gm");
-  body.append("parcel[dimensions][length]", String(DEFAULT_PACKAGE.length));
-  body.append("parcel[dimensions][breadth]", String(DEFAULT_PACKAGE.breadth));
-  body.append("parcel[dimensions][height]", String(DEFAULT_PACKAGE.height));
-  body.append("parcel[dimensions][unit]", "cm");
 
   const res = await fetchICarry("/api_add_shipment_surface", {
     method: "POST",
@@ -449,6 +462,39 @@ export async function cancelShipment(shipmentId: string): Promise<ICarryCancelRe
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`iCarry cancel shipment failed: ${res.status} ${text}`);
+  }
+
+  const data = await res.json();
+  
+  if (data.error) {
+    throw new Error(`iCarry API returned error: ${data.error}`);
+  }
+  
+  return data;
+}
+
+// ─── Track Shipment ─────────────────────────────────────────────
+
+/**
+ * Fetch the live tracking timeline for an existing shipment.
+ * 
+ * Endpoint: POST /api_track_shipment
+ */
+export async function trackShipment(shipmentId: string): Promise<ICarryTrackResponse> {
+  const body = new URLSearchParams();
+  body.append("shipment_id", shipmentId);
+
+  const res = await fetchICarry("/api_track_shipment", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body,
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`iCarry track shipment failed: ${res.status} ${text}`);
   }
 
   const data = await res.json();

@@ -164,10 +164,10 @@ export default function Navbar() {
                         }}
                       >
                         <Link
-                          href="/account"
+                          href="/account/profile"
                           onClick={closeMenu}
                           className={`group flex items-center justify-between py-4 px-2 rounded-2xl transition-all duration-200 ${
-                            pathname.startsWith("/account")
+                            pathname === "/account/profile"
                               ? "text-olive bg-olive/8"
                               : "text-text-dark hover:text-olive hover:bg-olive/5"
                           }`}
@@ -176,7 +176,36 @@ export default function Navbar() {
                             className="text-[22px] font-bold tracking-tight"
                             style={{ fontFamily: "var(--font-playfair)" }}
                           >
-                            My Account
+                            My Profile
+                          </span>
+                        </Link>
+                      </li>
+                      {/* My Orders link */}
+                      <li
+                        className={`transition-all ease-out ${
+                          menuOpen
+                            ? "opacity-100 translate-y-0"
+                            : "opacity-0 translate-y-4"
+                        }`}
+                        style={{
+                          transitionDuration: "400ms",
+                          transitionDelay: menuOpen ? `${100 + (navLinks.length + 2) * 60}ms` : "0ms",
+                        }}
+                      >
+                        <Link
+                          href="/account/orders"
+                          onClick={closeMenu}
+                          className={`group flex items-center justify-between py-4 px-2 rounded-2xl transition-all duration-200 ${
+                            pathname.startsWith("/account/orders")
+                              ? "text-olive bg-olive/8"
+                              : "text-text-dark hover:text-olive hover:bg-olive/5"
+                          }`}
+                        >
+                          <span
+                            className="text-[22px] font-bold tracking-tight"
+                            style={{ fontFamily: "var(--font-playfair)" }}
+                          >
+                            My Orders
                           </span>
                         </Link>
                       </li>
@@ -189,7 +218,7 @@ export default function Navbar() {
                         }`}
                         style={{
                           transitionDuration: "400ms",
-                          transitionDelay: menuOpen ? `${100 + (navLinks.length + 2) * 60}ms` : "0ms",
+                          transitionDelay: menuOpen ? `${100 + (navLinks.length + 3) * 60}ms` : "0ms",
                         }}
                       >
                         <button
@@ -336,6 +365,7 @@ export default function Navbar() {
               alt="Aaushadhi Logo"
               width={44}
               height={44}
+              priority
               className="transition-transform duration-300 group-hover:scale-105 object-contain"
             />
             <div className="leading-tight">
@@ -398,16 +428,27 @@ export default function Navbar() {
 
                     {/* Dropdown (appears on hover) */}
                     <div className="absolute right-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                      <div className="bg-white rounded-xl shadow-lg border border-olive/10 py-1.5 min-w-[160px]">
+                      <div className="bg-white rounded-xl shadow-lg border border-olive/10 py-1.5 min-w-[180px]">
                         <Link
-                          href="/account"
+                          href="/account/profile"
                           className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-dark hover:bg-olive/5 hover:text-olive transition-colors"
                         >
                           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                             <circle cx="12" cy="7" r="4" />
                           </svg>
-                          My Account
+                          My Profile
+                        </Link>
+                        <Link
+                          href="/account/orders"
+                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-dark hover:bg-olive/5 hover:text-olive transition-colors"
+                        >
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                            <line x1="3" y1="6" x2="21" y2="6" />
+                            <path d="M16 10a4 4 0 0 1-8 0" />
+                          </svg>
+                          My Orders
                         </Link>
                         <div className="mx-3 my-1 h-px bg-olive/10" />
                         <button
