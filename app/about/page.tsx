@@ -135,7 +135,7 @@ function ProcessStepIcon({ children }: { children: React.ReactNode }) {
 /* ── Page Component ── */
 
 export default function AboutPage() {
-  const playfair = { fontFamily: "var(--font-playfair)" };
+  const outfit = { fontFamily: "var(--font-outfit)" };
 
   return (
     <>
@@ -193,7 +193,7 @@ export default function AboutPage() {
                 {/* Title */}
                 <h1
                   className="text-3xl md:text-5xl lg:text-[3.2rem] font-bold text-olive leading-[1.15] mb-2"
-                  style={playfair}
+                  style={outfit}
                 >
                   Aaushadhi Wellness
                 </h1>
@@ -243,7 +243,7 @@ export default function AboutPage() {
                     <FeatureIconCircle>
                       <ShieldIcon className="text-olive" />
                     </FeatureIconCircle>
-                    <h3 className="text-sm font-bold text-text-dark mb-1" style={playfair}>
+                    <h3 className="text-sm font-bold text-text-dark mb-1" style={outfit}>
                       Non Preservative
                     </h3>
                     <p className="text-text-muted text-xs leading-snug">
@@ -256,7 +256,7 @@ export default function AboutPage() {
                     <FeatureIconCircle>
                       <DropletIcon className="text-olive" />
                     </FeatureIconCircle>
-                    <h3 className="text-sm font-bold text-text-dark mb-1" style={playfair}>
+                    <h3 className="text-sm font-bold text-text-dark mb-1" style={outfit}>
                       No Added Artificial Colour
                     </h3>
                     <p className="text-text-muted text-xs leading-snug">
@@ -269,7 +269,7 @@ export default function AboutPage() {
                     <FeatureIconCircle>
                       <LeafIcon className="text-olive" />
                     </FeatureIconCircle>
-                    <h3 className="text-sm font-bold text-text-dark mb-1" style={playfair}>
+                    <h3 className="text-sm font-bold text-text-dark mb-1" style={outfit}>
                       100% Pure Herbal Product
                     </h3>
                     <p className="text-text-muted text-xs leading-snug">
@@ -282,7 +282,7 @@ export default function AboutPage() {
                     <FeatureIconCircle>
                       <SproutIcon className="text-olive" />
                     </FeatureIconCircle>
-                    <h3 className="text-sm font-bold text-text-dark mb-1" style={playfair}>
+                    <h3 className="text-sm font-bold text-text-dark mb-1" style={outfit}>
                       Sourced From Our Own Farm
                     </h3>
                     <p className="text-text-muted text-xs leading-snug">
@@ -295,7 +295,7 @@ export default function AboutPage() {
                     <FeatureIconCircle>
                       <HeartHandshakeIcon className="text-olive" />
                     </FeatureIconCircle>
-                    <h3 className="text-sm font-bold text-text-dark mb-1" style={playfair}>
+                    <h3 className="text-sm font-bold text-text-dark mb-1" style={outfit}>
                       Sustainable &amp; Ethical
                     </h3>
                     <p className="text-text-muted text-xs leading-snug">
@@ -313,7 +313,7 @@ export default function AboutPage() {
                 <GlassCard>
                   <div className="mb-6">
                     <SectionDivider>
-                      <span className="text-olive font-bold text-lg whitespace-nowrap" style={playfair}>
+                      <span className="text-olive font-bold text-lg whitespace-nowrap" style={outfit}>
                         Our Story
                       </span>
                     </SectionDivider>
@@ -336,7 +336,7 @@ export default function AboutPage() {
                 <GlassCard>
                   <div className="mb-6">
                     <SectionDivider>
-                      <span className="text-olive font-bold text-lg whitespace-nowrap" style={playfair}>
+                      <span className="text-olive font-bold text-lg whitespace-nowrap" style={outfit}>
                         Our Promise
                       </span>
                     </SectionDivider>
@@ -370,7 +370,7 @@ export default function AboutPage() {
                   <SectionDivider>
                     <h2
                       className="text-xl md:text-2xl font-bold text-olive whitespace-nowrap"
-                      style={playfair}
+                      style={outfit}
                     >
                       From Our Farm to Your Family
                     </h2>
@@ -385,7 +385,7 @@ export default function AboutPage() {
                       <SproutIcon className="text-olive" />
                     </ProcessStepIcon>
                     <div className="text-left md:text-center">
-                      <h4 className="text-sm font-bold text-text-dark mb-1" style={playfair}>
+                      <h4 className="text-sm font-bold text-text-dark mb-1" style={outfit}>
                         Own Farm
                       </h4>
                       <p className="text-text-muted text-xs">
@@ -410,7 +410,7 @@ export default function AboutPage() {
                       </svg>
                     </ProcessStepIcon>
                     <div className="text-left md:text-center">
-                      <h4 className="text-sm font-bold text-text-dark mb-1" style={playfair}>
+                      <h4 className="text-sm font-bold text-text-dark mb-1" style={outfit}>
                         Careful Harvest
                       </h4>
                       <p className="text-text-muted text-xs">
@@ -434,7 +434,7 @@ export default function AboutPage() {
                       </svg>
                     </ProcessStepIcon>
                     <div className="text-left md:text-center">
-                      <h4 className="text-sm font-bold text-text-dark mb-1" style={playfair}>
+                      <h4 className="text-sm font-bold text-text-dark mb-1" style={outfit}>
                         Pure Process
                       </h4>
                       <p className="text-text-muted text-xs">
@@ -459,7 +459,7 @@ export default function AboutPage() {
                       </svg>
                     </ProcessStepIcon>
                     <div className="text-left md:text-center">
-                      <h4 className="text-sm font-bold text-text-dark mb-1" style={playfair}>
+                      <h4 className="text-sm font-bold text-text-dark mb-1" style={outfit}>
                         Pure Products
                       </h4>
                       <p className="text-text-muted text-xs">
@@ -498,7 +498,7 @@ export default function AboutPage() {
               <div className="max-w-2xl mx-auto text-center">
                 <p
                   className="text-olive font-bold text-lg md:text-xl tracking-wide mb-3"
-                  style={playfair}
+                  style={outfit}
                 >
                   Pure by Nature. Trusted by You. Crafted with Love.
                 </p>

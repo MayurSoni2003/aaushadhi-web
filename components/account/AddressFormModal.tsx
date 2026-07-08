@@ -183,7 +183,7 @@ export default function AddressFormModal({ isOpen, onClose, onSaved, editAddress
           <div className="flex items-center justify-between">
             <h3
               className="text-lg font-bold text-olive"
-              style={{ fontFamily: "var(--font-playfair)" }}
+              style={{ fontFamily: "var(--font-outfit)" }}
             >
               {editAddress ? "Edit Address" : "Add New Address"}
             </h3>

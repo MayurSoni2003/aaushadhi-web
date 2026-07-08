@@ -145,7 +145,7 @@ function ConfirmationContent() {
           className={`text-2xl md:text-3xl font-bold mb-2 ${
             isCancelled ? "text-red-600" : "text-olive"
           }`}
-          style={{ fontFamily: "var(--font-playfair)" }}
+          style={{ fontFamily: "var(--font-outfit)" }}
         >
           {isCancelled ? "Order Cancelled" : "Order Placed Successfully!"}
         </h1>

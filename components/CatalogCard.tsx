@@ -92,7 +92,7 @@ export default function CatalogCard({ product, priority = false }: Props) {
         <Link href={`/products/${product.slug}`} className="hover:text-olive transition-colors duration-200">
           <h3
             className="text-text-dark font-bold text-[12px] md:text-[15px] leading-snug hover:text-olive transition-colors line-clamp-2"
-            style={{ fontFamily: "var(--font-playfair)" }}
+            style={{ fontFamily: "var(--font-outfit)" }}
           >
             {product.productName}
           </h3>

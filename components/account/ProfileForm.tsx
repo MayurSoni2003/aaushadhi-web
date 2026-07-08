@@ -112,7 +112,7 @@ export default function ProfileForm() {
     <div className="bg-white rounded-2xl border border-olive/10 p-6 md:p-8">
       <h2
         className="text-lg font-bold text-olive mb-6"
-        style={{ fontFamily: "var(--font-playfair)" }}
+        style={{ fontFamily: "var(--font-outfit)" }}
       >
         Personal Information
       </h2>

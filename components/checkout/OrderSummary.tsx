@@ -29,7 +29,7 @@ export default function OrderSummary({
     >
       <h3
         className="text-base md:text-lg font-bold text-text-dark mb-4"
-        style={{ fontFamily: "var(--font-playfair)" }}
+        style={{ fontFamily: "var(--font-outfit)" }}
       >
         Order Summary
       </h3>

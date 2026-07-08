@@ -185,57 +185,50 @@ function OrderCard({ order }: { order: Order }) {
           )}
         </div>
 
-        {/* Main info — always full-width on mobile, flex-1 on sm+ */}
-        <div className="flex-1 min-w-0">
-          {/* Order ID + status badge row */}
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0">
-              <p className="text-sm font-bold text-text-dark group-hover:text-olive transition-colors truncate">
-                {order.orderId}
-              </p>
-              <p className="text-xs text-text-muted mt-0.5">{dateStr}</p>
-            </div>
-            {/* Order status badge */}
-            <span
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold flex-shrink-0 ${status.bg} ${status.text}`}
-            >
-              <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
-              {status.label}
-            </span>
-          </div>
-
-          {/* Meta row */}
-          <div className="flex flex-wrap items-center gap-1.5 mt-2">
-            {/* Payment method */}
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-olive/10 text-olive">
-              {order.paymentMethod === "cod" ? "Cash on Delivery" : "Online"}
-            </span>
-
-            {/* Item count text */}
-            <span className="text-[11px] text-text-muted">
-              {itemCount} {itemCount === 1 ? "item" : "items"}
-            </span>
-          </div>
+        {/* Main info */}
+        <div className="flex-1 min-w-0 flex flex-col justify-center space-y-1">
+          <p className="text-sm text-text-muted">
+            {itemCount} {itemCount === 1 ? "Item" : "Items"}
+          </p>
+          <p className="text-sm sm:text-base font-bold text-text-dark group-hover:text-olive transition-colors truncate" style={{ fontFamily: "var(--font-outfit)" }}>
+            Order Id : {order.orderId}
+          </p>
+          <p className="text-sm font-medium text-text-dark">
+            {order.orderStatus === "cancelled" ? "Cancelled on" : "Order Placed on"} {dateStr}
+          </p>
         </div>
 
-        {/* Amount + chevron */}
-        <div className="flex-shrink-0 flex flex-col items-end gap-1 self-start">
-          <p className="text-sm sm:text-base font-bold text-text-dark whitespace-nowrap">
-            ₹{order.totalAmount.toLocaleString("en-IN")}
-          </p>
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-olive/40 group-hover:text-olive group-hover:translate-x-0.5 transition-all duration-200"
+        {/* Status, Amount + chevron */}
+        <div className="flex-shrink-0 flex flex-col items-end gap-3 self-start">
+          {/* Order status badge */}
+          <span
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${status.bg} ${status.text}`}
           >
-            <path d="M9 18l6-6-6-6" />
-          </svg>
+            <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
+            {status.label}
+          </span>
+
+          {/* Amount + chevron */}
+          <div className="flex flex-col items-end gap-1">
+            <div className="flex items-center gap-1">
+              <p className="text-sm sm:text-base font-bold text-text-dark whitespace-nowrap">
+                ₹{order.totalAmount.toLocaleString("en-IN")}
+              </p>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="text-olive/40 group-hover:text-olive group-hover:translate-x-0.5 transition-all duration-200"
+              >
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </div>
+          </div>
         </div>
       </div>
     </Link>
@@ -289,7 +282,7 @@ export default function OrderList() {
         </div>
         <h3
           className="text-base font-bold text-text-dark mb-1"
-          style={{ fontFamily: "var(--font-playfair)" }}
+          style={{ fontFamily: "var(--font-outfit)" }}
         >
           Could not load orders
         </h3>
@@ -336,7 +329,7 @@ export default function OrderList() {
         </div>
         <h3
           className="text-base font-bold text-text-dark mb-1"
-          style={{ fontFamily: "var(--font-playfair)" }}
+          style={{ fontFamily: "var(--font-outfit)" }}
         >
           No orders yet
         </h3>
@@ -359,7 +352,7 @@ export default function OrderList() {
       <div className="flex items-center justify-between mb-5">
         <h2
           className="text-lg font-bold text-olive"
-          style={{ fontFamily: "var(--font-playfair)" }}
+          style={{ fontFamily: "var(--font-outfit)" }}
         >
           My Orders
         </h2>

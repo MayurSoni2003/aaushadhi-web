@@ -207,7 +207,7 @@ export default function CheckoutFlow() {
 
                 <h2
                   className="text-xl md:text-2xl font-bold text-text-dark text-center mb-2"
-                  style={{ fontFamily: "var(--font-playfair)" }}
+                  style={{ fontFamily: "var(--font-outfit)" }}
                 >
                   Payment & Checkout
                 </h2>

@@ -133,7 +133,7 @@ export default function AddressManager() {
       <div className="flex items-center justify-between mb-5">
         <h2
           className="text-lg font-bold text-olive"
-          style={{ fontFamily: "var(--font-playfair)" }}
+          style={{ fontFamily: "var(--font-outfit)" }}
         >
           Saved Addresses
         </h2>
@@ -177,7 +177,7 @@ export default function AddressManager() {
           </div>
           <h3
             className="text-base font-bold text-text-dark mb-1"
-            style={{ fontFamily: "var(--font-playfair)" }}
+            style={{ fontFamily: "var(--font-outfit)" }}
           >
             No saved addresses
           </h3>

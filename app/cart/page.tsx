@@ -23,7 +23,7 @@ export default function CartPage() {
         <div className="mb-8">
           <h1
             className="text-3xl md:text-4xl font-bold text-olive"
-            style={{ fontFamily: "var(--font-playfair)" }}
+            style={{ fontFamily: "var(--font-outfit)" }}
           >
             Your Cart
           </h1>
@@ -102,7 +102,7 @@ export default function CartPage() {
                     <div className="flex-1 min-w-0">
                       <h3
                         className="text-text-dark font-bold text-[15px] leading-snug truncate"
-                        style={{ fontFamily: "var(--font-playfair)" }}
+                        style={{ fontFamily: "var(--font-outfit)" }}
                       >
                         {item.product.productName}
                       </h3>
@@ -183,7 +183,7 @@ export default function CartPage() {
               >
                 <h2
                   className="text-lg font-bold text-text-dark mb-4"
-                  style={{ fontFamily: "var(--font-playfair)" }}
+                  style={{ fontFamily: "var(--font-outfit)" }}
                 >
                   Order Summary
                 </h2>

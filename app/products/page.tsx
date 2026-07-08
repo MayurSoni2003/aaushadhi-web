@@ -37,7 +37,7 @@ export default async function ProductsPage({ searchParams }: Props) {
             </p>
             <h1
               className="text-3xl md:text-5xl font-bold text-olive leading-tight"
-              style={{ fontFamily: "var(--font-playfair)" }}
+              style={{ fontFamily: "var(--font-outfit)" }}
             >
               Our Products
             </h1>

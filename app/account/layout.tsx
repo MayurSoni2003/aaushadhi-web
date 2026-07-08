@@ -79,7 +79,7 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
           <div className="text-center">
             <h2
               className="text-xl font-bold text-olive mb-2"
-              style={{ fontFamily: "var(--font-playfair)" }}
+              style={{ fontFamily: "var(--font-outfit)" }}
             >
               Please log in
             </h2>
@@ -102,7 +102,7 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
         <div className="mb-6 md:mb-8">
           <h1
             className="text-2xl md:text-3xl font-bold text-olive"
-            style={{ fontFamily: "var(--font-playfair)" }}
+            style={{ fontFamily: "var(--font-outfit)" }}
           >
             My Account
           </h1>

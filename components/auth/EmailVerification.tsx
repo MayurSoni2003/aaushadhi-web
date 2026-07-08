@@ -142,7 +142,7 @@ export default function EmailVerification({
       <div className="text-center mb-6">
         <h2
           className="text-2xl font-bold text-text-dark mb-2"
-          style={{ fontFamily: "var(--font-playfair)" }}
+          style={{ fontFamily: "var(--font-outfit)" }}
         >
           {title}
         </h2>

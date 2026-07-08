@@ -102,7 +102,7 @@ export default function Navbar() {
                   >
                     <span
                       className="text-[22px] font-bold tracking-tight"
-                      style={{ fontFamily: "var(--font-playfair)" }}
+                      style={{ fontFamily: "var(--font-outfit)" }}
                     >
                       {link.label}
                     </span>
@@ -136,7 +136,7 @@ export default function Navbar() {
                 >
                   <span
                     className="text-[22px] font-bold tracking-tight"
-                    style={{ fontFamily: "var(--font-playfair)" }}
+                    style={{ fontFamily: "var(--font-outfit)" }}
                   >
                     Cart
                   </span>
@@ -174,7 +174,7 @@ export default function Navbar() {
                         >
                           <span
                             className="text-[22px] font-bold tracking-tight"
-                            style={{ fontFamily: "var(--font-playfair)" }}
+                            style={{ fontFamily: "var(--font-outfit)" }}
                           >
                             My Profile
                           </span>
@@ -203,9 +203,38 @@ export default function Navbar() {
                         >
                           <span
                             className="text-[22px] font-bold tracking-tight"
-                            style={{ fontFamily: "var(--font-playfair)" }}
+                            style={{ fontFamily: "var(--font-outfit)" }}
                           >
                             My Orders
+                          </span>
+                        </Link>
+                      </li>
+                      {/* Manage Addresses link */}
+                      <li
+                        className={`transition-all ease-out ${
+                          menuOpen
+                            ? "opacity-100 translate-y-0"
+                            : "opacity-0 translate-y-4"
+                        }`}
+                        style={{
+                          transitionDuration: "400ms",
+                          transitionDelay: menuOpen ? `${100 + (navLinks.length + 3) * 60}ms` : "0ms",
+                        }}
+                      >
+                        <Link
+                          href="/account/addresses"
+                          onClick={closeMenu}
+                          className={`group flex items-center justify-between py-4 px-2 rounded-2xl transition-all duration-200 ${
+                            pathname.startsWith("/account/addresses")
+                              ? "text-olive bg-olive/8"
+                              : "text-text-dark hover:text-olive hover:bg-olive/5"
+                          }`}
+                        >
+                          <span
+                            className="text-[22px] font-bold tracking-tight"
+                            style={{ fontFamily: "var(--font-outfit)" }}
+                          >
+                            Manage Addresses
                           </span>
                         </Link>
                       </li>
@@ -218,7 +247,7 @@ export default function Navbar() {
                         }`}
                         style={{
                           transitionDuration: "400ms",
-                          transitionDelay: menuOpen ? `${100 + (navLinks.length + 3) * 60}ms` : "0ms",
+                          transitionDelay: menuOpen ? `${100 + (navLinks.length + 4) * 60}ms` : "0ms",
                         }}
                       >
                         <button
@@ -230,7 +259,7 @@ export default function Navbar() {
                         >
                           <span
                             className="text-[22px] font-bold tracking-tight"
-                            style={{ fontFamily: "var(--font-playfair)" }}
+                            style={{ fontFamily: "var(--font-outfit)" }}
                           >
                             Logout
                           </span>
@@ -258,7 +287,7 @@ export default function Navbar() {
                       >
                         <span
                           className="text-[22px] font-bold tracking-tight"
-                          style={{ fontFamily: "var(--font-playfair)" }}
+                          style={{ fontFamily: "var(--font-outfit)" }}
                         >
                           Login
                         </span>
@@ -371,13 +400,13 @@ export default function Navbar() {
             <div className="leading-tight">
               <div
                 className="text-olive font-bold text-lg tracking-wide"
-                style={{ fontFamily: "var(--font-playfair)" }}
+                style={{ fontFamily: "var(--font-outfit)" }}
               >
                 Aaushadhi
               </div>
               <div
                 className="text-olive font-bold text-lg -mt-1 tracking-wide"
-                style={{ fontFamily: "var(--font-playfair)" }}
+                style={{ fontFamily: "var(--font-outfit)" }}
               >
                 Wellness
               </div>
@@ -449,6 +478,16 @@ export default function Navbar() {
                             <path d="M16 10a4 4 0 0 1-8 0" />
                           </svg>
                           My Orders
+                        </Link>
+                        <Link
+                          href="/account/addresses"
+                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-dark hover:bg-olive/5 hover:text-olive transition-colors"
+                        >
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                            <circle cx="12" cy="10" r="3" />
+                          </svg>
+                          Manage Addresses
                         </Link>
                         <div className="mx-3 my-1 h-px bg-olive/10" />
                         <button

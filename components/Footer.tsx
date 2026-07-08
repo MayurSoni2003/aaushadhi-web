@@ -15,7 +15,7 @@ export default function Footer() {
           />
           <p
             className="text-olive font-bold text-xl"
-            style={{ fontFamily: "var(--font-playfair)" }}
+            style={{ fontFamily: "var(--font-outfit)" }}
           >
             Aaushadhi Wellness
           </p>

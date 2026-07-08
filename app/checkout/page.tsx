@@ -14,7 +14,7 @@ export default function CheckoutPage() {
         <div className="mb-6 md:mb-8">
           <h1
             className="text-2xl md:text-3xl font-bold text-olive"
-            style={{ fontFamily: "var(--font-playfair)" }}
+            style={{ fontFamily: "var(--font-outfit)" }}
           >
             Checkout
           </h1>

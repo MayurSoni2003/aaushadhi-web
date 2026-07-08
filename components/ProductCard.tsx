@@ -77,7 +77,7 @@ export default function ProductCard({
                 : "text-[18px]"
             }`}
           style={{
-            fontFamily:"var(--font-playfair)",
+            fontFamily:"var(--font-outfit)",
           }}
         >
           {product.productName}

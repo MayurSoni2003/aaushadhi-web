@@ -81,7 +81,7 @@ function ChannelCard({
       {/* Value */}
       <p
         className="text-lg md:text-xl font-bold text-text-dark mb-2 group-hover:text-olive transition-colors duration-300"
-        style={{ fontFamily: "var(--font-playfair)" }}
+        style={{ fontFamily: "var(--font-outfit)" }}
       >
         {value}
       </p>
@@ -105,7 +105,7 @@ function ChannelCard({
 
 /* ── Main Page Component ── */
 export default function ContactPage() {
-  const playfair = { fontFamily: "var(--font-playfair)" };
+  const outfit = { fontFamily: "var(--font-outfit)" };
   const [formState, setFormState] = useState<"idle" | "sending" | "sent">("idle");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -180,7 +180,7 @@ export default function ContactPage() {
                 {/* Headline — poetic, not generic */}
                 <h1
                   className="text-3xl md:text-5xl lg:text-[3.4rem] font-bold text-olive leading-[1.12] mb-4"
-                  style={{ ...playfair, fontStyle: "italic" }}
+                  style={{ ...outfit, fontStyle: "italic" }}
                 >
                   Every Wellness Journey
                   <br />
@@ -319,7 +319,7 @@ export default function ContactPage() {
 
                   <p
                     className="text-olive font-bold text-lg md:text-xl mb-2"
-                    style={playfair}
+                    style={outfit}
                   >
                     Your trust is our most valued herb.
                   </p>

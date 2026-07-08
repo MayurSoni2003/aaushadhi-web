@@ -34,7 +34,7 @@ export default function DeleteConfirmModal({ isOpen, onClose, onConfirm, loading
 
         <h3
           className="text-center text-lg font-bold text-text-dark mb-2"
-          style={{ fontFamily: "var(--font-playfair)" }}
+          style={{ fontFamily: "var(--font-outfit)" }}
         >
           Delete Address
         </h3>

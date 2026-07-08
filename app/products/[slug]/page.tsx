@@ -65,7 +65,7 @@ function Section({
         )}
         <h2
           className="text-xl md:text-2xl font-bold text-text-dark"
-          style={{ fontFamily: "var(--font-playfair)" }}
+          style={{ fontFamily: "var(--font-outfit)" }}
         >
           {title}
         </h2>
@@ -236,7 +236,7 @@ export default async function ProductPage({ params }: Props) {
             {/* Product Name */}
             <h1
               className="text-3xl md:text-5xl font-bold text-text-dark leading-tight mb-2"
-              style={{ fontFamily: "var(--font-playfair)" }}
+              style={{ fontFamily: "var(--font-outfit)" }}
             >
               {product.productName}
             </h1>
@@ -269,7 +269,7 @@ export default async function ProductPage({ params }: Props) {
             {/* Key Benefits */}
             {product.keyBenefits && product.keyBenefits.length > 0 && (
               <>
-                <h3 className="text-lg font-bold text-text-dark mb-4" style={{ fontFamily: "var(--font-playfair)" }}>
+                <h3 className="text-lg font-bold text-text-dark mb-4" style={{ fontFamily: "var(--font-outfit)" }}>
                   Key Benefits
                 </h3>
                 <ul className="space-y-3 mb-8">
@@ -470,7 +470,7 @@ export default async function ProductPage({ params }: Props) {
         {product.whyCustomersLoveIt && (
           <Section title="Why Customers Love It" icon={HeartIcon}>
             <div className="p-6 rounded-2xl bg-gradient-to-br from-olive/5 to-parchment/40 border border-olive/10 relative overflow-hidden">
-              <div className="absolute top-4 left-5 text-olive/15 text-5xl leading-none" style={{ fontFamily: "var(--font-playfair)" }}>"</div>
+              <div className="absolute top-4 left-5 text-olive/15 text-5xl leading-none" style={{ fontFamily: "var(--font-outfit)" }}>"</div>
               <p className="text-text-dark text-[15px] leading-[1.85] relative z-10 pl-6">
                 {product.whyCustomersLoveIt}
               </p>
@@ -591,7 +591,7 @@ export default async function ProductPage({ params }: Props) {
               <>
                 <h3
                   className="text-xl font-bold text-text-dark mb-3"
-                  style={{ fontFamily: "var(--font-playfair)" }}
+                  style={{ fontFamily: "var(--font-outfit)" }}
                 >
                   Why Choose Aaushadhi Wellness
                 </h3>

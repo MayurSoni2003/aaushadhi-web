@@ -25,7 +25,7 @@ export default function Hero() {
             className=" text-3xl md:text-5xl lg:text-[3.4rem] font-bold text-olive leading-[1.15] mb-4 "
             style={{
               fontFamily:
-                "var(--font-playfair)",
+                "var(--font-outfit)",
               fontStyle: "italic",
             }}
           >

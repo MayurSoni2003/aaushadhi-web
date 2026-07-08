@@ -364,7 +364,6 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
   const [cancelReason, setCancelReason] = useState<string>("");
 
   const CANCEL_REASONS = [
-    "Forgot to apply coupon code",
     "Want to order different product",
     "Wrong delivery address provided",
     "Change Payment mode",
@@ -406,7 +405,7 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
             <path d="M16 10a4 4 0 0 1-8 0" />
           </svg>
         </div>
-        <h3 className="text-base font-bold text-text-dark mb-1" style={{ fontFamily: "var(--font-playfair)" }}>Order not found</h3>
+        <h3 className="text-base font-bold text-text-dark mb-1" style={{ fontFamily: "var(--font-outfit)" }}>Order not found</h3>
         <p className="text-sm text-text-muted mb-5">This order doesn't exist or doesn't belong to your account.</p>
         <Link href="/account/orders" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-olive text-white text-sm font-bold hover:bg-olive-light transition-all">
           Back to My Orders
@@ -425,7 +424,7 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
             <line x1="12" y1="16" x2="12.01" y2="16" />
           </svg>
         </div>
-        <h3 className="text-base font-bold text-text-dark mb-1" style={{ fontFamily: "var(--font-playfair)" }}>Could not load order</h3>
+        <h3 className="text-base font-bold text-text-dark mb-1" style={{ fontFamily: "var(--font-outfit)" }}>Could not load order</h3>
         <p className="text-sm text-text-muted mb-5">Something went wrong. Please try again.</p>
         <button
           onClick={() => { setError(null); setLoading(true); }}
@@ -506,12 +505,13 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div>
             <h1
-              className="text-lg sm:text-xl font-bold text-text-dark"
-              style={{ fontFamily: "var(--font-playfair)" }}
+              className="text-2xl sm:text-3xl font-bold text-text-dark mb-1"
+              style={{ fontFamily: "var(--font-outfit)" }}
             >
-              {order.orderId}
+              Order Details
             </h1>
-            <p className="text-xs text-text-muted mt-0.5">{orderDate}</p>
+            <p className="text-sm font-medium text-text-dark">Order ID: {order.orderId}</p>
+            <p className="text-sm text-text-muted mt-0.5">Placed on: {orderDate}</p>
           </div>
           <div className="flex items-center gap-3">
             <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold flex-shrink-0 ${statusCfg.bg} ${statusCfg.text}`}>
@@ -541,7 +541,7 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
                     <line x1="12" y1="17" x2="12.01" y2="17"/>
                   </svg>
                 </div>
-                <h3 className="text-lg font-bold text-text-dark mb-2" style={{ fontFamily: "var(--font-playfair)" }}>
+                <h3 className="text-lg font-bold text-text-dark mb-2" style={{ fontFamily: "var(--font-outfit)" }}>
                   Cancel this order?
                 </h3>
                 
@@ -657,12 +657,7 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
           </div>
         )}
 
-        {/* Meta chips */}
-        <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-olive/8">
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-olive/10 text-olive">
-            {order.paymentMethod === "cod" ? "Cash on Delivery" : "Online Payment"}
-          </span>
-        </div>
+
 
         {/* Notes */}
         {order.notes && (
@@ -747,6 +742,12 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
               <span>Shipping</span>
               <span className={order.shippingCost === 0 ? "text-green-600 font-medium" : "text-text-dark font-medium"}>
                 {order.shippingCost === 0 ? "Free" : `₹${order.shippingCost.toLocaleString("en-IN")}`}
+              </span>
+            </div>
+            <div className="flex justify-between text-sm text-text-muted">
+              <span>Payment Method</span>
+              <span className="text-text-dark font-medium">
+                {order.paymentMethod === "cod" ? "Cash on Delivery" : "Online Payment"}
               </span>
             </div>
             <div className="pt-2.5 border-t border-olive/10 flex justify-between">
