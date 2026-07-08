@@ -129,7 +129,7 @@ export function mapIcarryStatus(icarryStatus: string | number): { status?: strin
     case "21":
       return { status: "delivered" };
     case "22":
-      return { status: "in_transit" };
+      return { status: "shipped" };
     case "23":
     case "27":
       return { status: "returned" };

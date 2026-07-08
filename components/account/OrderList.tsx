@@ -9,7 +9,6 @@ type OrderStatus =
   | "confirmed"
   | "processing"
   | "shipped"
-  | "in_transit"
   | "out_for_delivery"
   | "delivered"
   | "cancelled"
@@ -59,12 +58,6 @@ const STATUS_BADGE: Record<
     bg: "bg-sky-50",
     text: "text-sky-700",
     dot: "bg-sky-400",
-  },
-  in_transit: {
-    label: "In Transit",
-    bg: "bg-indigo-50",
-    text: "text-indigo-700",
-    dot: "bg-indigo-500",
   },
   out_for_delivery: {
     label: "Out for Delivery",

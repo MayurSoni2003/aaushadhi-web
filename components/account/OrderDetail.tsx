@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
 // ─── Types ──────────────────────────────────────────────────────
 type OrderStatus =
   | "confirmed" | "processing" | "shipped"
-  | "in_transit" | "out_for_delivery" | "delivered"
+  | "out_for_delivery" | "delivered"
   | "cancelled" | "returned";
 
 type PaymentStatus = "pending" | "paid" | "failed" | "refunded";
@@ -64,7 +64,6 @@ const ORDER_STATUS_BADGE: Record<OrderStatus, { label: string; bg: string; text:
   confirmed:        { label: "Confirmed",         bg: "bg-blue-50",   text: "text-blue-700",   dot: "bg-blue-400",    timelineBg: "bg-blue-500" },
   processing:       { label: "Processing",        bg: "bg-violet-50", text: "text-violet-700", dot: "bg-violet-400",  timelineBg: "bg-violet-500" },
   shipped:          { label: "Shipped",           bg: "bg-sky-50",    text: "text-sky-700",    dot: "bg-sky-400",     timelineBg: "bg-sky-500" },
-  in_transit:       { label: "In Transit",        bg: "bg-indigo-50", text: "text-indigo-700", dot: "bg-indigo-500",  timelineBg: "bg-indigo-500" },
   out_for_delivery: { label: "Out for Delivery",  bg: "bg-orange-50", text: "text-orange-700", dot: "bg-orange-400",  timelineBg: "bg-orange-500" },
   delivered:        { label: "Delivered",         bg: "bg-green-50",  text: "text-green-700",  dot: "bg-green-500",   timelineBg: "bg-green-500" },
   cancelled:        { label: "Cancelled",         bg: "bg-red-50",    text: "text-red-600",    dot: "bg-red-400",     timelineBg: "bg-red-400" },
@@ -77,6 +76,168 @@ const PAYMENT_STATUS_BADGE: Record<PaymentStatus, { label: string; bg: string; t
   failed:   { label: "Payment Failed",  bg: "bg-red-50",   text: "text-red-600" },
   refunded: { label: "Refunded",        bg: "bg-gray-100", text: "text-gray-600" },
 };
+
+// ─── Horizontal Progress Timeline ────────────────────────────────
+const NORMAL_MILESTONES: { key: OrderStatus; label: string }[] = [
+  { key: "confirmed",        label: "Confirmed" },
+  { key: "processing",       label: "Processing" },
+  { key: "shipped",          label: "Shipped" },
+  { key: "out_for_delivery", label: "Out for Delivery" },
+  { key: "delivered",        label: "Delivered" },
+];
+
+const CANCELLED_MILESTONES: { key: OrderStatus; label: string }[] = [
+  { key: "confirmed",  label: "Confirmed" },
+  { key: "cancelled",  label: "Cancelled" },
+];
+
+const RETURNED_MILESTONES: { key: OrderStatus; label: string }[] = [
+  { key: "confirmed",  label: "Confirmed" },
+  { key: "shipped",    label: "Shipped" },
+  { key: "delivered",  label: "Delivered" },
+  { key: "returned",   label: "Returned" },
+];
+
+function OrderProgressTimeline({ status, history }: { status: OrderStatus; history: StatusHistoryEntry[] }) {
+  const isCancelled = status === "cancelled";
+  const isReturned = status === "returned";
+  const milestones = isCancelled ? CANCELLED_MILESTONES : isReturned ? RETURNED_MILESTONES : NORMAL_MILESTONES;
+
+  const milestoneDates: Record<string, string> = {};
+  if (history) {
+    history.forEach((h) => {
+      milestoneDates[h.status] = new Date(h.timestamp).toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+      });
+    });
+  }
+
+  const activeIdx = milestones.findIndex((m) => m.key === status);
+  // progress as percentage across the segments
+  const totalSegments = milestones.length - 1;
+  const targetPct = totalSegments > 0 ? (activeIdx / totalSegments) * 100 : 100;
+
+  const [animatedPct, setAnimatedPct] = useState(0);
+  const rafRef = useRef<number | null>(null);
+  const startRef = useRef<number | null>(null);
+  const DURATION = 900; // ms
+
+  useEffect(() => {
+    setAnimatedPct(0);
+    startRef.current = null;
+    function step(ts: number) {
+      if (startRef.current === null) startRef.current = ts;
+      const elapsed = ts - startRef.current;
+      const progress = Math.min(elapsed / DURATION, 1);
+      // ease-in-out cubic
+      const eased = progress < 0.5
+        ? 4 * progress * progress * progress
+        : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+      setAnimatedPct(eased * targetPct);
+      if (progress < 1) rafRef.current = requestAnimationFrame(step);
+    }
+    rafRef.current = requestAnimationFrame(step);
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+  }, [status, targetPct]);
+
+  return (
+    <div className="bg-white rounded-2xl border border-olive/10 px-4 py-5 sm:px-6 sm:py-6">
+      <h2
+        className="text-sm font-bold text-olive uppercase tracking-widest mb-5"
+        style={{ fontFamily: "var(--font-inter)" }}
+      >
+        Order Timeline
+      </h2>
+
+      <div className={isCancelled ? "max-w-md mx-auto sm:mx-0" : ""}>
+        {/* Dots row — line is relative to this row only */}
+        <div className="relative flex items-center justify-between">
+          {/* Track wrapper to offset by half the dot container width (72px / 2 = 36px) */}
+          <div className="absolute left-[36px] right-[36px] top-1/2 -translate-y-1/2 h-[3px]">
+            {/* Base grey track */}
+            <div className="absolute inset-0 bg-olive/12 rounded-full w-full h-full" />
+
+            {/* Animated filled track */}
+            {isReturned ? (
+              <>
+                <div
+                  className="absolute inset-y-0 left-0 h-full rounded-l-full transition-none bg-olive"
+                  style={{ width: `${Math.min(animatedPct, 66.666)}%` }}
+                />
+                {animatedPct > 66.666 && (
+                  <div
+                    className="absolute inset-y-0 h-full rounded-r-full transition-none bg-red-400"
+                    style={{ left: "66.666%", width: `${animatedPct - 66.666}%` }}
+                  />
+                )}
+              </>
+            ) : (
+              <div
+                className={`absolute inset-y-0 left-0 h-full rounded-full transition-none ${
+                  isCancelled ? "bg-red-400" : "bg-olive"
+                }`}
+                style={{ width: `${animatedPct}%` }}
+              />
+            )}
+          </div>
+
+        {/* Dots only */}
+        {milestones.map((m, i) => {
+          const isDone = i < activeIdx;
+          const isActive = i === activeIdx;
+          return (
+            <div key={m.key} className="relative z-10 flex-shrink-0 flex justify-center" style={{ width: 72 }}>
+              <div
+                className={`
+                  w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full ring-2 ring-white shadow-sm transition-colors
+                  ${
+                    (isCancelled && isActive) || (isReturned && m.key === "returned")
+                      ? "bg-red-500 ring-red-100"
+                      : isActive
+                      ? "bg-olive ring-olive/20"
+                      : isDone
+                      ? "bg-olive"
+                      : "bg-olive/20"
+                  }
+                `}
+              />
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Labels row — completely separate from the track */}
+      <div className="flex justify-between mt-2.5">
+        {milestones.map((m, i) => {
+          const isDone = i < activeIdx;
+          const isActive = i === activeIdx;
+          return (
+            <div
+              key={m.key}
+              className={`text-center leading-tight flex-shrink-0 flex flex-col items-center justify-start ${
+                (isCancelled && isActive) || (isReturned && m.key === "returned")
+                  ? "text-red-600 font-semibold"
+                  : isActive
+                  ? "text-olive font-semibold"
+                  : isDone
+                  ? "text-olive/70 font-medium"
+                  : "text-text-muted"
+              } text-[9px] sm:text-[11px]`}
+              style={{ width: 72 }}
+            >
+              <span>{m.label}</span>
+              {milestoneDates[m.key] && (
+                <span className="mt-1 opacity-90">{milestoneDates[m.key]}</span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+    </div>
+  );
+}
 
 // ─── Skeleton ────────────────────────────────────────────────────
 function Skeleton({ className }: { className?: string }) {
@@ -100,7 +261,14 @@ function OrderDetailSkeleton() {
         </div>
         <div className="flex gap-2 flex-wrap">
           <Skeleton className="h-5 w-28 rounded-full" />
-          <Skeleton className="h-5 w-24 rounded-full" />
+        </div>
+      </div>
+
+      {/* Horizontal timeline skeleton */}
+      <div className="bg-white rounded-2xl border border-olive/10 p-5">
+        <Skeleton className="h-3 w-full rounded-full" />
+        <div className="flex justify-between mt-3">
+          {[1,2,3,4,5].map((i) => <Skeleton key={i} className="h-3 w-12" />)}
         </div>
       </div>
 
@@ -133,20 +301,6 @@ function OrderDetailSkeleton() {
         <Skeleton className="h-3 w-full" />
         <Skeleton className="h-3 w-full" />
         <Skeleton className="h-4 w-full" />
-      </div>
-
-      {/* Timeline */}
-      <div className="bg-white rounded-2xl border border-olive/10 p-5 space-y-4">
-        <Skeleton className="h-4 w-32" />
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="flex gap-3">
-            <Skeleton className="w-3 h-3 rounded-full flex-shrink-0 mt-1" />
-            <div className="flex-1 space-y-1.5">
-              <Skeleton className="h-3 w-24" />
-              <Skeleton className="h-3 w-36" />
-            </div>
-          </div>
-        ))}
       </div>
     </div>
   );
@@ -206,6 +360,19 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
   const [isCancelling, setIsCancelling] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
   const [cancelSuccess, setCancelSuccess] = useState(false);
+  const [cancelStep, setCancelStep] = useState<1 | 2>(1);
+  const [cancelReason, setCancelReason] = useState<string>("");
+
+  const CANCEL_REASONS = [
+    "Forgot to apply coupon code",
+    "Want to order different product",
+    "Wrong delivery address provided",
+    "Change Payment mode",
+    "Expected delivery time is long",
+    "Ordered multiple orders by mistake",
+    "Got better deal",
+    "Other"
+  ];
 
   // Define fetchOrder outside so it can be called manually
   const fetchOrder = async () => {
@@ -297,6 +464,8 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
       setTimeout(() => {
         setIsCancelDialogOpen(false);
         setCancelSuccess(false); // reset for future
+        setCancelStep(1);
+        setCancelReason("");
       }, 2000);
       
     } catch (err: any) {
@@ -317,7 +486,6 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
 
   // Timeline: chronological (already stored in append order); last entry is active
   const timeline = [...(order.statusHistory || [])];
-  const latestIdx = timeline.length - 1;
 
   return (
     <div className="space-y-4">
@@ -378,13 +546,16 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
                 </h3>
                 
                 {cancelSuccess ? (
-                  <div className="bg-green-50 text-green-700 p-3 rounded-xl text-sm font-medium flex items-center gap-2">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="20 6 9 17 4 12"/>
-                    </svg>
-                    Order successfully cancelled!
+                  <div className="text-center py-4">
+                    <div className="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4 text-green-600">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-bold text-text-dark mb-1">Order Cancelled</h3>
+                    <p className="text-sm text-text-muted">Your order has been successfully cancelled.</p>
                   </div>
-                ) : (
+                ) : cancelStep === 1 ? (
                   <>
                     <p className="text-sm text-text-muted mb-6">
                       Are you sure you want to cancel {order.orderId}? This action cannot be undone.
@@ -398,18 +569,72 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
                     
                     <div className="flex gap-3">
                       <button
+                        onClick={() => setCancelStep(2)}
+                        disabled={isCancelling}
+                        className="flex-1 px-4 py-2.5 rounded-full border border-red-200 text-red-600 text-sm font-bold hover:bg-red-50 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                      >
+                        Yes
+                      </button>
+                      <button
                         onClick={() => {
                           setIsCancelDialogOpen(false);
                           setCancelError(null);
+                          setCancelStep(1);
+                          setCancelReason("");
                         }}
+                        disabled={isCancelling}
+                        className="flex-1 px-4 py-2.5 rounded-full bg-olive text-white text-sm font-bold hover:bg-olive/90 transition-colors disabled:opacity-50"
+                      >
+                        No
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm text-text-dark font-medium mb-5 text-center">
+                      Your complete order will be cancelled
+                    </p>
+                    
+                    {cancelError && (
+                      <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-xl border border-red-100 font-medium">
+                        {cancelError}
+                      </div>
+                    )}
+                    
+                    <div className="mb-6 space-y-1.5 text-left">
+                      <label htmlFor="cancelReason" className="text-xs font-bold text-olive uppercase tracking-widest block" style={{ fontFamily: "var(--font-inter)" }}>
+                        Select Issue Type<span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        id="cancelReason"
+                        value={cancelReason}
+                        onChange={(e) => setCancelReason(e.target.value)}
+                        className="w-full bg-white border border-olive/20 rounded-xl px-4 py-3.5 text-sm text-text-dark focus:outline-none focus:ring-2 focus:ring-olive/30 focus:border-olive transition-shadow appearance-none cursor-pointer"
+                        style={{
+                          backgroundImage: `url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9l6 6 6-6' stroke='%235C6B2E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+                          backgroundRepeat: "no-repeat",
+                          backgroundPosition: "right 12px center",
+                          backgroundSize: "20px"
+                        }}
+                      >
+                        <option value="" disabled>Select...</option>
+                        {CANCEL_REASONS.map(r => (
+                          <option key={r} value={r}>{r}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => setCancelStep(1)}
                         disabled={isCancelling}
                         className="flex-1 px-4 py-2.5 rounded-full border border-olive/20 text-text-dark text-sm font-bold hover:bg-olive/5 transition-colors disabled:opacity-50"
                       >
-                        Nevermind
+                        Back
                       </button>
                       <button
                         onClick={handleCancelOrder}
-                        disabled={isCancelling}
+                        disabled={isCancelling || !cancelReason}
                         className="flex-1 px-4 py-2.5 rounded-full bg-red-600 text-white text-sm font-bold hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                       >
                         {isCancelling ? (
@@ -421,7 +646,7 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
                             Cancelling...
                           </>
                         ) : (
-                          "Yes, Cancel"
+                          "Cancel Order"
                         )}
                       </button>
                     </div>
@@ -447,7 +672,11 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
         )}
       </div>
 
+      {/* ── Horizontal Progress Timeline ── */}
+      <OrderProgressTimeline status={order.orderStatus} history={order.statusHistory} />
+
       {/* ── Products ── */}
+
       <Section title="Items Ordered">
         <div className="divide-y divide-olive/8">
           {order.orderItem.map((item) => (
@@ -528,175 +757,111 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
         </Section>
       </div>
 
-      {/* ── Status Timeline ── */}
-      {timeline.length > 0 && (
-        <Section title="Order Timeline">
-          
-          {/* Tracking Section (Top of Timeline) */}
-          {order.icarryShipmentId && (
-            <div className="mb-6">
-              {!isTrackingExpanded ? (
-                <button
-                  onClick={() => {
-                    setIsTrackingExpanded(true);
-                    fetchTracking();
-                  }}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-olive text-white text-sm font-bold hover:bg-olive-light transition-all shadow-sm"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10"/>
-                    <polyline points="12 6 12 12 16 14"/>
-                  </svg>
-                  Track Live Shipment
-                </button>
-              ) : (
-                <div className="bg-olive/5 rounded-2xl p-4 sm:p-6 border border-olive/10 relative">
-                  {/* Close button */}
-                  <button
-                    onClick={() => {
-                      setIsTrackingExpanded(false);
-                      // Clear data so it fetches fresh next time
-                      setTrackingData(null);
-                      setTrackingError(null);
-                    }}
-                    className="absolute top-4 right-4 text-olive/60 hover:text-olive transition-colors p-1"
-                    aria-label="Close tracking"
-                  >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="18" y1="6" x2="6" y2="18"/>
-                      <line x1="6" y1="6" x2="18" y2="18"/>
-                    </svg>
-                  </button>
+      {/* ── Order Timeline (Track Live Shipment only when icarry linked) ── */}
+      {order.icarryShipmentId && (
+        <Section title="Live Tracking">
+          {!isTrackingExpanded ? (
+            <button
+              onClick={() => {
+                setIsTrackingExpanded(true);
+                fetchTracking();
+              }}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-olive text-white text-sm font-bold hover:bg-olive-light transition-all shadow-sm"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+              Track Live Shipment
+            </button>
+          ) : (
+            <div className="bg-olive/5 rounded-2xl p-4 sm:p-6 border border-olive/10 relative">
+              <button
+                onClick={() => {
+                  setIsTrackingExpanded(false);
+                  setTrackingData(null);
+                  setTrackingError(null);
+                }}
+                className="absolute top-4 right-4 text-olive/60 hover:text-olive transition-colors p-1"
+                aria-label="Close tracking"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
 
-                  <h3 className="text-sm font-bold text-olive uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-olive animate-pulse" />
-                    Live Updates
-                  </h3>
+              <h3 className="text-sm font-bold text-olive uppercase tracking-wider mb-4 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-olive animate-pulse" />
+                Live Updates
+              </h3>
 
-                  {trackingLoading ? (
-                    <div className="space-y-4">
-                      <Skeleton className="h-4 w-32" />
-                      {[1, 2].map((i) => (
-                        <div key={i} className="flex gap-3">
-                          <Skeleton className="w-3 h-3 rounded-full flex-shrink-0 mt-1" />
-                          <div className="flex-1 space-y-1.5">
-                            <Skeleton className="h-3 w-48" />
-                            <Skeleton className="h-3 w-32" />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : trackingError ? (
-                    <div className="text-center py-4 space-y-3">
-                      <p className="text-sm font-medium text-red-600">{trackingError}</p>
-                      <button
-                        onClick={fetchTracking}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white border border-olive/20 text-text-dark text-xs font-bold shadow-sm hover:bg-olive/5 transition-colors"
-                      >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M21 2v6h-6"/>
-                          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-                        </svg>
-                        Retry
-                      </button>
-                    </div>
-                  ) : trackingData?.details?.length ? (
-                    <div className="relative">
-                      {trackingData.details.length > 1 && (
-                        <div className="absolute left-[5px] top-2 bottom-2 w-px bg-olive/20" />
-                      )}
-                      <div className="space-y-0">
-                        {trackingData.details.map((ev: any, idx: number) => {
-                          const isLatest = idx === trackingData.details.length - 1;
-                          const ts = new Date(ev.datetime);
-                          const dateStr = ts.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
-                          const timeStr = ts.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true });
-
-                          return (
-                            <div key={idx} className="flex gap-3 sm:gap-4 pb-5 last:pb-0">
-                              <div className="flex-shrink-0 relative flex flex-col items-center" style={{ width: "12px" }}>
-                                <div className={`w-3 h-3 rounded-full mt-0.5 ring-2 ring-white flex-shrink-0 ${isLatest ? "bg-olive" : "bg-olive/30"}`} />
-                              </div>
-                              <div className={`flex-1 min-w-0 pb-1 ${isLatest ? "" : "opacity-70"}`}>
-                                <p className={`text-sm font-bold ${isLatest ? "text-olive" : "text-text-dark"}`}>{ev.notes || "Update"}</p>
-                                <p className="text-xs text-text-muted mt-1">
-                                  {dateStr} at {timeStr}
-                                </p>
-                                {ev.location && (
-                                  <p className="text-[11px] font-medium text-text-dark mt-1 flex items-center gap-1 opacity-80">
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                                      <circle cx="12" cy="10" r="3" />
-                                    </svg>
-                                    {ev.location}
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })}
+              {trackingLoading ? (
+                <div className="space-y-4">
+                  <Skeleton className="h-4 w-32" />
+                  {[1, 2].map((i) => (
+                    <div key={i} className="flex gap-3">
+                      <Skeleton className="w-3 h-3 rounded-full flex-shrink-0 mt-1" />
+                      <div className="flex-1 space-y-1.5">
+                        <Skeleton className="h-3 w-48" />
+                        <Skeleton className="h-3 w-32" />
                       </div>
                     </div>
-                  ) : (
-                    <p className="text-sm text-text-muted italic py-2">Tracking updates are not yet available from the courier.</p>
-                  )}
+                  ))}
                 </div>
+              ) : trackingError ? (
+                <div className="text-center py-4 space-y-3">
+                  <p className="text-sm text-text-muted italic">Tracking data is not available yet.</p>
+                  <button
+                    onClick={fetchTracking}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white border border-olive/20 text-text-dark text-xs font-bold shadow-sm hover:bg-olive/5 transition-colors"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 2v6h-6"/>
+                      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                    </svg>
+                    Retry
+                  </button>
+                </div>
+              ) : trackingData?.details?.length ? (
+                <div className="relative">
+                  {trackingData.details.length > 1 && (
+                    <div className="absolute left-[5px] top-2 bottom-2 w-px bg-olive/20" />
+                  )}
+                  <div className="space-y-0">
+                    {trackingData.details.map((ev: any, idx: number) => {
+                      const isLatest = idx === trackingData.details.length - 1;
+                      const ts = new Date(ev.datetime);
+                      const dateStr = ts.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+                      const timeStr = ts.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true });
+                      return (
+                        <div key={idx} className="flex gap-3 sm:gap-4 pb-5 last:pb-0">
+                          <div className="flex-shrink-0 relative flex flex-col items-center" style={{ width: "12px" }}>
+                            <div className={`w-3 h-3 rounded-full mt-0.5 ring-2 ring-white flex-shrink-0 ${isLatest ? "bg-olive" : "bg-olive/30"}`} />
+                          </div>
+                          <div className={`flex-1 min-w-0 pb-1 ${isLatest ? "" : "opacity-70"}`}>
+                            <p className={`text-sm font-bold ${isLatest ? "text-olive" : "text-text-dark"}`}>{ev.notes || "Update"}</p>
+                            <p className="text-xs text-text-muted mt-1">{dateStr} at {timeStr}</p>
+                            {ev.location && (
+                              <p className="text-[11px] font-medium text-text-dark mt-1 flex items-center gap-1 opacity-80">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                                  <circle cx="12" cy="10" r="3" />
+                                </svg>
+                                {ev.location}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-text-muted italic py-2">Tracking updates are not yet available from the courier.</p>
               )}
             </div>
           )}
-
-          <div className="relative">
-            {/* Vertical connector line */}
-            {timeline.length > 1 && (
-              <div className="absolute left-[5px] top-2 bottom-2 w-px bg-olive/15" />
-            )}
-
-            <div className="space-y-0">
-              {timeline.map((entry, idx) => {
-                const isLatest = idx === latestIdx;
-                const cfg = ORDER_STATUS_BADGE[entry.status] ?? { label: entry.status, timelineBg: "bg-gray-400", text: "text-gray-600", bg: "bg-gray-100", dot: "bg-gray-400" };
-
-                const ts = new Date(entry.timestamp);
-                const dateStr = ts.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
-                const timeStr = ts.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true });
-
-                return (
-                  <div key={entry.id} className="flex gap-3 sm:gap-4 pb-5 last:pb-0">
-                    {/* Timeline dot */}
-                    <div className="flex-shrink-0 relative flex flex-col items-center" style={{ width: "12px" }}>
-                      <div
-                        className={`w-3 h-3 rounded-full mt-0.5 ring-2 ring-white flex-shrink-0 ${
-                          isLatest ? cfg.timelineBg : "bg-olive/20"
-                        }`}
-                      />
-                    </div>
-
-                    {/* Content */}
-                    <div className={`flex-1 min-w-0 pb-1 ${isLatest ? "" : "opacity-70"}`}>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold ${
-                            isLatest ? `${cfg.bg} ${cfg.text}` : "bg-olive/8 text-text-muted"
-                          }`}
-                        >
-                          {cfg.label}
-                        </span>
-                        {isLatest && (
-                          <span className="text-[10px] font-bold text-olive uppercase tracking-wider">Current</span>
-                        )}
-                      </div>
-                      <p className="text-xs text-text-muted mt-1">
-                        {dateStr} at {timeStr}
-                      </p>
-                      {entry.remarks && (
-                        <p className="text-xs text-text-dark mt-0.5 leading-relaxed">{entry.remarks}</p>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
         </Section>
       )}
     </div>

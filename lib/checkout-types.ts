@@ -36,7 +36,6 @@ export type OrderStatus =
   | "confirmed"
   | "processing"
   | "shipped"
-  | "in_transit"
   | "out_for_delivery"
   | "delivered"
   | "cancelled"

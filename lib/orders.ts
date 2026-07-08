@@ -7,11 +7,10 @@ const STATUS_WEIGHTS: Record<string, number> = {
   confirmed: 10,
   processing: 20,
   shipped: 30,
-  in_transit: 40,
-  out_for_delivery: 50,
-  delivered: 60,
-  returned: 70,
-  cancelled: 70,
+  out_for_delivery: 40,
+  delivered: 50,
+  returned: 60,
+  cancelled: 60,
 };
 
 /**
