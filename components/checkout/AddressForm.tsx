@@ -42,7 +42,7 @@ export default function AddressForm({ cartItems, cartTotal, onComplete }: Props)
   const [state, setState] = useState("");
   const [country, setCountry] = useState("");
   
-  const [saveAddress, setSaveAddress] = useState(false);
+  const [saveAddress, setSaveAddress] = useState(true);
   const [isDefault, setIsDefault] = useState(false);
 
   // General state
@@ -353,26 +353,11 @@ export default function AddressForm({ cartItems, cartTotal, onComplete }: Props)
               + Add New Address
             </button>
             
-            {/* Serviceability info for selected address */}
             {checking && viewMode === "list" && (
               <div className="flex justify-center py-2 text-olive text-xs">Checking delivery...</div>
             )}
             {serviceError && viewMode === "list" && (
               <p className="text-red-500 text-xs text-center">{serviceError}</p>
-            )}
-            {deliveryEstimate && viewMode === "list" && (
-              <div className="mt-3 p-3.5 rounded-xl bg-olive/5 border border-olive/15">
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-olive/15 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5C6B2E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
-                  </div>
-                  <div>
-                    <p className="text-olive font-semibold text-sm">Delivery Available</p>
-                    <p className="text-text-muted text-xs mt-0.5">Estimated delivery: <span className="font-medium text-text-dark">{deliveryEstimate.estimatedDays}</span></p>
-                    <p className="text-text-muted text-xs mt-0.5">Shipping charge: <span className="font-medium text-text-dark">₹{deliveryEstimate.shippingCost}</span></p>
-                  </div>
-                </div>
-              </div>
             )}
           </div>
         )}
@@ -394,45 +379,8 @@ export default function AddressForm({ cartItems, cartTotal, onComplete }: Props)
               </button>
             )}
             
-            <div>
-              <label className="block text-xs font-semibold text-text-dark uppercase tracking-wider mb-1.5">
-                Pin Code <span className="text-red-400">*</span>
-              </label>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={pincode}
-                onChange={(e) => setPincode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                placeholder="Enter 6-digit pincode"
-                className="w-full px-4 py-3 rounded-xl border border-olive/20 bg-white/60 text-sm text-text-dark outline-none focus:border-olive/40 focus:ring-2 focus:ring-olive/10 transition-all placeholder:text-text-muted/60"
-                autoFocus
-              />
-              {checking && (
-                <div className="flex items-center gap-2 mt-2 text-olive text-xs">
-                  <svg className="animate-spin w-3.5 h-3.5" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" opacity="0.3"/><path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/></svg>
-                  Checking delivery availability...
-                </div>
-              )}
-              {serviceError && <p className="text-red-500 text-xs mt-2">{serviceError}</p>}
-              {deliveryEstimate && (
-                <div className="mt-3 p-3.5 rounded-xl bg-olive/5 border border-olive/15">
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-full bg-olive/15 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5C6B2E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
-                    </div>
-                    <div>
-                      <p className="text-olive font-semibold text-sm">Delivery Available</p>
-                      <p className="text-text-muted text-xs mt-0.5">Estimated delivery: <span className="font-medium text-text-dark">{deliveryEstimate.estimatedDays}</span></p>
-                      <p className="text-text-muted text-xs mt-0.5">Shipping charge: <span className="font-medium text-text-dark">₹{deliveryEstimate.shippingCost}</span></p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {deliveryEstimate && (
-              <div className="space-y-4 animate-fade-slide-up-delay">
-                <div>
+            <div className="space-y-4 animate-fade-slide-up">
+              <div>
                   <label className="block text-xs font-semibold text-text-dark uppercase tracking-wider mb-1.5">
                     Full Name <span className="text-red-400">*</span>
                   </label>
@@ -495,6 +443,27 @@ export default function AddressForm({ cartItems, cartTotal, onComplete }: Props)
                   />
                 </div>
 
+                <div>
+                  <label className="block text-xs font-semibold text-text-dark uppercase tracking-wider mb-1.5">
+                    Pin Code <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={pincode}
+                    onChange={(e) => setPincode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    placeholder="Enter 6-digit pincode"
+                    className="w-full px-4 py-3 rounded-xl border border-olive/20 bg-white/60 text-sm text-text-dark outline-none focus:border-olive/40 focus:ring-2 focus:ring-olive/10 transition-all placeholder:text-text-muted/60"
+                  />
+                  {checking && (
+                    <div className="flex items-center gap-2 mt-2 text-olive text-xs">
+                      <svg className="animate-spin w-3.5 h-3.5" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" opacity="0.3"/><path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/></svg>
+                      Checking delivery availability...
+                    </div>
+                  )}
+                  {serviceError && <p className="text-red-500 text-xs mt-2">{serviceError}</p>}
+                </div>
+
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-semibold text-text-dark uppercase tracking-wider mb-1.5">City</label>
@@ -513,31 +482,18 @@ export default function AddressForm({ cartItems, cartTotal, onComplete }: Props)
 
                 {customer && (
                   <div className="pt-2 pb-2">
-                    <label className="flex items-center gap-2 cursor-pointer mb-3">
+                    <label className="flex items-center gap-2 cursor-pointer animate-fade-slide-up">
                       <input 
                         type="checkbox" 
-                        checked={saveAddress} 
-                        onChange={(e) => setSaveAddress(e.target.checked)}
+                        checked={isDefault} 
+                        onChange={(e) => setIsDefault(e.target.checked)}
                         className="w-4 h-4 text-olive focus:ring-olive/50 rounded border-olive/30 accent-olive"
                       />
-                      <span className="text-sm font-medium text-text-dark">Save this address for future checkouts</span>
+                      <span className="text-sm font-medium text-text-dark">Save as default address</span>
                     </label>
-                    
-                    {saveAddress && (
-                      <label className="flex items-center gap-2 cursor-pointer ml-6 animate-fade-slide-up">
-                        <input 
-                          type="checkbox" 
-                          checked={isDefault} 
-                          onChange={(e) => setIsDefault(e.target.checked)}
-                          className="w-4 h-4 text-olive focus:ring-olive/50 rounded border-olive/30 accent-olive"
-                        />
-                        <span className="text-xs text-text-muted">Set as default address</span>
-                      </label>
-                    )}
                   </div>
                 )}
               </div>
-            )}
           </div>
         )}
 

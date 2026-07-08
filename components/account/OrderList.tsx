@@ -6,7 +6,6 @@ import Image from "next/image";
 
 // ─── Types ──────────────────────────────────────────────────────
 type OrderStatus =
-  | "pending"
   | "confirmed"
   | "processing"
   | "shipped"
@@ -43,12 +42,6 @@ const STATUS_BADGE: Record<
   OrderStatus,
   { label: string; bg: string; text: string; dot: string }
 > = {
-  pending: {
-    label: "Pending",
-    bg: "bg-amber-50",
-    text: "text-amber-700",
-    dot: "bg-amber-400",
-  },
   confirmed: {
     label: "Confirmed",
     bg: "bg-blue-50",
@@ -147,11 +140,6 @@ function OrderCard({ order }: { order: Order }) {
     text: "text-gray-600",
     dot: "bg-gray-400",
   };
-  const payment = PAYMENT_STATUS_BADGE[order.paymentStatus] ?? {
-    label: order.paymentStatus,
-    bg: "bg-gray-100",
-    text: "text-gray-600",
-  };
 
   const firstItem = order.orderItem?.[0];
   const itemCount = order.orderItem?.length ?? 0;
@@ -225,13 +213,6 @@ function OrderCard({ order }: { order: Order }) {
 
           {/* Meta row */}
           <div className="flex flex-wrap items-center gap-1.5 mt-2">
-            {/* Payment status */}
-            <span
-              className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${payment.bg} ${payment.text}`}
-            >
-              {payment.label}
-            </span>
-
             {/* Payment method */}
             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-olive/10 text-olive">
               {order.paymentMethod === "cod" ? "Cash on Delivery" : "Online"}
@@ -341,9 +322,7 @@ export default function OrderList() {
     );
   }
 
-  const activeOrders = orders.filter((o) => o.orderStatus !== "cancelled");
-
-  if (activeOrders.length === 0) {
+  if (orders.length === 0) {
     return (
       <div className="bg-white rounded-2xl border border-olive/10 p-10 text-center">
         <div className="w-16 h-16 rounded-full bg-olive/10 flex items-center justify-center mx-auto mb-4">
@@ -392,13 +371,13 @@ export default function OrderList() {
           My Orders
         </h2>
         <span className="text-xs text-text-muted font-medium px-3 py-1 bg-olive/5 rounded-full">
-          {activeOrders.length} {activeOrders.length === 1 ? "order" : "orders"}
+          {orders.length} {orders.length === 1 ? "order" : "orders"}
         </span>
       </div>
 
       {/* Order list */}
       <div className="space-y-3">
-        {activeOrders.map((order) => (
+        {orders.map((order) => (
           <OrderCard key={order.documentId} order={order} />
         ))}
       </div>

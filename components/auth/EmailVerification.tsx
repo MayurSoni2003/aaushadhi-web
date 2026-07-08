@@ -12,7 +12,7 @@ interface EmailVerificationProps {
 
 export default function EmailVerification({
   onVerified,
-  title = "Verify your email",
+  title = "Login / Sign Up",
   subtitle = "We'll send you a secure one-time password.",
 }: EmailVerificationProps) {
   const [email, setEmail] = useState("");

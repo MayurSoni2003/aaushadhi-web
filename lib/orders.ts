@@ -4,15 +4,14 @@ const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN || "";
 export type StatusSource = "system" | "cron" | "webhook" | "admin" | "customer";
 
 const STATUS_WEIGHTS: Record<string, number> = {
-  pending: 10,
-  confirmed: 20,
-  processing: 30,
-  shipped: 40,
-  in_transit: 50,
-  out_for_delivery: 60,
-  delivered: 70,
-  returned: 80,
-  cancelled: 80,
+  confirmed: 10,
+  processing: 20,
+  shipped: 30,
+  in_transit: 40,
+  out_for_delivery: 50,
+  delivered: 60,
+  returned: 70,
+  cancelled: 70,
 };
 
 /**

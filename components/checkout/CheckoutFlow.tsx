@@ -300,7 +300,7 @@ export default function CheckoutFlow() {
                   ) : paymentMethod === "online" ? (
                     "Online Payment Coming Soon"
                   ) : (
-                    `Place Order — ₹${(cartTotal + (shippingCost || 0)).toLocaleString("en-IN")}`
+                    `Place Order `
                   )}
                 </button>
 
@@ -317,18 +317,20 @@ export default function CheckoutFlow() {
         </div>
 
         {/* Order summary sidebar */}
-        <div className="lg:w-80 flex-shrink-0">
-          <div className="lg:sticky lg:top-24">
-            <OrderSummary
-              cartItems={cartItems}
-              subtotal={cartTotal}
-              shippingCost={shippingCost}
-              courierEstimate={
-                addressData?.deliveryEstimate?.estimatedDays
-              }
-            />
+        {step !== 1 && (
+          <div className="lg:w-80 flex-shrink-0">
+            <div className="lg:sticky lg:top-24">
+              <OrderSummary
+                cartItems={cartItems}
+                subtotal={cartTotal}
+                shippingCost={shippingCost}
+                courierEstimate={
+                  addressData?.deliveryEstimate?.estimatedDays
+                }
+              />
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

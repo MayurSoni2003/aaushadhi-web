@@ -108,7 +108,7 @@ export async function POST(
     }
 
     // 5. Enforce cancellation rules based on the newly synced status
-    const cancellableStatuses = ["pending", "confirmed", "processing"];
+    const cancellableStatuses = ["confirmed", "processing"];
     if (!cancellableStatuses.includes(currentStatus)) {
       return NextResponse.json(
         { error: `Order cannot be cancelled because it is currently ${currentStatus}` },

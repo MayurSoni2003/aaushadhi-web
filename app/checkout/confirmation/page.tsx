@@ -309,7 +309,7 @@ function ConfirmationContent() {
             {order.courierName || "Standard Delivery"}
           </p>
           <p className="text-xs text-text-muted mt-1">
-            Estimated: 3-5 business days
+            Estimated: 5-7 business days
           </p>
           {order.trackingId && (
             <div className="mt-2">

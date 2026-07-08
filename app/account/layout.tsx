@@ -116,12 +116,14 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
           <nav className="md:w-56 flex-shrink-0">
             {/* Mobile: horizontal tabs */}
             <div className="flex md:hidden gap-2 overflow-x-auto pb-2">
-              {accountLinks.map((link) => (
+              {accountLinks.map((link) => {
+                const isActive = pathname === link.href || (pathname && pathname.startsWith(link.href + "/"));
+                return (
                 <Link
                   key={link.href}
                   href={link.href}
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 ${
-                    pathname === link.href
+                    isActive
                       ? "bg-olive text-white shadow-sm"
                       : "bg-white text-text-dark hover:bg-olive/5 border border-olive/10"
                   }`}
@@ -129,17 +131,20 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
                   {link.icon}
                   {link.label}
                 </Link>
-              ))}
+                );
+              })}
             </div>
 
             {/* Desktop: vertical sidebar */}
             <div className="hidden md:flex flex-col gap-1">
-              {accountLinks.map((link) => (
+              {accountLinks.map((link) => {
+                const isActive = pathname === link.href || (pathname && pathname.startsWith(link.href + "/"));
+                return (
                 <Link
                   key={link.href}
                   href={link.href}
                   className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    pathname === link.href
+                    isActive
                       ? "bg-olive/10 text-olive"
                       : "text-text-dark hover:bg-olive/5 hover:text-olive"
                   }`}
@@ -147,7 +152,8 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
                   {link.icon}
                   {link.label}
                 </Link>
-              ))}
+                );
+              })}
             </div>
           </nav>
 

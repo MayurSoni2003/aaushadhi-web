@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
-    // 2. Fetch Pending Orders from Strapi
+    // 2. Fetch Active Orders from Strapi
     // Orders with an icarryShipmentId and NOT in terminal states
     const query = new URLSearchParams();
     query.append("filters[icarryShipmentId][$notNull]", "true");
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     const orders = strapiData.data || [];
 
     if (orders.length === 0) {
-      return NextResponse.json({ success: true, message: "No pending orders to sync" });
+      return NextResponse.json({ success: true, message: "No active orders to sync" });
     }
 
     // 3. Batch shipment IDs for iCarry API

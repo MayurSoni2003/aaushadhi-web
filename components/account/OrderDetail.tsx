@@ -6,7 +6,7 @@ import Image from "next/image";
 
 // ─── Types ──────────────────────────────────────────────────────
 type OrderStatus =
-  | "pending" | "confirmed" | "processing" | "shipped"
+  | "confirmed" | "processing" | "shipped"
   | "in_transit" | "out_for_delivery" | "delivered"
   | "cancelled" | "returned";
 
@@ -61,7 +61,6 @@ interface Order {
 
 // ─── Badge configs ───────────────────────────────────────────────
 const ORDER_STATUS_BADGE: Record<OrderStatus, { label: string; bg: string; text: string; dot: string; timelineBg: string }> = {
-  pending:          { label: "Pending",          bg: "bg-amber-50",  text: "text-amber-700",  dot: "bg-amber-400",   timelineBg: "bg-amber-400" },
   confirmed:        { label: "Confirmed",         bg: "bg-blue-50",   text: "text-blue-700",   dot: "bg-blue-400",    timelineBg: "bg-blue-500" },
   processing:       { label: "Processing",        bg: "bg-violet-50", text: "text-violet-700", dot: "bg-violet-400",  timelineBg: "bg-violet-500" },
   shipped:          { label: "Shipped",           bg: "bg-sky-50",    text: "text-sky-700",    dot: "bg-sky-400",     timelineBg: "bg-sky-500" },
@@ -347,6 +346,10 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
             <p className="text-xs text-text-muted mt-0.5">{orderDate}</p>
           </div>
           <div className="flex items-center gap-3">
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold flex-shrink-0 ${statusCfg.bg} ${statusCfg.text}`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${statusCfg.dot}`} />
+              {statusCfg.label}
+            </span>
             {(order.orderStatus === "confirmed" || order.orderStatus === "processing") && (
               <button
                 onClick={() => setIsCancelDialogOpen(true)}
@@ -355,10 +358,6 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
                 Cancel Order
               </button>
             )}
-            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold flex-shrink-0 ${statusCfg.bg} ${statusCfg.text}`}>
-              <span className={`w-1.5 h-1.5 rounded-full ${statusCfg.dot}`} />
-              {statusCfg.label}
-            </span>
           </div>
         </div>
 
@@ -435,9 +434,6 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
 
         {/* Meta chips */}
         <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-olive/8">
-          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${paymentCfg.bg} ${paymentCfg.text}`}>
-            {paymentCfg.label}
-          </span>
           <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-olive/10 text-olive">
             {order.paymentMethod === "cod" ? "Cash on Delivery" : "Online Payment"}
           </span>
@@ -479,7 +475,7 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
               {/* Info */}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-text-dark line-clamp-2">{item.productName}</p>
-                <p className="text-xs text-text-muted mt-0.5">Qty: {item.quantity}</p>
+                <p className="text-xs text-text-muted mt-0.5">₹{item.price.toLocaleString("en-IN")} × {item.quantity}</p>
               </div>
 
               {/* Price */}
@@ -487,9 +483,6 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
                 <p className="text-sm font-bold text-text-dark">
                   ₹{(item.price * item.quantity).toLocaleString("en-IN")}
                 </p>
-                {item.quantity > 1 && (
-                  <p className="text-[11px] text-text-muted">₹{item.price.toLocaleString("en-IN")} each</p>
-                )}
               </div>
             </div>
           ))}

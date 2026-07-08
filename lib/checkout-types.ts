@@ -33,7 +33,6 @@ export type PaymentMethod = "cod" | "online";
 
 // ─── Order Status (matches Strapi enum) ──
 export type OrderStatus =
-  | "pending"
   | "confirmed"
   | "processing"
   | "shipped"

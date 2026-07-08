@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
     const orderId = generateOrderId();
 
     // ─── Determine initial statuses ───
-    const initialOrderStatus = paymentMethod === "cod" ? "confirmed" : "pending";
+    const initialOrderStatus = "confirmed";
     const paymentStatus = paymentMethod === "cod" ? "pending" : "pending";
 
     // ─── Create order in Strapi with initial history ───
@@ -188,7 +188,7 @@ export async function POST(request: NextRequest) {
       success: true,
       data: {
         orderId,
-        orderStatus: initialOrderStatus as "confirmed" | "pending",
+        orderStatus: initialOrderStatus,
         paymentMethod: paymentMethod as "cod" | "online",
         totalAmount,
       },

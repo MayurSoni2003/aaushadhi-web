@@ -112,6 +112,19 @@ export async function POST(request: NextRequest) {
 
     if (emailError) {
       console.error("Failed to send email via Resend:", emailError);
+      
+      // Cleanup: delete the session we just created since the email failed to send
+      if (createRes.ok) {
+        const createJson = await createRes.json();
+        const newSessionId = createJson.data?.documentId;
+        if (newSessionId) {
+          await fetch(`${STRAPI_URL}/api/otp-sessions/${newSessionId}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
+          }).catch(() => {});
+        }
+      }
+
       return NextResponse.json({ success: false, error: "Failed to send email" }, { status: 500 });
     }
 
