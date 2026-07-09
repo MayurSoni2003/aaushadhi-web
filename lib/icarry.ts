@@ -117,7 +117,6 @@ export function mapIcarryStatus(icarryStatus: string | number): { status?: strin
     case "1":
     case "24":
     case "25":
-      return { status: "confirmed" };
     case "2":
       return { status: "processing" };
     case "3":

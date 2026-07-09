@@ -626,11 +626,16 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
 
                     <div className="flex gap-3">
                       <button
-                        onClick={() => setCancelStep(1)}
+                        onClick={() => {
+                          setIsCancelDialogOpen(false);
+                          setCancelError(null);
+                          setCancelStep(1);
+                          setCancelReason("");
+                        }}
                         disabled={isCancelling}
                         className="flex-1 px-4 py-2.5 rounded-full border border-olive/20 text-text-dark text-sm font-bold hover:bg-olive/5 transition-colors disabled:opacity-50"
                       >
-                        Back
+                        Cancel
                       </button>
                       <button
                         onClick={handleCancelOrder}
@@ -760,7 +765,7 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
 
       {/* ── Order Timeline (Track Live Shipment only when icarry linked) ── */}
       {order.icarryShipmentId && (
-        <Section title="Live Tracking">
+        <Section title={["cancelled", "delivered", "returned"].includes(order.orderStatus) ? "Tracking History" : "Live Tracking"}>
           {!isTrackingExpanded ? (
             <button
               onClick={() => {
@@ -773,7 +778,7 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
                 <circle cx="12" cy="12" r="10"/>
                 <polyline points="12 6 12 12 16 14"/>
               </svg>
-              Track Live Shipment
+              {["cancelled", "delivered", "returned"].includes(order.orderStatus) ? "View Tracking History" : "Track Live Shipment"}
             </button>
           ) : (
             <div className="bg-olive/5 rounded-2xl p-4 sm:p-6 border border-olive/10 relative">
@@ -792,10 +797,7 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
                 </svg>
               </button>
 
-              <h3 className="text-sm font-bold text-olive uppercase tracking-wider mb-4 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-olive animate-pulse" />
-                Live Updates
-              </h3>
+              {/* Inner heading removed to avoid duplication with Section title */}
 
               {trackingLoading ? (
                 <div className="space-y-4">
@@ -835,13 +837,14 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
                       const ts = new Date(ev.datetime);
                       const dateStr = ts.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
                       const timeStr = ts.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true });
+                      const isCancelledNode = ev.notes?.toLowerCase().includes("cancel");
                       return (
                         <div key={idx} className="flex gap-3 sm:gap-4 pb-5 last:pb-0">
                           <div className="flex-shrink-0 relative flex flex-col items-center" style={{ width: "12px" }}>
-                            <div className={`w-3 h-3 rounded-full mt-0.5 ring-2 ring-white flex-shrink-0 ${isLatest ? "bg-olive" : "bg-olive/30"}`} />
+                            <div className={`w-3 h-3 rounded-full mt-0.5 ring-2 ring-white flex-shrink-0 ${isCancelledNode ? "bg-red-500" : isLatest ? "bg-olive" : "bg-olive/30"}`} />
                           </div>
-                          <div className={`flex-1 min-w-0 pb-1 ${isLatest ? "" : "opacity-70"}`}>
-                            <p className={`text-sm font-bold ${isLatest ? "text-olive" : "text-text-dark"}`}>{ev.notes || "Update"}</p>
+                          <div className={`flex-1 min-w-0 pb-1 ${isLatest || isCancelledNode ? "" : "opacity-70"}`}>
+                            <p className={`text-sm font-bold ${isCancelledNode ? "text-red-600" : isLatest ? "text-olive" : "text-text-dark"}`}>{ev.notes || "Update"}</p>
                             <p className="text-xs text-text-muted mt-1">{dateStr} at {timeStr}</p>
                             {ev.location && (
                               <p className="text-[11px] font-medium text-text-dark mt-1 flex items-center gap-1 opacity-80">

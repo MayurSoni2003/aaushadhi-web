@@ -48,9 +48,7 @@ export async function POST(
     }
 
     // 3. Verify iCarry shipment exists
-    if (!order.icarryShipmentId) {
-      return NextResponse.json({ error: "Order cannot be cancelled as no shipment is assigned" }, { status: 400 });
-    }
+    // (Removed strict validation to allow cancellation before shipment is booked)
 
     // 4. Early Idempotency Check
     // If the database already knows the order is cancelled, short-circuit immediately.
@@ -58,53 +56,55 @@ export async function POST(
       return NextResponse.json({ error: "Order is already cancelled" }, { status: 400 });
     }
 
-    // 5. Perform a live Shipment Status Sync
+    // 5. Perform a live Shipment Status Sync (Only if shipment exists)
     let currentStatus = order.orderStatus;
     let syncedIcarryStatusCode = order.icarryStatusCode;
-    
-    try {
-      const syncRes = await syncShipments([order.icarryShipmentId]);
-      if (syncRes.msg && syncRes.msg.length > 0) {
-        const item = syncRes.msg[0];
-        const parsedStatusCode = parseInt(item.status, 10);
-        if (!isNaN(parsedStatusCode)) {
-          syncedIcarryStatusCode = parsedStatusCode;
-        }
-        const mappedStatus = mapIcarryStatus(item.status);
-        if (mappedStatus.status) {
-          currentStatus = mappedStatus.status;
-        }
-      }
-    } catch (e) {
-      console.error("Live sync failed during cancellation:", e);
-      // We proceed with the last known status if sync temporarily fails,
-      // or we could fail. Since the user requested "Perform a live Shipment Status Sync",
-      // we'll fail if we can't sync to strictly adhere to "Enforce these rules in your backend".
-      return NextResponse.json({ error: "Failed to verify current shipment status with courier" }, { status: 502 });
-    }
-
-    // Update Strapi with the live synced status first to ensure the database is perfectly up-to-date
-    // (even if cancellation is subsequently rejected)
     let latestHistory = order.statusHistory;
-    try {
-      const updateRes = await saveOrderWithHistory(
-        documentId,
-        order.orderStatus,
-        order.statusHistory,
-        currentStatus,
-        "system",
-        "Live sync before cancellation",
-        { 
-          icarryStatusCode: syncedIcarryStatusCode,
-          lastSyncedAt: new Date().toISOString()
+    
+    if (order.icarryShipmentId) {
+      try {
+        const syncRes = await syncShipments([order.icarryShipmentId]);
+        if (syncRes.msg && syncRes.msg.length > 0) {
+          const item = syncRes.msg[0];
+          const parsedStatusCode = parseInt(item.status, 10);
+          if (!isNaN(parsedStatusCode)) {
+            syncedIcarryStatusCode = parsedStatusCode;
+          }
+          const mappedStatus = mapIcarryStatus(item.status);
+          if (mappedStatus.status) {
+            currentStatus = mappedStatus.status;
+          }
         }
-      );
-      if (updateRes && updateRes.data) {
-        latestHistory = updateRes.data.statusHistory;
+      } catch (e) {
+        console.error("Live sync failed during cancellation:", e);
+        // We proceed with the last known status if sync temporarily fails,
+        // or we could fail. Since the user requested "Perform a live Shipment Status Sync",
+        // we'll fail if we can't sync to strictly adhere to "Enforce these rules in your backend".
+        return NextResponse.json({ error: "Failed to verify current shipment status with courier" }, { status: 502 });
       }
-    } catch (e: any) {
-      console.error("Failed to update pre-cancellation synced status in Strapi", e);
-      // We log but proceed with the live memory status
+
+      // Update Strapi with the live synced status first to ensure the database is perfectly up-to-date
+      // (even if cancellation is subsequently rejected)
+      try {
+        const updateRes = await saveOrderWithHistory(
+          documentId,
+          order.orderStatus,
+          order.statusHistory,
+          currentStatus,
+          "system",
+          "Live sync before cancellation",
+          { 
+            icarryStatusCode: syncedIcarryStatusCode,
+            lastSyncedAt: new Date().toISOString()
+          }
+        );
+        if (updateRes && updateRes.data) {
+          latestHistory = updateRes.data.statusHistory;
+        }
+      } catch (e: any) {
+        console.error("Failed to update pre-cancellation synced status in Strapi", e);
+        // We log but proceed with the live memory status
+      }
     }
 
     // 5. Enforce cancellation rules based on the newly synced status
@@ -116,17 +116,19 @@ export async function POST(
       );
     }
 
-    // 6. Call iCarry Cancel API
-    try {
-      await cancelShipment(order.icarryShipmentId);
-    } catch (e: any) {
-      console.error("Failed to cancel shipment with iCarry:", e);
-      // If iCarry returns "Shipment id not found", it usually means the shipment is still a Draft
-      // (not yet booked with a courier) or was deleted. We should proceed to cancel it locally anyway.
-      if (e.message && e.message.toLowerCase().includes("not found")) {
-        console.warn(`iCarry could not find shipment ${order.icarryShipmentId} (likely a draft). Proceeding with local cancellation.`);
-      } else {
-        return NextResponse.json({ error: e.message || "Courier cancellation failed" }, { status: 502 });
+    // 6. Call iCarry Cancel API (Only if shipment exists)
+    if (order.icarryShipmentId) {
+      try {
+        await cancelShipment(order.icarryShipmentId);
+      } catch (e: any) {
+        console.error("Failed to cancel shipment with iCarry:", e);
+        // If iCarry returns "Shipment id not found", it usually means the shipment is still a Draft
+        // (not yet booked with a courier) or was deleted. We should proceed to cancel it locally anyway.
+        if (e.message && e.message.toLowerCase().includes("not found")) {
+          console.warn(`iCarry could not find shipment ${order.icarryShipmentId} (likely a draft). Proceeding with local cancellation.`);
+        } else {
+          return NextResponse.json({ error: e.message || "Courier cancellation failed" }, { status: 502 });
+        }
       }
     }
 

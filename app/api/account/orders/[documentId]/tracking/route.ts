@@ -76,6 +76,18 @@ export async function GET(
         const timeB = new Date(b.datetime).getTime();
         return timeA - timeB; // Oldest first
       });
+
+      // If the order is cancelled, ensure the tracking timeline clearly reflects it
+      if (order.orderStatus === "cancelled") {
+        const lastDetail = safeTrackingData.details[safeTrackingData.details.length - 1];
+        if (!lastDetail?.notes?.toLowerCase().includes("cancel")) {
+          safeTrackingData.details.push({
+            notes: "Shipment Cancelled",
+            location: "",
+            datetime: new Date().toISOString()
+          });
+        }
+      }
     }
 
     return NextResponse.json({

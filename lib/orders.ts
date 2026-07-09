@@ -78,7 +78,6 @@ export async function saveOrderWithHistory(
   // while keeping the id to prevent recreation of existing components.
   const history = currentHistory || [];
   const cleanHistory = history.map((entry: any) => ({
-    ...(entry.id ? { id: entry.id } : {}),
     status: entry.status,
     timestamp: entry.timestamp,
     source: entry.source,

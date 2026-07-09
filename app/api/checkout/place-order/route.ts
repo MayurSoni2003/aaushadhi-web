@@ -159,8 +159,11 @@ export async function POST(request: NextRequest) {
           pickupAddressId: ICARRY_PICKUP_ADDRESS_ID,
         });
 
+        // ─── Feature Flag: Skip updating icarryShipmentId in strapi if disabled ───
+        const isICarryShipmentId = process.env.FETCH_ICARRY_SHIPMENT_ID === "true";
+
         // Update order with shipment ID (Draft booking)
-        if (bookingResult.shipment_id) {
+        if (isICarryShipmentId && bookingResult.shipment_id) {
           const updateRes = await fetch(`${STRAPI_URL}/api/orders/${documentId}`, {
             method: "PUT",
             headers: {

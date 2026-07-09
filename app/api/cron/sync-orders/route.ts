@@ -57,8 +57,9 @@ export async function GET(request: NextRequest) {
 
     orders.forEach((order: any) => {
       if (order.icarryShipmentId) {
-        shipmentIds.push(order.icarryShipmentId);
-        shipmentIdToOrderMap.set(order.icarryShipmentId, order);
+        const sid = String(order.icarryShipmentId).trim();
+        shipmentIds.push(sid);
+        shipmentIdToOrderMap.set(sid, order);
       }
     });
 
@@ -68,6 +69,7 @@ export async function GET(request: NextRequest) {
 
     // 4. Call iCarry Sync API
     const syncRes = await syncShipments(shipmentIds);
+    
     if (!syncRes.msg || !Array.isArray(syncRes.msg)) {
       console.warn("Unexpected iCarry Sync Response:", syncRes);
       return NextResponse.json({ success: false, error: "Invalid response from iCarry" }, { status: 502 });
@@ -78,7 +80,8 @@ export async function GET(request: NextRequest) {
     const now = new Date().toISOString();
 
     for (const item of syncRes.msg) {
-      const order = shipmentIdToOrderMap.get(item.shipment_id);
+      const lookUpKey = String(item.shipment_id).trim();
+      const order = shipmentIdToOrderMap.get(lookUpKey);
       
       // If the Sync API returns a shipment ID that doesn't exist in Strapi, log and continue
       if (!order) {
