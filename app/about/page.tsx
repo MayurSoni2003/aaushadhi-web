@@ -102,11 +102,12 @@ function GlassCard({ children, className = "" }: { children: React.ReactNode; cl
     <div
       className={`rounded-3xl p-7 md:p-10 transition-all duration-350 hover:-translate-y-1 ${className}`}
       style={{
-        background: "rgba(255, 255, 255, 0.5)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
+        background: "rgba(255, 255, 255, 0.65)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
         border: "1.5px solid rgba(255, 255, 255, 0.6)",
         boxShadow: "0 8px 40px rgba(0, 0, 0, 0.04), inset 0 1px 3px rgba(255, 255, 255, 0.4)",
+        willChange: "transform",
       }}
     >
       {children}
@@ -117,7 +118,7 @@ function GlassCard({ children, className = "" }: { children: React.ReactNode; cl
 /* Feature icon circle */
 function FeatureIconCircle({ children }: { children: React.ReactNode }) {
   return (
-    <div className="w-20 h-20 md:w-20 md:h-20 rounded-full border-2 border-olive/20 flex items-center justify-center mx-auto mb-4 bg-white/50 transition-all duration-350 hover:border-olive hover:bg-olive/5 hover:scale-108">
+    <div className="w-20 h-20 md:w-20 md:h-20 rounded-full border-2 border-olive/20 flex items-center justify-center mx-auto mb-4 bg-white transition-all duration-350 hover:border-olive hover:bg-olive/5 hover:scale-108" style={{ willChange: "transform" }}>
       {children}
     </div>
   );
@@ -126,7 +127,7 @@ function FeatureIconCircle({ children }: { children: React.ReactNode }) {
 /* Process step icon */
 function ProcessStepIcon({ children }: { children: React.ReactNode }) {
   return (
-    <div className="w-[72px] h-[72px] md:w-[72px] md:h-[72px] min-w-[56px] min-h-[56px] rounded-full border-2 border-olive flex items-center justify-center mb-3.5 md:mb-3.5 bg-white/60 transition-all duration-350 hover:bg-olive/8 hover:scale-110">
+    <div className="w-[72px] h-[72px] md:w-[72px] md:h-[72px] min-w-[56px] min-h-[56px] rounded-full border-2 border-olive flex items-center justify-center mb-3.5 md:mb-3.5 bg-white transition-all duration-350 hover:bg-olive/8 hover:scale-110" style={{ willChange: "transform" }}>
       {children}
     </div>
   );
@@ -235,9 +236,9 @@ export default function AboutPage() {
             </section>
 
             {/* ═══════════════ Feature Badges Grid ═══════════════ */}
-            <section className="px-4 md:px-8 py-12" id="about-features">
+            <section className="relative px-4 md:px-8 py-12" id="about-features" style={{ isolation: "isolate" }}>
               <div className="max-w-5xl mx-auto">
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-6 md:gap-8">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-8">
                   {/* Non Preservative */}
                   <div className="flex flex-col items-center text-center">
                     <FeatureIconCircle>
@@ -265,7 +266,7 @@ export default function AboutPage() {
                   </div>
 
                   {/* 100% Pure Herbal Product */}
-                  <div className="flex flex-col items-center text-center col-span-2 md:col-span-1">
+                  <div className="flex flex-col items-center text-center col-span-2 sm:col-span-1">
                     <FeatureIconCircle>
                       <LeafIcon className="text-olive" />
                     </FeatureIconCircle>
