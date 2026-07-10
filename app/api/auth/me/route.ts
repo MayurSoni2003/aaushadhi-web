@@ -10,13 +10,12 @@ export async function GET() {
     const session = await getSession();
 
     if (!session || !session.email) {
-      return NextResponse.json<AuthResponse>({ success: false, error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json<AuthResponse>({ success: false, error: "Unauthorized" }, { status: 200 });
     }
 
     // Fetch latest customer data from Strapi
     const query = new URLSearchParams({
       "filters[email][$eq]": session.email,
-      "populate": "*", // e.g. for addresses or orders if needed
     }).toString();
 
     const fetchRes = await fetch(`${STRAPI_URL}/api/customers?${query}`, {
@@ -37,9 +36,17 @@ export async function GET() {
       return NextResponse.json<AuthResponse>({ success: false, error: "User not found" }, { status: 404 });
     }
 
+    const customer = fetchJson.data[0];
+
     return NextResponse.json<AuthResponse>({
       success: true,
-      customer: fetchJson.data[0],
+      customer: {
+        documentId: customer.documentId,
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        email: customer.email,
+        phone: customer.phone,
+      } as StrapiCustomer,
     });
 
   } catch (error) {

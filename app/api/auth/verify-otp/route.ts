@@ -99,7 +99,6 @@ export async function POST(request: NextRequest) {
     // 6. Fetch or Create Customer
     const customerQuery = new URLSearchParams({
       "filters[email][$eq]": emailLower,
-      "populate": "*",
     }).toString();
 
     const customerRes = await fetch(`${STRAPI_URL}/api/customers?${customerQuery}`, {
@@ -186,7 +185,13 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json<AuthResponse>({
       success: true,
-      customer,
+      customer: {
+        documentId: customer.documentId,
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        email: customer.email,
+        phone: customer.phone,
+      } as StrapiCustomer,
     });
 
   } catch (error) {

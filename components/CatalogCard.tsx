@@ -174,7 +174,7 @@ export default function CatalogCard({ product, priority = false }: Props) {
                 −
               </button>
               <span className="text-text-dark font-semibold text-xs md:text-sm">
-                {qty} × 100g
+                {qty}
               </span>
               <button
                 type="button"
@@ -195,7 +195,7 @@ export default function CatalogCard({ product, priority = false }: Props) {
                 ${isBuyingNow ? "bg-earth/70 cursor-wait" : "bg-earth hover:bg-earth/90 active:scale-[0.97] cursor-pointer"}
               `}
             >
-              {isBuyingNow ? "..." : "Buy Now"}
+              {isBuyingNow ? "..." : "Go to Cart"}
             </button>
           </div>
         )}

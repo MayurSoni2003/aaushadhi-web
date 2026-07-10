@@ -19,8 +19,10 @@ export default function EmailVerification({
   const [name, setName] = useState("");
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
   const [cooldown, setCooldown] = useState(0);
 
   const inputRefs = [
@@ -53,8 +55,9 @@ export default function EmailVerification({
     
     if (cooldown > 0) return;
 
-    setIsLoading(true);
+    setIsSendingOtp(true);
     setError("");
+    setInfo("");
 
     try {
       await authService.sendOtp(email);
@@ -63,9 +66,18 @@ export default function EmailVerification({
       // Focus first OTP input after short delay to allow DOM to render
       setTimeout(() => inputRefs[0].current?.focus(), 100);
     } catch (err: any) {
-      setError(err.message || "Failed to send code. Please try again.");
+      const msg = err.message || "Failed to send code. Please try again.";
+      if (msg.includes("wait 60 seconds")) {
+        // OTP was already sent recently, transition to verification step
+        setIsOtpSent(true);
+        setCooldown(60);
+        setTimeout(() => inputRefs[0].current?.focus(), 100);
+        setInfo("Code was already sent recently. Please check your email.");
+      } else {
+        setError(msg);
+      }
     } finally {
-      setIsLoading(false);
+      setIsSendingOtp(false);
     }
   };
 
@@ -74,15 +86,16 @@ export default function EmailVerification({
     const code = otp.join("");
     if (code.length !== 6) return;
 
-    setIsLoading(true);
+    setIsVerifyingOtp(true);
     setError("");
+    setInfo("");
 
     try {
       const customer = await authService.verifyOtp(email, code, name);
       onVerified(customer);
     } catch (err: any) {
       setError(err.message || "Invalid or expired code.");
-      setIsLoading(false);
+      setIsVerifyingOtp(false);
     }
   };
 
@@ -167,7 +180,7 @@ export default function EmailVerification({
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="John Doe"
+              placeholder="Full Name"
               className="w-full px-4 py-3 rounded-xl border border-olive/20 focus:border-olive focus:ring-1 focus:ring-olive outline-none transition-all duration-200 bg-white/50"
               required
             />
@@ -194,10 +207,10 @@ export default function EmailVerification({
 
           <button
             type="submit"
-            disabled={isLoading || !email || !name}
+            disabled={isSendingOtp || !email || !name}
             className="w-full py-3.5 rounded-xl bg-olive text-white text-sm font-bold uppercase tracking-wider hover:bg-olive-light transition-all duration-200 shadow-md active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            {isLoading ? "Sending..." : "Send Code"}
+            {isSendingOtp ? "Sending..." : "Send Code"}
           </button>
         </form>
       ) : (
@@ -220,13 +233,14 @@ export default function EmailVerification({
           </div>
 
           {error && <p className="text-red-500 text-xs text-center">{error}</p>}
+          {info && <p className="text-olive text-xs text-center">{info}</p>}
 
           <button
             type="submit"
-            disabled={isLoading || otp.some((d) => d === "")}
+            disabled={isVerifyingOtp || otp.some((d) => d === "")}
             className="w-full py-3.5 rounded-xl bg-olive text-white text-sm font-bold uppercase tracking-wider hover:bg-olive-light transition-all duration-200 shadow-md active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            {isLoading ? "Verifying..." : "Verify Code"}
+            {isVerifyingOtp ? "Verifying..." : "Verify Code"}
           </button>
 
           <div className="text-center text-sm">
@@ -234,10 +248,10 @@ export default function EmailVerification({
             <button
               type="button"
               onClick={handleSendOtp}
-              disabled={cooldown > 0 || isLoading}
-              className="text-olive font-semibold hover:underline disabled:opacity-50 disabled:no-underline disabled:cursor-not-allowed"
+              disabled={cooldown > 0 || isSendingOtp}
+              className="text-olive font-semibold hover:underline disabled:opacity-50 disabled:no-underline disabled:cursor-not-allowed cursor-pointer"
             >
-              {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend"}
+              {isSendingOtp ? "Sending..." : (cooldown > 0 ? `Resend in ${cooldown}s` : "Resend")}
             </button>
           </div>
           
@@ -248,8 +262,10 @@ export default function EmailVerification({
                 setIsOtpSent(false);
                 setOtp(["", "", "", "", "", ""]);
                 setError("");
+                setInfo("");
+                setCooldown(0);
               }}
-              className="text-text-muted text-xs underline"
+              className="text-text-muted text-xs hover:underline cursor-pointer"
             >
               Change email address
             </button>

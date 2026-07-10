@@ -160,16 +160,7 @@ export default function CartPage() {
                 );
               })}
 
-              {/* Clear cart */}
-              <div className="pt-2">
-                <button
-                  type="button"
-                  onClick={clearCart}
-                  className="text-text-muted text-sm hover:text-red-500 transition-colors cursor-pointer"
-                >
-                  Clear entire cart
-                </button>
-              </div>
+
             </div>
 
             {/* Order summary */}
@@ -241,11 +232,6 @@ export default function CartPage() {
                   </svg>
                   Proceed to Checkout
                 </button>
-
-                <p className="mt-3 text-text-muted text-[11px] text-center leading-relaxed">
-                  You&apos;ll verify your mobile number and enter your delivery
-                  address on the next page.
-                </p>
               </div>
             </div>
           </div>
