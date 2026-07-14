@@ -24,6 +24,7 @@ export default function AddressFormModal({ isOpen, onClose, onSaved, editAddress
   const [checkingPincode, setCheckingPincode] = useState(false);
   const [pincodeValid, setPincodeValid] = useState<boolean | null>(null);
   const [pincodeError, setPincodeError] = useState("");
+  const [mobileError, setMobileError] = useState("");
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
 
@@ -59,6 +60,7 @@ export default function AddressFormModal({ isOpen, onClose, onSaved, editAddress
     setIsDefault(false);
     setPincodeValid(null);
     setPincodeError("");
+    setMobileError("");
     setFormError("");
   }
 
@@ -115,10 +117,12 @@ export default function AddressFormModal({ isOpen, onClose, onSaved, editAddress
 
     // Validate
     if (!name.trim()) { setFormError("Name is required"); return; }
-    if (!mobile.trim() || !/^\d{10}$/.test(mobile.replace(/\D/g, ""))) {
-      setFormError("A valid 10-digit mobile number is required");
+    const digitsOnly = mobile.replace(/\D/g, "");
+    if (digitsOnly.length !== 10 || !/^[6-9]/.test(digitsOnly)) {
+      setMobileError("Please enter a valid 10-digit Indian mobile number.");
       return;
     }
+    setMobileError("");
     if (!pincode || pincodeValid !== true) {
       setFormError("Please enter a valid, serviceable pincode");
       return;
@@ -229,10 +233,22 @@ export default function AddressFormModal({ isOpen, onClose, onSaved, editAddress
               <input
                 type="tel"
                 value={mobile}
-                onChange={(e) => setMobile(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl border border-olive/15 bg-cream/50 text-text-dark text-sm focus:outline-none focus:ring-2 focus:ring-olive/30 transition-all"
+                onChange={(e) => {
+                  const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
+                  setMobile(digits);
+                  if (mobileError) setMobileError("");
+                }}
+                className={`w-full px-4 py-2.5 rounded-xl border text-text-dark text-sm focus:outline-none focus:ring-2 transition-all ${
+                  mobileError
+                    ? "border-red-300 bg-red-50/50 focus:ring-red-200"
+                    : "border-olive/15 bg-cream/50 focus:ring-olive/30"
+                }`}
                 placeholder="10-digit mobile"
+                inputMode="numeric"
               />
+              {mobileError && (
+                <p className="text-red-500 text-xs mt-1">{mobileError}</p>
+              )}
             </div>
           </div>
 

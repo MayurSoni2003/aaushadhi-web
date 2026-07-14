@@ -50,6 +50,7 @@ export default function AddressForm({ cartItems, cartTotal, onComplete }: Props)
   const [deliveryEstimate, setDeliveryEstimate] = useState<DeliveryEstimate | null>(null);
   const [serviceError, setServiceError] = useState("");
   const [formError, setFormError] = useState("");
+  const [mobileError, setMobileError] = useState("");
 
   // Sync email from customer if present and new form
   useEffect(() => {
@@ -216,10 +217,12 @@ export default function AddressForm({ cartItems, cartTotal, onComplete }: Props)
       setFormError("Please enter your full name");
       return;
     }
-    if (!mobile.trim()) {
-      setFormError("Please enter your mobile number");
+    const mobileDigits = mobile.replace(/\D/g, "");
+    if (mobileDigits.length !== 10 || !/^[6-9]/.test(mobileDigits)) {
+      setMobileError("Please enter a valid 10-digit Indian mobile number.");
       return;
     }
+    setMobileError("");
     if (!addressLine1.trim()) {
       setFormError("Please enter your address");
       return;
@@ -401,10 +404,23 @@ export default function AddressForm({ cartItems, cartTotal, onComplete }: Props)
                     <input
                       type="tel"
                       value={mobile}
-                      onChange={(e) => { setMobile(e.target.value.replace(/\D/g, "").slice(0, 10)); setFormError(""); }}
+                      onChange={(e) => {
+                        const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
+                        setMobile(digits);
+                        if (mobileError) setMobileError("");
+                        setFormError("");
+                      }}
                       placeholder="10-digit mobile"
-                      className="w-full px-4 py-3 rounded-xl border border-olive/20 bg-white/60 text-sm text-text-dark outline-none focus:border-olive/40 focus:ring-2 focus:ring-olive/10 transition-all placeholder:text-text-muted/60"
+                      className={`w-full px-4 py-3 rounded-xl border text-sm text-text-dark outline-none transition-all placeholder:text-text-muted/60 ${
+                        mobileError
+                          ? "border-red-400 focus:border-red-400 focus:ring-2 focus:ring-red-100 bg-red-50/30"
+                          : "border-olive/20 bg-white/60 focus:border-olive/40 focus:ring-2 focus:ring-olive/10"
+                      }`}
+                      inputMode="numeric"
                     />
+                    {mobileError && (
+                      <p className="text-red-500 text-xs mt-1">{mobileError}</p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-text-dark uppercase tracking-wider mb-1.5">

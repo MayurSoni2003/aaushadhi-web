@@ -16,8 +16,10 @@ export default function EmailVerification({
   subtitle = "We'll send you a secure one-time password.",
 }: EmailVerificationProps) {
   const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [phoneError, setPhoneError] = useState("");
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
@@ -50,10 +52,18 @@ export default function EmailVerification({
     }
     
     if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
-      setError("Please enter a valid email address.");
+      setEmailError("Please enter a valid email address.");
       return;
     }
-    
+    setEmailError("");
+
+    const digitsOnly = phone.replace(/\D/g, "");
+    if (digitsOnly.length !== 10 || !/^[6-9]/.test(digitsOnly)) {
+      setPhoneError("Please enter a valid 10-digit Indian mobile number.");
+      return;
+    }
+    setPhoneError("");
+
     if (cooldown > 0) return;
 
     setIsSendingOtp(true);
@@ -197,11 +207,21 @@ export default function EmailVerification({
               id="email"
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (emailError) setEmailError("");
+              }}
               placeholder="you@example.com"
-              className="w-full px-4 py-3 rounded-xl border border-olive/20 focus:border-olive focus:ring-1 focus:ring-olive outline-none transition-all duration-200 bg-white/50"
+              className={`w-full px-4 py-3 rounded-xl border outline-none transition-all duration-200 bg-white/50 ${
+                emailError
+                  ? "border-red-400 focus:border-red-400 focus:ring-1 focus:ring-red-300"
+                  : "border-olive/20 focus:border-olive focus:ring-1 focus:ring-olive"
+              }`}
               required
             />
+            {emailError && (
+              <p className="text-red-500 text-xs mt-1">{emailError}</p>
+            )}
           </div>
           <div>
             <label
@@ -214,18 +234,30 @@ export default function EmailVerification({
               id="phone"
               type="tel"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={(e) => {
+                const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
+                setPhone(digits);
+                if (phoneError) setPhoneError("");
+              }}
               placeholder="10-digit mobile number"
-              className="w-full px-4 py-3 rounded-xl border border-olive/20 focus:border-olive focus:ring-1 focus:ring-olive outline-none transition-all duration-200 bg-white/50"
+              className={`w-full px-4 py-3 rounded-xl border outline-none transition-all duration-200 bg-white/50 ${
+                phoneError
+                  ? "border-red-400 focus:border-red-400 focus:ring-1 focus:ring-red-300"
+                  : "border-olive/20 focus:border-olive focus:ring-1 focus:ring-olive"
+              }`}
               required
+              inputMode="numeric"
             />
+            {phoneError && (
+              <p className="text-red-500 text-xs mt-1">{phoneError}</p>
+            )}
           </div>
 
           {error && <p className="text-red-500 text-xs text-center">{error}</p>}
 
           <button
             type="submit"
-            disabled={isSendingOtp || !email || !name || !phone}
+            disabled={isSendingOtp || !/^\S+@\S+\.\S+$/.test(email) || !name || phone.replace(/\D/g, "").length !== 10}
             className="w-full py-3.5 rounded-xl bg-olive text-white text-sm font-bold uppercase tracking-wider hover:bg-olive-light transition-all duration-200 shadow-md active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {isSendingOtp ? "Sending..." : "Send Code"}

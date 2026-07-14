@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { bookShipment, calculateTotalWeight } from "@/lib/icarry";
+import { Resend } from "resend";
 import type {
   PlaceOrderRequest,
   PlaceOrderResponse,
@@ -11,6 +12,9 @@ import { saveOrderWithHistory } from "@/lib/orders";
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
 const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN || "";
 const ICARRY_PICKUP_ADDRESS_ID = parseInt(process.env.ICARRY_PICKUP_ADDRESS_ID || "0", 10);
+const resend = new Resend(process.env.RESEND_API_KEY);
+const fromEmail = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
+const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || "";
 
 /**
  * Generate a unique customer-facing order ID.
@@ -185,6 +189,58 @@ export async function POST(request: NextRequest) {
         // Log but don't fail the order — shipment can be booked manually
         console.error("iCarry booking failed (order still created):", bookingError);
       }
+    }
+
+    // ─── Notify admin of new order via email (fire-and-forget) ───
+    if (adminEmail) {
+      const itemsHtml = items
+        .map(
+          (item: OrderItemData) =>
+            `<tr>
+              <td style="padding:6px 12px;border-bottom:1px solid #eee">${item.productName}</td>
+              <td style="padding:6px 12px;border-bottom:1px solid #eee;text-align:center">${item.quantity}</td>
+              <td style="padding:6px 12px;border-bottom:1px solid #eee;text-align:right">₹${(item.price * item.quantity).toLocaleString("en-IN")}</td>
+            </tr>`
+        )
+        .join("");
+
+      resend.emails.send({
+        from: `Aaushadhi Wellness <${fromEmail}>`,
+        to: [adminEmail],
+        subject: `🛒 New Order: ${orderId} — ₹${totalAmount.toLocaleString("en-IN")}`,
+        html: `
+          <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#333">
+            <h2 style="color:#5C6B2E;margin-bottom:4px">New Order Received</h2>
+            <p style="color:#888;font-size:13px;margin-top:0">Aaushadhi Wellness Admin Alert</p>
+
+            <table style="width:100%;border-collapse:collapse;margin:16px 0;font-size:14px">
+              <tr><td style="padding:6px 12px;color:#888;width:140px">Order ID</td><td style="padding:6px 12px;font-weight:bold">${orderId}</td></tr>
+              <tr><td style="padding:6px 12px;color:#888">Customer</td><td style="padding:6px 12px">${customerName}</td></tr>
+              <tr><td style="padding:6px 12px;color:#888">Email</td><td style="padding:6px 12px">${customerEmail}</td></tr>
+              <tr><td style="padding:6px 12px;color:#888">Phone</td><td style="padding:6px 12px">${customerPhone}</td></tr>
+              <tr><td style="padding:6px 12px;color:#888">Payment</td><td style="padding:6px 12px;text-transform:uppercase;font-weight:bold;color:#5C6B2E">${paymentMethod}</td></tr>
+              <tr><td style="padding:6px 12px;color:#888">Total</td><td style="padding:6px 12px;font-size:16px;font-weight:bold">₹${totalAmount.toLocaleString("en-IN")}</td></tr>
+              <tr><td style="padding:6px 12px;color:#888">Address</td><td style="padding:6px 12px">${shippingAddress.addressLine1}${shippingAddress.addressLine2 ? ", " + shippingAddress.addressLine2 : ""}, ${shippingAddress.city}, ${shippingAddress.state} — ${shippingAddress.pincode}</td></tr>
+            </table>
+
+            <h3 style="color:#5C6B2E;margin-bottom:8px;font-size:14px">Items Ordered</h3>
+            <table style="width:100%;border-collapse:collapse;font-size:13px">
+              <thead>
+                <tr style="background:#f5f5f0">
+                  <th style="padding:6px 12px;text-align:left">Product</th>
+                  <th style="padding:6px 12px;text-align:center">Qty</th>
+                  <th style="padding:6px 12px;text-align:right">Amount</th>
+                </tr>
+              </thead>
+              <tbody>${itemsHtml}</tbody>
+            </table>
+
+            ${notes ? `<p style="margin-top:16px;font-size:13px;color:#555"><strong>Customer Note:</strong> ${notes}</p>` : ""}
+
+            <p style="margin-top:24px;font-size:12px;color:#aaa">This is an automated notification from Aaushadhi Wellness.</p>
+          </div>
+        `,
+      }).catch((err: Error) => console.error("Admin notification email failed:", err));
     }
 
     return NextResponse.json<PlaceOrderResponse>({
