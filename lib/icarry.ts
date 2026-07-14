@@ -463,7 +463,23 @@ export async function cancelShipment(shipmentId: string): Promise<ICarryCancelRe
     throw new Error(`iCarry cancel shipment failed: ${res.status} ${text}`);
   }
 
-  const data = await res.json();
+  const text = await res.text();
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (err) {
+    // iCarry sometimes returns PHP Notices/Warnings prepended to the JSON response.
+    const jsonMatch = text.match(/\{.*\}/s);
+    if (jsonMatch) {
+      try {
+        data = JSON.parse(jsonMatch[0]);
+      } catch (e2) {
+        throw new Error(`iCarry API returned invalid JSON: ${text.substring(0, 100)}...`);
+      }
+    } else {
+      throw new Error(`iCarry API returned invalid JSON: ${text.substring(0, 100)}...`);
+    }
+  }
   
   if (data.error) {
     throw new Error(`iCarry API returned error: ${data.error}`);

@@ -25,7 +25,9 @@ function parseTrackingDate(dateString: string): Date {
     const minute = parseInt(parts[4], 10) || 0;
     const second = parseInt(parts[5], 10) || 0;
     
-    d = new Date(year, month, day, hour, minute, second);
+    // iCarry returns timestamps in UTC without the 'Z' suffix.
+    // Use Date.UTC to ensure it's interpreted as UTC, not local time.
+    d = new Date(Date.UTC(year, month, day, hour, minute, second));
     if (!isNaN(d.getTime())) return d;
   }
   return new Date(NaN);
