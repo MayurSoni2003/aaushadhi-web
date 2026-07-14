@@ -74,11 +74,14 @@ export default function OrderSummary({
         <div className="flex justify-between text-xs">
           <span className="text-text-muted">Shipping</span>
           {shippingCost !== null ? (
-            <span className="text-text-dark font-medium">
+            <span className="text-text-dark font-medium flex items-center gap-2">
               {shippingCost === 0 ? (
-                <span className="text-olive">FREE</span>
+                <>
+                  <span className="text-olive font-bold uppercase">Free</span>
+                  <span className="line-through text-text-muted/60">₹80</span>
+                </>
               ) : (
-                `₹${shippingCost}`
+                <span>₹{shippingCost}</span>
               )}
             </span>
           ) : (

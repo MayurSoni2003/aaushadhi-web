@@ -11,8 +11,13 @@ import { useCart } from "@/context/CartContext";
 export default function CartPage() {
   const router = useRouter();
   const { requireAuth } = useAuth();
-  const { cartItems, cartTotal, updateQuantity, removeFromCart, clearCart } =
+  const { cartItems, cartCount, cartTotal, updateQuantity, removeFromCart, clearCart } =
     useCart();
+  const orderTotal = cartItems.reduce(
+    (sum, item) => sum + (item.product.comparePrice || item.product.price) * item.quantity,
+    0
+  );
+  const itemsDiscount = orderTotal - cartTotal;
 
   return (
     <div className="min-h-screen bg-cream flex flex-col">
@@ -25,16 +30,11 @@ export default function CartPage() {
             className="text-3xl md:text-4xl font-bold text-olive"
             style={{ fontFamily: "var(--font-outfit)" }}
           >
-            Your Cart
+            Your Shopping Cart
           </h1>
-          <p className="mt-1 text-text-muted text-sm">
-            {cartItems.length === 0
-              ? "Your cart is empty"
-              : `${cartItems.length} item${cartItems.length > 1 ? "s" : ""} in your cart`}
-          </p>
         </div>
 
-        {cartItems.length === 0 ? (
+        {cartCount === 0 ? (
           /* Empty state */
           <div className="text-center py-20">
             <div className="mx-auto w-20 h-20 rounded-full bg-parchment flex items-center justify-center mb-6">
@@ -74,6 +74,19 @@ export default function CartPage() {
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Cart items list */}
             <div className="flex-1 space-y-4">
+              <div className="flex items-center gap-2 mb-2 px-1">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-text-dark">
+                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                  <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                  <path d="M12 11h4"></path>
+                  <path d="M12 16h4"></path>
+                  <path d="M8 11h.01"></path>
+                  <path d="M8 16h.01"></path>
+                </svg>
+                <h2 className="text-[16px] font-bold text-text-dark">
+                  Cart items ({cartCount})
+                </h2>
+              </div>
               {cartItems.map((item) => {
                 const lineTotal = item.product.price * item.quantity;
                 const totalGrams = item.quantity * 100;
@@ -106,9 +119,19 @@ export default function CartPage() {
                       >
                         {item.product.productName}
                       </h3>
-                      <p className="text-text-muted text-[12px] mt-0.5">
-                        ₹{item.product.price} per 100g
-                      </p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <p className="text-text-dark font-bold text-[13px]">
+                          ₹{item.product.price}
+                        </p>
+                        {item.product.comparePrice > item.product.price && (
+                          <p className="text-text-muted text-[12px] line-through">
+                            ₹{item.product.comparePrice}
+                          </p>
+                        )}
+                        <p className="text-text-muted text-[12px]">
+                          per 100g
+                        </p>
+                      </div>
 
                       {/* Quantity controls */}
                       <div className="mt-2 flex items-center gap-3">
@@ -173,36 +196,55 @@ export default function CartPage() {
                 }}
               >
                 <h2
-                  className="text-lg font-bold text-text-dark mb-4"
-                  style={{ fontFamily: "var(--font-outfit)" }}
+                  className="text-[17px] font-bold text-text-dark mb-5 flex items-center gap-2"
                 >
-                  Order Summary
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-text-dark">
+                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                    <path d="M12 11h4"></path>
+                    <path d="M12 16h4"></path>
+                    <path d="M8 11h.01"></path>
+                    <path d="M8 16h.01"></path>
+                  </svg>
+                  Price Summary
                 </h2>
 
-                <div className="space-y-2 mb-4">
-                  {cartItems.map((item) => (
-                    <div
-                      key={item.product.id}
-                      className="flex justify-between text-sm"
-                    >
-                      <span className="text-text-muted truncate pr-2">
-                        {item.product.productName} × {item.quantity}
-                      </span>
-                      <span className="text-text-dark font-medium flex-shrink-0">
-                        ₹{item.product.price * item.quantity}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                <div className="space-y-3 mb-5">
+                  <div className="flex justify-between text-[14px]">
+                    <span className="text-text-muted">Order Total</span>
+                    <span className="text-text-dark font-medium">
+                      ₹{cartTotal.toFixed(2)}
+                    </span>
+                  </div>
 
-                <div className="border-t border-olive/10 pt-3 mb-6">
-                  <div className="flex justify-between">
-                    <span className="text-text-dark font-bold">Total</span>
-                    <span className="text-olive font-bold text-xl">
-                      ₹{cartTotal.toLocaleString("en-IN")}
+                  <div className="flex justify-between text-[14px]">
+                    <div className="flex flex-col">
+                      <span className="text-text-muted">Shipping</span>
+                      {cartTotal <= 499 && (
+                        <span className="text-[10px] text-olive/80 mt-0.5">Free shipping above ₹499</span>
+                      )}
+                    </div>
+                    <span className="text-text-dark font-medium flex items-center gap-2">
+                      {cartTotal > 499 ? (
+                        <>
+                          <span className="text-olive font-bold uppercase">Free</span>
+                          <span className="line-through text-text-muted/60">₹80.00</span>
+                        </>
+                      ) : (
+                        <span>₹80.00</span>
+                      )}
                     </span>
                   </div>
                 </div>
+
+                <div className="border-t border-olive/10 pt-4 mb-6">
+                  <div className="flex justify-between items-center">
+                    <span className="text-text-dark font-bold text-[15px]">To pay</span>
+                    <span className="text-text-dark font-bold text-lg">
+                      ₹{(cartTotal + (cartTotal > 499 ? 0 : 80)).toFixed(2)}
+                    </span>
+                  </div>
+                </div>         
 
                 {/* Checkout button */}
                 <button
