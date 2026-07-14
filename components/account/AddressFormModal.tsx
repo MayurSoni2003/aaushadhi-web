@@ -91,12 +91,12 @@ export default function AddressFormModal({ isOpen, onClose, onSaved, editAddress
       });
 
       const data = await res.json();
-      if (data.success && data.serviceable) {
+      if (data.success && data.data && data.data.serviceable) {
         setPincodeValid(true);
         setPincodeError("");
-        if (data.city) setCity(data.city);
-        if (data.state) setState(data.state);
-        if (data.country) setCountry(data.country);
+        if (data.data.city) setCity(data.data.city);
+        if (data.data.state) setState(data.data.state);
+        if (data.data.country) setCountry(data.data.country);
       } else {
         setPincodeValid(false);
         setPincodeError(data.error || "This pincode is not serviceable for delivery.");
@@ -219,7 +219,7 @@ export default function AddressFormModal({ isOpen, onClose, onSaved, editAddress
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full px-4 py-2.5 rounded-xl border border-olive/15 bg-cream/50 text-text-dark text-sm focus:outline-none focus:ring-2 focus:ring-olive/30 transition-all"
-                placeholder="Consignee name"
+                placeholder="Full Name"
               />
             </div>
             <div>
@@ -236,48 +236,6 @@ export default function AddressFormModal({ isOpen, onClose, onSaved, editAddress
             </div>
           </div>
 
-          {/* Pincode */}
-          <div>
-            <label className="block text-xs font-semibold text-text-muted uppercase tracking-wider mb-1.5">
-              Pincode <span className="text-red-400">*</span>
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                value={pincode}
-                onChange={(e) => handlePincodeChange(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                maxLength={6}
-                className={`w-full px-4 py-2.5 rounded-xl border text-text-dark text-sm focus:outline-none focus:ring-2 transition-all ${
-                  pincodeValid === true
-                    ? "border-green-300 bg-green-50/50 focus:ring-green-200"
-                    : pincodeValid === false
-                      ? "border-red-300 bg-red-50/50 focus:ring-red-200"
-                      : "border-olive/15 bg-cream/50 focus:ring-olive/30"
-                }`}
-                placeholder="6-digit pincode"
-              />
-              {checkingPincode && (
-                <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                  <div className="w-4 h-4 border-2 border-olive/30 border-t-olive rounded-full animate-spin" />
-                </div>
-              )}
-              {pincodeValid === true && !checkingPincode && (
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                    <path d="M20 6 9 17l-5-5" />
-                  </svg>
-                </div>
-              )}
-            </div>
-            {pincodeError && (
-              <p className="text-xs text-red-500 mt-1">{pincodeError}</p>
-            )}
-            {pincodeValid === true && city && (
-              <p className="text-xs text-green-600 mt-1">
-                ✓ Serviceable — {city}, {state}
-              </p>
-            )}
-          </div>
 
           {/* Address Line 1 */}
           <div>
@@ -305,6 +263,37 @@ export default function AddressFormModal({ isOpen, onClose, onSaved, editAddress
               className="w-full px-4 py-2.5 rounded-xl border border-olive/15 bg-cream/50 text-text-dark text-sm focus:outline-none focus:ring-2 focus:ring-olive/30 transition-all"
               placeholder="Landmark, area (optional)"
             />
+          </div>
+
+          {/* Pincode */}
+          <div>
+            <label className="block text-xs font-semibold text-text-muted uppercase tracking-wider mb-1.5">
+              Pincode <span className="text-red-400">*</span>
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                value={pincode}
+                onChange={(e) => handlePincodeChange(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                maxLength={6}
+                className={`w-full px-4 py-2.5 rounded-xl border text-text-dark text-sm focus:outline-none focus:ring-2 transition-all ${
+                  pincodeValid === false
+                    ? "border-red-300 bg-red-50/50 focus:ring-red-200"
+                    : "border-olive/15 bg-cream/50 focus:ring-olive/30"
+                }`}
+                placeholder="6-digit pincode"
+              />
+              {checkingPincode && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <div className="w-4 h-4 border-2 border-olive/30 border-t-olive rounded-full animate-spin" />
+                </div>
+              )}
+
+            </div>
+            {pincodeError && (
+              <p className="text-xs text-red-500 mt-1">{pincodeError}</p>
+            )}
+
           </div>
 
           {/* City, State, Country (auto-filled) */}

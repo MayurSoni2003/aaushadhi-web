@@ -59,6 +59,37 @@ interface Order {
   icarryShipmentId?: string;
 }
 
+/**
+ * Parses tracking date strings that might be in DD/MM/YY HH:mm:ss format (e.g. from iCarry)
+ */
+function parseTrackingDate(dateString: string): Date {
+  if (!dateString) return new Date(NaN);
+  
+  // 1. Try standard parsing first
+  let d = new Date(dateString);
+  if (!isNaN(d.getTime())) return d;
+  
+  // 2. Fallback for formats like "14/07/26 12:15:26" or "14-07-2026 12:15"
+  const parts = dateString.split(/[\s/:-]+/);
+  if (parts.length >= 5) {
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1;
+    let year = parseInt(parts[2], 10);
+    
+    // Convert YY to YYYY
+    if (year < 100) year += 2000;
+    
+    const hour = parseInt(parts[3], 10) || 0;
+    const minute = parseInt(parts[4], 10) || 0;
+    const second = parseInt(parts[5], 10) || 0;
+    
+    d = new Date(year, month, day, hour, minute, second);
+    if (!isNaN(d.getTime())) return d;
+  }
+  
+  return new Date(NaN);
+}
+
 // ─── Badge configs ───────────────────────────────────────────────
 const ORDER_STATUS_BADGE: Record<OrderStatus, { label: string; bg: string; text: string; dot: string; timelineBg: string }> = {
   confirmed:        { label: "Confirmed",         bg: "bg-blue-50",   text: "text-blue-700",   dot: "bg-blue-400",    timelineBg: "bg-blue-500" },
@@ -788,7 +819,7 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
                   setTrackingData(null);
                   setTrackingError(null);
                 }}
-                className="absolute top-4 right-4 text-olive/60 hover:text-olive transition-colors p-1"
+                className="absolute top-2 right-2 text-olive/60 hover:text-olive transition-colors p-2 z-10 cursor-pointer"
                 aria-label="Close tracking"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -814,17 +845,23 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
                 </div>
               ) : trackingError ? (
                 <div className="text-center py-4 space-y-3">
-                  <p className="text-sm text-text-muted italic">Tracking data is not available yet.</p>
-                  <button
-                    onClick={fetchTracking}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white border border-olive/20 text-text-dark text-xs font-bold shadow-sm hover:bg-olive/5 transition-colors"
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M21 2v6h-6"/>
-                      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-                    </svg>
-                    Retry
-                  </button>
+                  <p className="text-sm text-text-muted italic">
+                    {order.orderStatus === "cancelled"
+                      ? "Tracking data is not available for this cancelled order."
+                      : "Tracking data is not available yet."}
+                  </p>
+                  {order.orderStatus !== "cancelled" && (
+                    <button
+                      onClick={fetchTracking}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white border border-olive/20 text-text-dark text-xs font-bold shadow-sm hover:bg-olive/5 transition-colors"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 2v6h-6"/>
+                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                      </svg>
+                      Retry
+                    </button>
+                  )}
                 </div>
               ) : trackingData?.details?.length ? (
                 <div className="relative">
@@ -833,10 +870,11 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
                   )}
                   <div className="space-y-0">
                     {trackingData.details.map((ev: any, idx: number) => {
-                      const isLatest = idx === trackingData.details.length - 1;
-                      const ts = new Date(ev.datetime);
-                      const dateStr = ts.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
-                      const timeStr = ts.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true });
+                      const isLatest = idx === 0;
+                      const ts = parseTrackingDate(ev.datetime);
+                      const isValidDate = !isNaN(ts.getTime());
+                      const dateStr = isValidDate ? ts.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : ev.datetime;
+                      const timeStr = isValidDate ? ts.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true }) : "";
                       const isCancelledNode = ev.notes?.toLowerCase().includes("cancel");
                       return (
                         <div key={idx} className="flex gap-3 sm:gap-4 pb-5 last:pb-0">
@@ -845,7 +883,9 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
                           </div>
                           <div className={`flex-1 min-w-0 pb-1 ${isLatest || isCancelledNode ? "" : "opacity-70"}`}>
                             <p className={`text-sm font-bold ${isCancelledNode ? "text-red-600" : isLatest ? "text-olive" : "text-text-dark"}`}>{ev.notes || "Update"}</p>
-                            <p className="text-xs text-text-muted mt-1">{dateStr} at {timeStr}</p>
+                            <p className="text-xs text-text-muted mt-1">
+                              {isValidDate ? `${dateStr} at ${timeStr}` : dateStr}
+                            </p>
                             {ev.location && (
                               <p className="text-[11px] font-medium text-text-dark mt-1 flex items-center gap-1 opacity-80">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
