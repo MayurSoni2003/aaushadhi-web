@@ -24,7 +24,7 @@ export async function POST(
 
     // 1. Fetch order from Strapi
     const orderRes = await fetch(
-      `${STRAPI_URL}/api/orders/${documentId}?populate[customer]=true&populate[statusHistory]=true`,
+      `${STRAPI_URL}/api/orders/${documentId}?populate[customer]=true&populate[statusHistory]=true&populate[shippingAddress]=true`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -166,9 +166,9 @@ export async function POST(
 
             <table style="width:100%;border-collapse:collapse;margin:16px 0;font-size:14px">
               <tr><td style="padding:6px 12px;color:#888;width:140px">Order ID</td><td style="padding:6px 12px;font-weight:bold">${order.orderId || documentId}</td></tr>
-              <tr><td style="padding:6px 12px;color:#888">Customer</td><td style="padding:6px 12px">${order.customerName || ""}</td></tr>
-              <tr><td style="padding:6px 12px;color:#888">Email</td><td style="padding:6px 12px">${order.customer?.email || ""}</td></tr>
-              <tr><td style="padding:6px 12px;color:#888">Phone</td><td style="padding:6px 12px">${order.customerPhone || ""}</td></tr>
+              <tr><td style="padding:6px 12px;color:#888">Customer</td><td style="padding:6px 12px">${order.shippingAddress?.name || ""}</td></tr>
+              <tr><td style="padding:6px 12px;color:#888">Email</td><td style="padding:6px 12px">${order.customerEmail || order.customer?.email || ""}</td></tr>
+              <tr><td style="padding:6px 12px;color:#888">Phone</td><td style="padding:6px 12px">${order.shippingAddress?.mobile || ""}</td></tr>
               <tr><td style="padding:6px 12px;color:#888">Total</td><td style="padding:6px 12px;font-weight:bold">₹${(order.totalAmount || 0).toLocaleString("en-IN")}</td></tr>
               <tr><td style="padding:6px 12px;color:#888">Status Before</td><td style="padding:6px 12px;text-transform:capitalize">${currentStatus}</td></tr>
               ${order.icarryShipmentId ? `<tr><td style="padding:6px 12px;color:#888">iCarry ID</td><td style="padding:6px 12px">${order.icarryShipmentId}</td></tr>` : ""}
