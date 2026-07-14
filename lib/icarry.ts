@@ -469,7 +469,7 @@ export async function cancelShipment(shipmentId: string): Promise<ICarryCancelRe
     data = JSON.parse(text);
   } catch (err) {
     // iCarry sometimes returns PHP Notices/Warnings prepended to the JSON response.
-    const jsonMatch = text.match(/\{.*\}/s);
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       try {
         data = JSON.parse(jsonMatch[0]);
