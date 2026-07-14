@@ -17,6 +17,7 @@ export default function EmailVerification({
 }: EmailVerificationProps) {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
@@ -91,7 +92,7 @@ export default function EmailVerification({
     setInfo("");
 
     try {
-      const customer = await authService.verifyOtp(email, code, name);
+      const customer = await authService.verifyOtp(email, code, name, phone);
       onVerified(customer);
     } catch (err: any) {
       setError(err.message || "Invalid or expired code.");
@@ -202,12 +203,29 @@ export default function EmailVerification({
               required
             />
           </div>
+          <div>
+            <label
+              htmlFor="phone"
+              className="block text-xs font-semibold uppercase tracking-wider text-text-muted mb-2"
+            >
+              Phone Number
+            </label>
+            <input
+              id="phone"
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="10-digit mobile number"
+              className="w-full px-4 py-3 rounded-xl border border-olive/20 focus:border-olive focus:ring-1 focus:ring-olive outline-none transition-all duration-200 bg-white/50"
+              required
+            />
+          </div>
 
           {error && <p className="text-red-500 text-xs text-center">{error}</p>}
 
           <button
             type="submit"
-            disabled={isSendingOtp || !email || !name}
+            disabled={isSendingOtp || !email || !name || !phone}
             className="w-full py-3.5 rounded-xl bg-olive text-white text-sm font-bold uppercase tracking-wider hover:bg-olive-light transition-all duration-200 shadow-md active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {isSendingOtp ? "Sending..." : "Send Code"}

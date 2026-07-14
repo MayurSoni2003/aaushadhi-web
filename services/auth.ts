@@ -23,11 +23,11 @@ export const authService = {
   /**
    * Verify the OTP and receive the Strapi Customer.
    */
-  async verifyOtp(email: string, otp: string, name: string): Promise<StrapiCustomer> {
+  async verifyOtp(email: string, otp: string, name: string, phone: string): Promise<StrapiCustomer> {
     const res = await fetch("/api/auth/verify-otp", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, otp, name }),
+      body: JSON.stringify({ email, otp, name, phone }),
     });
 
     const data: AuthResponse = await res.json();

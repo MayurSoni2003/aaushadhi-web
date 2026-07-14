@@ -11,7 +11,7 @@ const MAX_ATTEMPTS = 5;
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, otp, name } = await request.json();
+    const { email, otp, name, phone } = await request.json();
 
     if (!email || !otp) {
       return NextResponse.json<AuthResponse>(
@@ -130,12 +130,13 @@ export async function POST(request: NextRequest) {
     if (customerJson.data && customerJson.data.length > 0) {
       customer = customerJson.data[0];
       
-      // Update name if provided and either first or last name is missing
-      if (name && (!customer.firstName || !customer.lastName)) {
+      // Update name if provided and missing, or phone if provided and missing
+      if ((name && (!customer.firstName || !customer.lastName)) || (phone && !customer.phone)) {
         const updatePayload = {
           data: {
             firstName: customer.firstName || firstName,
             lastName: customer.lastName || lastName,
+            ...(phone && !customer.phone ? { phone } : {}),
           },
         };
         
@@ -150,6 +151,7 @@ export async function POST(request: NextRequest) {
         
         customer.firstName = customer.firstName || firstName;
         customer.lastName = customer.lastName || lastName;
+        if (phone && !customer.phone) customer.phone = phone;
       }
       
     } else {
@@ -159,6 +161,7 @@ export async function POST(request: NextRequest) {
           email: emailLower,
           firstName,
           lastName,
+          ...(phone ? { phone } : {}),
         },
       };
 
