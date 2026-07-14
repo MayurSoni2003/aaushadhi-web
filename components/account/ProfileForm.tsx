@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 
+import ChangeEmailModal from "./ChangeEmailModal";
+
 type ProfileData = {
   firstName: string;
   lastName: string;
@@ -22,6 +24,7 @@ export default function ProfileForm() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -164,18 +167,26 @@ export default function ProfileForm() {
             />
           </div>
 
-          {/* Email (read-only) */}
+          {/* Email (read-only with change button) */}
           <div>
-            <label className="block text-xs font-semibold text-text-muted uppercase tracking-wider mb-1.5">
-              Email
-            </label>
+            <div className="flex justify-between items-center mb-1.5">
+              <label className="block text-xs font-semibold text-text-muted uppercase tracking-wider">
+                Email
+              </label>
+              <button
+                type="button"
+                onClick={() => setIsEmailModalOpen(true)}
+                className="text-xs text-olive font-semibold hover:underline cursor-pointer"
+              >
+                Change
+              </button>
+            </div>
             <input
               type="email"
               value={profile?.email || ""}
               readOnly
               className="w-full px-4 py-2.5 rounded-xl border border-olive/10 bg-olive/5 text-text-muted text-sm cursor-not-allowed"
             />
-            <p className="text-[11px] text-text-muted mt-1">Email cannot be changed as it is your login identifier.</p>
           </div>
 
           {/* Phone */}
@@ -211,6 +222,15 @@ export default function ProfileForm() {
           </button>
         </div>
       </form>
+
+      <ChangeEmailModal 
+        isOpen={isEmailModalOpen}
+        onClose={() => setIsEmailModalOpen(false)}
+        onSuccess={() => {
+          setSuccessMsg("Email successfully updated!");
+          fetchProfile(); // reload the UI profile data
+        }}
+      />
     </div>
   );
 }
