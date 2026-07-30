@@ -6,7 +6,7 @@ import { Resend } from "resend";
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
 const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN || "";
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY || "re_dummy_key_for_build");
 const fromEmail = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
 const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || "";
 

@@ -5,7 +5,7 @@ import { getSession } from "@/lib/session";
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
 const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN || "";
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY || "re_dummy_key_for_build");
 const fromEmail = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
 const SESSION_SECRET = process.env.SESSION_SECRET || "default_super_secret_for_dev_only";
 
