@@ -2,6 +2,9 @@ import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import ProductCarousel from "@/components/ProductCarousel";
 import Footer from "@/components/Footer";
+import BrandStory from "@/components/BrandStory";
+import Seasonal from "@/components/Seasonal";
+import BlogAndUSP from "@/components/Blog&USP";
 import { getProducts } from "@/lib/strapi";
 
 export default async function Home() {
@@ -10,7 +13,6 @@ export default async function Home() {
 
   return (
     <>
-      {/* Full-page dreamy gradient background — everything sits on this */}
       <div
         className="relative min-h-screen overflow-clip"
         style={{
@@ -18,7 +20,6 @@ export default async function Home() {
             "linear-gradient(170deg, #EDE3CA 0%, #F5EAD6 15%, #F2D4C0 35%, #ECC8B8 48%, #E0C8C4 55%, #D4CEDB 65%, #C8D6E2 78%, #D0DBE6 90%, #D6DDE8 100%)",
         }}
       >
-        {/* Decorative leaf — top right */}
         <div className="absolute -top-4 -right-4 w-72 md:w-96 h-72 md:h-96 opacity-25 pointer-events-none select-none z-0">
           <svg
             viewBox="0 0 400 400"
@@ -44,7 +45,6 @@ export default async function Home() {
               strokeLinecap="round"
               opacity="0.3"
             />
-            {/* Second leaf overlapping */}
             <path
               d="M350 10C350 10 250 50 200 130C160 200 190 280 260 260C330 240 370 140 350 10Z"
               fill="#5C6B2E"
@@ -53,7 +53,6 @@ export default async function Home() {
           </svg>
         </div>
 
-        {/* Decorative leaf — bottom left (subtle) */}
         <div className="absolute bottom-20 -left-8 w-40 h-40 opacity-15 pointer-events-none select-none z-0">
           <svg
             viewBox="0 0 200 200"
@@ -67,7 +66,6 @@ export default async function Home() {
           </svg>
         </div>
 
-        {/* Sparkle / bokeh dots */}
         <div className="absolute top-[18%] left-[12%] w-1.5 h-1.5 rounded-full bg-white/50 pointer-events-none z-0" />
         <div className="absolute top-[25%] right-[18%] w-1 h-1 rounded-full bg-white/40 pointer-events-none z-0" />
         <div className="absolute top-[55%] left-[25%] w-2 h-2 rounded-full bg-white/35 pointer-events-none z-0" />
@@ -76,12 +74,14 @@ export default async function Home() {
         <div className="absolute top-[75%] left-[45%] w-1 h-1 rounded-full bg-white/30 pointer-events-none z-0" />
         <div className="absolute top-[80%] right-[15%] w-1.5 h-1.5 rounded-full bg-white/35 pointer-events-none z-0" />
 
-        {/* Page content */}
         <div className="relative z-10">
           <Navbar />
           <main>
             <Hero />
             <ProductCarousel products={featured} />
+            <BrandStory />
+            <Seasonal products={featured} />
+            <BlogAndUSP />
           </main>
         </div>
       </div>
