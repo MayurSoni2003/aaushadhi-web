@@ -1,546 +1,779 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import type { ReactNode } from "react";
+import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import Image from "next/image";
+import {
+  ShieldCheck,
+  Droplets,
+  Leaf,
+  Sprout,
+  HandHeart,
+} from "lucide-react";
+import {
+  Scissors,
+  FlaskConical,
+  PackageCheck,
+} from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "About Us — Aaushadhi Wellness | Rooted in Nature",
-  description:
-    "Learn about Aaushadhi Wellness — we blend ancient Ayurvedic wisdom with modern science to create 100% pure herbal products. From seed to shelf, nature's goodness in its truest form.",
+title: "About Us — Aaushadhi Wellness | Rooted in Nature",
+description:
+"Learn about Aaushadhi Wellness — we blend ancient Ayurvedic wisdom with modern science to create 100% pure herbal products. From seed to shelf, nature's goodness in its truest form.",
 };
 
 /* ── SVG Icon Components ── */
 
 function LeafIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z" />
-      <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
-    </svg>
+return (
+<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+<path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z" />
+<path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+</svg>
   );
 }
 
 function ShieldIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-      <path d="m9 12 2 2 4-4" />
-    </svg>
+return (
+<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+<path d="m9 12 2 2 4-4" />
+</svg>
   );
 }
 
 function DropletIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z" />
-    </svg>
+return (
+<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+<path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z" />
+</svg>
   );
 }
 
 function SproutIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M7 20h10" />
-      <path d="M10 20c5.5-2.5.8-6.4 3-10" />
-      <path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z" />
-      <path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z" />
-    </svg>
+return (
+<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+<path d="M7 20h10" />
+<path d="M10 20c5.5-2.5.8-6.4 3-10" />
+<path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z" />
+<path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z" />
+</svg>
   );
 }
 
 function HeartHandshakeIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-      <path d="M12 5 9.04 7.96a2.17 2.17 0 0 0 0 3.08v0c.82.82 2.13.85 3 .07l2.07-1.9a2.82 2.82 0 0 1 3.79 0l2.96 2.66" />
-      <path d="m18 15-2-2" />
-      <path d="m15 18-2-2" />
-    </svg>
+return (
+<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+<path d="M12 5 9.04 7.96a2.17 2.17 0 0 0 0 3.08v0c.82.82 2.13.85 3 .07l2.07-1.9a2.82 2.82 0 0 1 3.79 0l2.96 2.66" />
+<path d="m18 15-2-2" />
+<path d="m15 18-2-2" />
+</svg>
   );
 }
 
 function CheckCircleIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5C6B2E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m5 12 5 5L20 7" />
-    </svg>
+return (
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5C6B2E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+<path d="m5 12 5 5L20 7" />
+</svg>
   );
 }
 
 function ArrowRightIcon() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M5 12h14" />
-      <path d="m12 5 7 7-7 7" />
-    </svg>
+return (
+<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+<path d="M5 12h14" />
+<path d="m12 5 7 7-7 7" />
+</svg>
   );
 }
 
 /* Small inline icons for trust strip */
-function TrustIcon({ children }: { children: React.ReactNode }) {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      {children}
-    </svg>
+function TrustIcon({ children }: { children: ReactNode }) {
+return (
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+{children}
+</svg>
   );
 }
 
 /* Reusable section divider */
-function SectionDivider({ children }: { children?: React.ReactNode }) {
-  return (
-    <div className="flex items-center justify-center gap-4 max-w-[400px] mx-auto">
-      <span className="flex-1 h-[1.5px]" style={{ background: "linear-gradient(90deg, transparent, var(--olive), transparent)", opacity: 0.3 }} />
-      {children}
-      <span className="flex-1 h-[1.5px]" style={{ background: "linear-gradient(90deg, transparent, var(--olive), transparent)", opacity: 0.3 }} />
-    </div>
+function SectionDivider({ children }: { children?: ReactNode }) {
+return (
+<div className="flex items-center justify-center gap-4 max-w-[400px] mx-auto">
+<span className="flex-1 h-[1.5px]" style={{ background: "linear-gradient(90deg, transparent, var(--olive), transparent)", opacity: 0.3 }} />
+{children}
+<span className="flex-1 h-[1.5px]" style={{ background: "linear-gradient(90deg, transparent, var(--olive), transparent)", opacity: 0.3 }} />
+</div>
   );
 }
 
 /* Reusable glass card */
-function GlassCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return (
-    <div
-      className={`rounded-3xl p-7 md:p-10 transition-all duration-350 hover:-translate-y-1 ${className}`}
-      style={{
-        background: "rgba(255, 255, 255, 0.65)",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
-        border: "1.5px solid rgba(255, 255, 255, 0.6)",
-        boxShadow: "0 8px 40px rgba(0, 0, 0, 0.04), inset 0 1px 3px rgba(255, 255, 255, 0.4)",
-        willChange: "transform",
+function GlassCard({ children, className = "" }: { children: ReactNode; className?: string }) {
+return (
+<div
+className={`rounded-3xl p-5 sm:p-7 md:p-10 transition-all duration-350 hover:-translate-y-1 ${className}`}
+style={{
+background: "rgba(255, 255, 255, 0.5)",
+backdropFilter: "blur(20px)",
+WebkitBackdropFilter: "blur(20px)",
+border: "1.5px solid rgba(255, 255, 255, 0.6)",
+boxShadow: "0 8px 40px rgba(0, 0, 0, 0.04), inset 0 1px 3px rgba(255, 255, 255, 0.4)",
       }}
-    >
-      {children}
-    </div>
+>
+{children}
+</div>
   );
 }
 
 /* Feature icon circle */
-function FeatureIconCircle({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="w-20 h-20 md:w-20 md:h-20 rounded-full border-2 border-olive/20 flex items-center justify-center mx-auto mb-4 bg-white transition-all duration-350 hover:border-olive hover:bg-olive/5 hover:scale-108" style={{ willChange: "transform" }}>
-      {children}
-    </div>
+function FeatureIconCircle({ children }: { children: ReactNode }) {
+return (
+<div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-olive/20 flex items-center justify-center mx-auto mb-4 bg-white/50 transition-all duration-350 hover:border-olive hover:bg-olive/5 hover:scale-108">
+{children}
+</div>
   );
 }
 
 /* Process step icon */
-function ProcessStepIcon({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="w-[72px] h-[72px] md:w-[72px] md:h-[72px] min-w-[56px] min-h-[56px] rounded-full border-2 border-olive flex items-center justify-center mb-3.5 md:mb-3.5 bg-white transition-all duration-350 hover:bg-olive/8 hover:scale-110" style={{ willChange: "transform" }}>
-      {children}
-    </div>
+function ProcessStepIcon({ children }: { children: ReactNode }) {
+return (
+<div className="w-14 h-14 sm:w-[72px] sm:h-[72px] min-w-[56px] min-h-[56px] rounded-full border-2 border-olive flex items-center justify-center mb-3.5 bg-white/60 transition-all duration-350 hover:bg-olive/8 hover:scale-110">
+{children}
+</div>
   );
 }
 
 /* ── Page Component ── */
 
+const values = [
+  { icon: LeafIcon, title: "100% Natural", text: "Every ingredient is sourced straight from nature, with nothing synthetic added." },
+  { icon: ShieldIcon, title: "Purity Tested", text: "Every batch is lab-verified for purity, safety, and potency before it reaches you." },
+  { icon: DropletIcon, title: "Cold Extracted", text: "Gentle extraction methods preserve the full potency of every herb we use." },
+  { icon: SproutIcon, title: "Sustainably Grown", text: "Our herbs are cultivated in partnership with farmers who share our values." },
+  { icon: HeartHandshakeIcon, title: "Ethically Sourced", text: "Fair partnerships with growers, from seed to shelf, every step of the way." },
+];
+
+const process = [
+  { icon: SproutIcon, title: "Cultivate", text: "Herbs grown in nutrient-rich soil, free from pesticides." },
+  { icon: LeafIcon, title: "Harvest", text: "Hand-picked at peak potency by experienced growers." },
+  { icon: DropletIcon, title: "Extract", text: "Cold-processed to retain every active compound." },
+  { icon: ShieldIcon, title: "Test", text: "Verified in the lab for purity before packaging." },
+];
+
 export default function AboutPage() {
-  const outfit = { fontFamily: "var(--font-outfit)" };
+return (
+<>
+<Navbar />
+
+<main className="overflow-x-hidden">
+{/* ── Hero ── */}
+<section className="relative flex min-h-[50vh] items-center overflow-hidden bg-[#ECD7B9] py-8 sm:py-10 md:min-h-[70vh] md:py-14">
+{/* Decorative Leaves */}
+<div className="absolute left-4 top-8 text-2xl opacity-10 sm:left-8 sm:top-12 sm:text-4xl">🌿</div>
+<div className="absolute right-4 top-10 text-xl opacity-10 sm:right-10 sm:top-16 sm:text-3xl">🍃</div>
+<div className="absolute bottom-8 left-6 text-xl opacity-10 sm:bottom-12 sm:left-16 sm:text-3xl">☘️</div>
+<div className="absolute bottom-8 right-6 text-xl opacity-10 sm:bottom-12 sm:right-16 sm:text-3xl">🌱</div>
+
+{/* Soft Glow */}
+<div className="absolute left-1/2 top-1/2 h-[180px] w-[180px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/30 blur-[100px] sm:h-[260px] sm:w-[260px]" />
+
+<div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
+<div className="flex flex-col items-center text-center">
+
+{/* Logo */}
+<div className="relative">
+<div className="absolute inset-0 rounded-full bg-[#556B2F]/10 blur-2xl" />
+<img
+src="/aaushadhi_logo_full.svg"
+alt="Aaushadhi Wellness"
+className="relative mx-auto h-16 w-16 object-contain sm:h-24 sm:w-24 md:h-32 md:w-32"
+/>
+</div>
+
+{/* Brand */}
+<h1
+className="mt-4 text-xl font-bold text-[#556B2F] sm:text-3xl md:text-5xl"
+style={{ fontFamily: "var(--font-playfair)" }}
+>
+        Aaushadhi Wellness
+</h1>
+
+{/* Divider */}
+<div className="mt-3 h-px w-24 bg-[#556B2F]/25" />
+
+{/* Tagline */}
+<p className="mt-4 max-w-3xl text-sm leading-relaxed text-[#1F1F1F] md:text-xl">
+        Rooted in Nature.
+<span className="mx-2 text-[#556B2F]">•</span>
+        Backed by Purity.
+<span className="mx-2 text-[#556B2F]">•</span>
+        Made for Wellness.
+</p>
+
+{/* Intro */}
+<p className="mt-4 max-w-2xl text-xs leading-6 text-[#5B564F] sm:text-sm sm:leading-7 md:text-base">
+        Every formulation is inspired by centuries of Ayurvedic wisdom,
+        crafted from carefully cultivated herbs, and created to support
+        natural wellness through purity, authenticity, and trust.
+</p>
+
+</div>
+</div>
+</section>
+
+<section
+className="relative overflow-hidden py-12 sm:py-20 md:py-28"
+style={{
+backgroundImage: "url('/products/bg.png')",
+backgroundRepeat: "no-repeat",
+backgroundPosition: "center",
+backgroundSize: "cover",
+backgroundColor: "#ECD7B9",
+}}
+>
+{/* Left Leaves */}
+<img
+src="/images/leaf-left.png"
+className="absolute left-0 top-0 hidden w-40 opacity-30 sm:block"
+alt=""
+/>
+
+{/* Right Leaves */}
+<img
+src="/images/leaf-right.png"
+className="absolute right-0 top-0 hidden w-40 opacity-30 sm:block"
+alt=""
+/>
+
+<div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6">
+
+{/* Heading */}
+
+<h2
+className="text-center text-2xl font-bold text-[#2F3E2D] sm:text-4xl md:text-5xl"
+style={{ fontFamily: "var(--font-playfair)" }}
+>
+      About Us
+</h2>
+
+{/* About Card */}
+
+<div
+className="mt-6 rounded-[24px] px-5 py-6 text-center sm:mt-8 sm:rounded-[28px] sm:px-8 sm:py-8 md:px-14 md:py-12"
+style={{
+background: "#F3E4C8",
+boxShadow:
+"0 20px 50px rgba(0,0,0,.06), inset 0 1px 1px rgba(255,255,255,.5)",
+      }}
+>
+<h3 className="text-lg font-bold leading-snug text-[#5C6B2E] sm:text-2xl md:text-3xl">
+        At AAUSHADHI WELLNESS, we blend ancient Ayurvedic wisdom with
+        modern science to create 100% pure herbal products that support
+        your journey to a healthier, balanced life.
+</h3>
+
+<p className="mt-5 text-[#2E2E2E] text-sm leading-6 sm:mt-8 sm:text-lg sm:leading-9 md:text-xl">
+        Everything we make is rooted in nature, grown with care on our own farms,
+        and crafted with a deep commitment to purity, transparency and
+        sustainability. From seed to shelf, we ensure nature's goodness reaches
+        you in its truest form.
+</p>
+</div>
+
+{/* USP Heading */}
+
+<h2
+className="mt-14 text-center text-2xl font-bold text-[#2F3E2D] sm:mt-24 sm:text-4xl md:text-5xl"
+style={{ fontFamily: "var(--font-playfair)" }}
+>
+      Our USPs
+</h2>
+
+{/* USP Grid */}
+
+<div className="mt-8 grid grid-cols-2 gap-6 sm:mt-12 sm:gap-10 md:grid-cols-3 lg:grid-cols-5 md:gap-12">
+
+{[
+        {
+icon: ShieldCheck,
+title: "Non Preservative",
+desc: "No chemicals. No compromises. Only natural goodness.",
+        },
+        {
+icon: Droplets,
+title: "No Added Artificial Colour",
+desc: "Only the natural goodness of herbs.",
+        },
+        {
+icon: Leaf,
+title: "100% Pure Herbal Product",
+desc: "Pure herbs. Pure care. Pure you.",
+        },
+        {
+icon: Sprout,
+title: "Sourced From Our Own Farm",
+desc: "Grown with love and harvested with care.",
+        },
+        {
+icon: HandHeart,
+title: "Sustainable & Ethical",
+desc: "For you. For nature. For the future.",
+        },
+      ].map((item)=>(
+<div key={item.title} className="text-center group">
+
+<div
+className="
+            mx-auto
+            w-20
+            h-20
+            sm:w-28
+            sm:h-28
+            md:w-36
+            md:h-36
+            rounded-full
+            bg-white
+            border
+            border-[#D8C9AB]
+            shadow-lg
+            flex
+            items-center
+            justify-center
+            text-3xl
+            sm:text-4xl
+            md:text-5xl
+            transition
+            duration-500
+            group-hover:-translate-y-2
+            group-hover:shadow-xl
+            "
+>
+<item.icon className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10" />
+</div>
+
+<h3
+className="mt-4 text-sm font-bold text-[#2F3E2D] sm:mt-6 sm:text-lg md:mt-8 md:text-2xl"
+style={{ fontFamily: "var(--font-playfair)" }}
+>
+{item.title}
+</h3>
+
+<p className="mt-2 text-[#5F5A50] leading-5 text-xs sm:mt-3 sm:text-sm md:mt-4 md:text-base md:leading-7">
+{item.desc}
+</p>
+
+</div>
+      ))}
+
+</div>
+
+</div>
+</section>
+{/* ================= OUR STORY ================= */}
+
+<section
+className="relative overflow-hidden py-14 sm:py-20 md:py-28"
+style={{
+background: "#ECD7B9",
+  }}
+>
+{/* Decorative Leaves */}
+
+<div className="absolute left-4 top-8 hidden text-5xl opacity-10 sm:left-10 sm:top-16 sm:block">
+    🌿
+</div>
+
+<div className="absolute right-6 bottom-10 hidden text-5xl opacity-10 sm:right-12 sm:bottom-20 sm:block">
+    🍃
+</div>
+
+<div className="mx-auto grid max-w-7xl items-center gap-10 px-4 sm:gap-14 sm:px-6 md:gap-20 lg:grid-cols-2">
+
+{/* Left Image */}
+
+<div className="relative">
+
+<div
+className="overflow-hidden rounded-[20px] sm:rounded-[34px]"
+style={{
+boxShadow:
+"0 30px 60px rgba(0,0,0,.08)",
+        }}
+>
+<Image
+src="/Images/ourstory.jpg"      // Replace with your image
+alt="Our Story"
+width={650}
+height={750}
+className="h-64 w-full object-cover transition duration-700 hover:scale-105 sm:h-96 md:h-[700px]"
+/>
+</div>
+
+</div>
+
+{/* Right Content */}
+
+<div className="max-w-xl">
+
+<span
+className="inline-block text-3xl font-bold text-[#5C6B2E] sm:text-4xl md:text-5xl"
+style={{
+fontFamily: "var(--font-playfair)",
+        }}
+>
+        Our Story
+</span>
+
+<div className="mt-6 space-y-5 sm:mt-8 sm:space-y-8">
+
+<p className="text-base leading-7 text-[#1F1F1F] sm:text-xl sm:leading-8 md:text-[30px] md:leading-[1.8]">
+
+<span className="font-semibold tracking-wide">
+            AAUSHADHI WELLNESS
+</span>{" "}
+          was born from a simple belief —
+          that nature has the power to heal,
+          nourish and transform lives.
+
+</p>
+
+<p className="text-base leading-7 text-[#1F1F1F] sm:text-xl sm:leading-8 md:text-[30px] md:leading-[1.8]">
+
+          What started as a small step
+          towards living a healthier life
+          has grown into a mission to
+          share the purest form of nature
+          with the world.
+
+</p>
+
+</div>
+
+{/* Quote */}
+
+<div
+className="mt-8 rounded-2xl border border-[#DCC9A5] bg-white/50 px-5 py-4 backdrop-blur-md sm:mt-10 sm:px-7 sm:py-5"
+>
+<p
+className="text-sm italic text-[#5C6B2E] sm:text-base"
+style={{
+fontFamily: "var(--font-playfair)",
+          }}
+>
+          "From Seed to Shelf, Every Product Carries Nature's Promise."
+</p>
+</div>
+
+</div>
+
+</div>
+</section>
+
+{/* ================= OUR PROMISE ================= */}
+
+<section
+className="relative overflow-hidden py-14 sm:py-20 md:py-28"
+style={{
+backgroundImage: "url('/products/bg.png')",
+backgroundRepeat: "no-repeat",
+backgroundPosition: "center",
+backgroundSize: "cover",
+backgroundColor: "#ECD7B9",
+  }}
+>
+{/* Decorative Leaves */}
+
+<img
+src="/images/leaf-left.png"
+alt=""
+className="absolute left-0 top-16 hidden w-40 opacity-20 pointer-events-none sm:block"
+/>
+
+<img
+src="/images/leaf-right.png"
+alt=""
+className="absolute right-0 top-8 hidden w-40 opacity-20 pointer-events-none sm:block"
+/>
+
+<img
+src="/images/leaf-center.png"
+alt=""
+className="absolute bottom-0 left-1/2 -translate-x-1/2 w-24 opacity-15 pointer-events-none sm:w-36"
+/>
+
+<div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6">
+
+{/* Heading */}
+
+<h2
+className="mb-8 text-center text-2xl font-bold text-[#2F3E2D] sm:mb-12 sm:text-4xl md:mb-16 md:text-5xl"
+style={{ fontFamily: "var(--font-playfair)" }}
+>
+      Our Promise
+</h2>
+
+<div className="grid items-center gap-8 sm:gap-12 md:gap-16 lg:grid-cols-2">
+
+{/* Promise Card */}
+
+<div
+className="rounded-[24px] p-6 sm:rounded-[34px] sm:p-8 md:p-12"
+style={{
+background: "#F2DFC0",
+boxShadow:
+"0 20px 45px rgba(0,0,0,.06), inset 0 1px 1px rgba(255,255,255,.4)",
+        }}
+>
+<ul className="space-y-5 text-sm leading-7 text-[#2E2E2E] sm:space-y-6 sm:text-lg sm:leading-8 md:space-y-8 md:text-[21px] md:leading-9">
+
+<li className="flex gap-3 sm:gap-4">
+<span className="text-[#5C6B2E] mt-1">•</span>
+<span>
+              We grow our own herbs using natural &
+              sustainable practices.
+</span>
+</li>
+
+<li className="flex gap-3 sm:gap-4">
+<span className="text-[#5C6B2E] mt-1">•</span>
+<span>
+              Our products are free from preservatives,
+              harmful chemicals & artificial colours.
+</span>
+</li>
+
+<li className="flex gap-3 sm:gap-4">
+<span className="text-[#5C6B2E] mt-1">•</span>
+<span>
+              We maintain the highest quality standards
+              at every step — from seed to shelf.
+</span>
+</li>
+
+<li className="flex gap-3 sm:gap-4">
+<span className="text-[#5C6B2E] mt-1">•</span>
+<span>
+              We are committed to your wellness and
+              the well-being of our planet.
+</span>
+</li>
+
+</ul>
+</div>
+
+{/* Image */}
+
+<div className="relative">
+
+<div className="overflow-hidden rounded-[24px] shadow-xl sm:rounded-[34px]">
+
+<Image
+src="/Images/ourpromise.jpg"
+alt="Our Promise"
+width={650}
+height={850}
+className="h-64 w-full object-cover transition duration-700 hover:scale-105 sm:h-96 md:h-[640px]"
+/>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+</section>
+{/* ================= FARM TO FAMILY ================= */}
+
+<section
+  className="relative overflow-hidden py-28"
+  style={{
+    backgroundImage: "url('/products/bg.png')",
+    backgroundRepeat: "repeat",
+    backgroundSize: "700px",
+    backgroundColor: "#ECD7B9",
+  }}
+>
+  {/* Decorative Leaves */}
+
+  <img
+    src="/images/leaf-left.png"
+    alt=""
+    className="absolute left-0 bottom-0 w-40 opacity-20"
+  />
+
+  <img
+    src="/images/leaf-right.png"
+    alt=""
+    className="absolute right-0 top-0 w-40 opacity-20"
+  />
+
+  <img
+    src="/images/leaf-center.png"
+    alt=""
+    className="absolute left-1/2 top-10 -translate-x-1/2 w-28 opacity-15"
+  />
+
+  <div className="relative z-10 mx-auto max-w-7xl px-6">
+
+    <h2
+      className="text-center text-5xl font-bold text-[#2F3E2D]"
+      style={{ fontFamily: "var(--font-playfair)" }}
+    >
+      From Our Farm to Your Family
+    </h2>
+
+    <div className="relative mt-20">
+
+      {/* Connecting Line */}
+
+      <div className="absolute top-14 left-[10%] right-[10%] hidden h-[2px] bg-[#556B2F]/20 lg:block" />
+
+      <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
+
+        {[
+  {
+    icon: Sprout,
+    title: "Own Farm",
+    desc: "We grow our herbs with natural care",
+  },
+  {
+    icon: Scissors,
+    title: "Careful Harvest",
+    desc: "Handpicked at the right time",
+  },
+  {
+    icon: FlaskConical,
+    title: "Pure Process",
+    desc: "Cleaned, sorted & prepared with utmost care",
+  },
+  {
+    icon: PackageCheck,
+    title: "Pure Products",
+    desc: "Delivered to you in their purest form",
+  },
+].map((item) => {
+  const Icon = item.icon;
 
   return (
-    <>
-      <div
-        className="relative min-h-screen overflow-clip"
-        style={{
-          background:
-            "linear-gradient(170deg, #EDE3CA 0%, #F5EAD6 15%, #F2D4C0 35%, #ECC8B8 48%, #E0C8C4 55%, #D4CEDB 65%, #C8D6E2 78%, #D0DBE6 90%, #D6DDE8 100%)",
-        }}
-      >
-        {/* Decorative leaf — top right */}
-        <div className="absolute -top-4 -right-4 w-72 md:w-96 h-72 md:h-96 opacity-25 pointer-events-none select-none z-0">
-          <svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M380 30C380 30 220 20 130 140C60 240 100 350 210 340C320 330 400 180 380 30Z" fill="#7A8C3A" opacity="0.6" />
-            <path d="M340 60C290 150 240 230 190 320" stroke="#5C6B2E" strokeWidth="2" strokeLinecap="round" opacity="0.4" />
-            <path d="M310 90C270 150 240 210 210 270" stroke="#5C6B2E" strokeWidth="1.2" strokeLinecap="round" opacity="0.3" />
-            <path d="M350 10C350 10 250 50 200 130C160 200 190 280 260 260C330 240 370 140 350 10Z" fill="#5C6B2E" opacity="0.3" />
-          </svg>
-        </div>
+    <div key={item.title} className="text-center group">
 
-        {/* Decorative leaf — bottom left */}
-        <div className="absolute bottom-20 -left-8 w-40 h-40 opacity-15 pointer-events-none select-none z-0">
-          <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M20 180C20 180 120 170 160 100C190 40 140 0 80 20C20 40 -10 120 20 180Z" fill="#7A8C3A" />
-          </svg>
-        </div>
-
-        {/* Sparkle dots */}
-        <div className="absolute top-[18%] left-[12%] w-1.5 h-1.5 rounded-full bg-white/50 pointer-events-none z-0" />
-        <div className="absolute top-[25%] right-[18%] w-1 h-1 rounded-full bg-white/40 pointer-events-none z-0" />
-        <div className="absolute top-[55%] left-[25%] w-2 h-2 rounded-full bg-white/35 pointer-events-none z-0" />
-        <div className="absolute top-[65%] right-[30%] w-1.5 h-1.5 rounded-full bg-white/45 pointer-events-none z-0" />
-        <div className="absolute top-[40%] left-[55%] w-1 h-1 rounded-full bg-white/40 pointer-events-none z-0" />
-
-        {/* Page content */}
-        <div className="relative z-10">
-          <Navbar />
-
-          <main className="pb-20">
-            {/* ═══════════════ Hero Section ═══════════════ */}
-            <section className="relative overflow-hidden px-4 md:px-8 pt-8 pb-12" id="about-hero">
-              <div className="max-w-3xl mx-auto text-center relative z-10">
-                {/* Logo */}
-                <div className="flex justify-center mb-6">
-                  <Image
-                    src="/aaushadhi_logo.svg"
-                    alt="Aaushadhi Wellness Logo"
-                    width={180}
-                    height={180}
-                    className="object-contain"
-                    priority
-                  />
-                </div>
-
-                {/* Title */}
-                <h1
-                  className="text-3xl md:text-5xl lg:text-[3.2rem] font-bold text-olive leading-[1.15] mb-2"
-                  style={outfit}
-                >
-                  Aaushadhi Wellness
-                </h1>
-
-                {/* Tagline */}
-                <p className="text-text-muted text-sm md:text-base mb-8 italic tracking-wide">
-                  Rooted in Nature. Backed by Purity. Made for Wellness.
-                </p>
-
-                {/* Decorative divider */}
-                <div className="mb-8">
-                  <SectionDivider>
-                    <LeafIcon className="text-olive opacity-40" />
-                  </SectionDivider>
-                </div>
-
-                {/* Badge */}
-                <div className="mb-6">
-                  <span className="inline-flex items-center gap-2 px-5 py-1.5 rounded-full text-xs font-semibold tracking-widest uppercase text-olive bg-olive/8 border border-olive/12">
-                    About Us
-                  </span>
-                </div>
-
-                {/* Intro text — glass card */}
-                <GlassCard className="text-center max-w-2xl mx-auto">
-                  <p className="text-text-dark text-base md:text-lg leading-relaxed mb-4">
-                    At <strong className="text-olive">AAUSHADHI WELLNESS</strong>, we blend ancient
-                    Ayurvedic wisdom with modern science to create{" "}
-                    <strong>100% pure herbal products</strong> that support your journey to a
-                    healthier, balanced life.
-                  </p>
-                  <p className="text-text-muted text-sm md:text-base leading-relaxed">
-                    Everything we make is rooted in nature, grown with care on our own farms, and
-                    crafted with a deep commitment to purity, transparency, and sustainability. From
-                    seed to shelf, we ensure nature&apos;s goodness reaches you in its truest form.
-                  </p>
-                </GlassCard>
-              </div>
-            </section>
-
-            {/* ═══════════════ Feature Badges Grid ═══════════════ */}
-            <section className="relative px-4 md:px-8 py-12" id="about-features" style={{ isolation: "isolate" }}>
-              <div className="max-w-5xl mx-auto">
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-8">
-                  {/* Non Preservative */}
-                  <div className="flex flex-col items-center text-center">
-                    <FeatureIconCircle>
-                      <ShieldIcon className="text-olive" />
-                    </FeatureIconCircle>
-                    <h3 className="text-sm font-bold text-text-dark mb-1" style={outfit}>
-                      Non Preservative
-                    </h3>
-                    <p className="text-text-muted text-xs leading-snug">
-                      No chemicals. No compromises. Only the natural goodness of herbs.
-                    </p>
-                  </div>
-
-                  {/* No Added Artificial Colour */}
-                  <div className="flex flex-col items-center text-center">
-                    <FeatureIconCircle>
-                      <DropletIcon className="text-olive" />
-                    </FeatureIconCircle>
-                    <h3 className="text-sm font-bold text-text-dark mb-1" style={outfit}>
-                      No Added Artificial Colour
-                    </h3>
-                    <p className="text-text-muted text-xs leading-snug">
-                      Only the natural goodness of herbs.
-                    </p>
-                  </div>
-
-                  {/* 100% Pure Herbal Product */}
-                  <div className="flex flex-col items-center text-center col-span-2 sm:col-span-1">
-                    <FeatureIconCircle>
-                      <LeafIcon className="text-olive" />
-                    </FeatureIconCircle>
-                    <h3 className="text-sm font-bold text-text-dark mb-1" style={outfit}>
-                      100% Pure Herbal Product
-                    </h3>
-                    <p className="text-text-muted text-xs leading-snug">
-                      Pure herbs, pure care, pure you.
-                    </p>
-                  </div>
-
-                  {/* Sourced From Our Own Farm */}
-                  <div className="flex flex-col items-center text-center">
-                    <FeatureIconCircle>
-                      <SproutIcon className="text-olive" />
-                    </FeatureIconCircle>
-                    <h3 className="text-sm font-bold text-text-dark mb-1" style={outfit}>
-                      Sourced From Our Own Farm
-                    </h3>
-                    <p className="text-text-muted text-xs leading-snug">
-                      Grown with love, harvested with care.
-                    </p>
-                  </div>
-
-                  {/* Sustainable & Ethical */}
-                  <div className="flex flex-col items-center text-center">
-                    <FeatureIconCircle>
-                      <HeartHandshakeIcon className="text-olive" />
-                    </FeatureIconCircle>
-                    <h3 className="text-sm font-bold text-text-dark mb-1" style={outfit}>
-                      Sustainable &amp; Ethical
-                    </h3>
-                    <p className="text-text-muted text-xs leading-snug">
-                      For you, for nature, for the future.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            {/* ═══════════════ Our Story & Our Promise ═══════════════ */}
-            <section className="px-4 md:px-8 py-12" id="about-story-promise">
-              <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8">
-                {/* Our Story */}
-                <GlassCard>
-                  <div className="mb-6">
-                    <SectionDivider>
-                      <span className="text-olive font-bold text-lg whitespace-nowrap" style={outfit}>
-                        Our Story
-                      </span>
-                    </SectionDivider>
-                  </div>
-                  <p className="text-text-dark text-[15px] leading-relaxed mb-4">
-                    AAUSHADHI WELLNESS was born from a simple belief — that nature has the power to
-                    heal, nourish, and transform lives.
-                  </p>
-                  <p className="text-text-dark text-[15px] leading-relaxed mb-4">
-                    What started as a small step towards living a healthier life has grown into a
-                    mission to share the purest form of nature with the world.
-                  </p>
-                  <p className="text-text-muted text-sm leading-relaxed italic">
-                    From our own farm to your home, we ensure every product carries the essence of
-                    purity, trust, and well-being.
-                  </p>
-                </GlassCard>
-
-                {/* Our Promise */}
-                <GlassCard>
-                  <div className="mb-6">
-                    <SectionDivider>
-                      <span className="text-olive font-bold text-lg whitespace-nowrap" style={outfit}>
-                        Our Promise
-                      </span>
-                    </SectionDivider>
-                  </div>
-                  <ul className="list-none p-0 m-0">
-                    {[
-                      "We grow our own herbs using natural & sustainable practices.",
-                      "Our products are free from preservatives, harmful chemicals & artificial colours.",
-                      "We maintain the highest quality standards at every step — from seed to shelf.",
-                      "We are committed to your wellness and the well-being of our planet.",
-                    ].map((text, i) => (
-                      <li
-                        key={i}
-                        className="flex items-start gap-3 py-3 border-b border-olive/6 last:border-b-0 text-[15px] leading-relaxed text-text-dark"
-                      >
-                        <span className="shrink-0 w-[22px] h-[22px] rounded-full bg-olive/10 flex items-center justify-center mt-0.5">
-                          <CheckCircleIcon />
-                        </span>
-                        {text}
-                      </li>
-                    ))}
-                  </ul>
-                </GlassCard>
-              </div>
-            </section>
-
-            {/* ═══════════════ From Our Farm to Your Family ═══════════════ */}
-            <section className="px-4 md:px-8 py-12" id="about-process">
-              <div className="max-w-4xl mx-auto text-center">
-                <div className="mb-8">
-                  <SectionDivider>
-                    <h2
-                      className="text-xl md:text-2xl font-bold text-olive whitespace-nowrap"
-                      style={outfit}
-                    >
-                      From Our Farm to Your Family
-                    </h2>
-                  </SectionDivider>
-                </div>
-
-                {/* Process Flow — desktop: horizontal grid, mobile: vertical stack */}
-                <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr] items-start gap-2 md:gap-0 max-w-[900px] mx-auto">
-                  {/* Step 1: Own Farm */}
-                  <div className="flex flex-row md:flex-col items-center md:text-center gap-4 md:gap-0 px-2">
-                    <ProcessStepIcon>
-                      <SproutIcon className="text-olive" />
-                    </ProcessStepIcon>
-                    <div className="text-left md:text-center">
-                      <h4 className="text-sm font-bold text-text-dark mb-1" style={outfit}>
-                        Own Farm
-                      </h4>
-                      <p className="text-text-muted text-xs">
-                        We grow our herbs with natural care
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Arrow */}
-                  <div className="flex items-center justify-center md:pt-7 text-olive opacity-40 rotate-90 md:rotate-0 my-1 md:my-0">
-                    <ArrowRightIcon />
-                  </div>
-
-                  {/* Step 2: Careful Harvest */}
-                  <div className="flex flex-row md:flex-col items-center md:text-center gap-4 md:gap-0 px-2">
-                    <ProcessStepIcon>
-                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-olive">
-                        <path d="M6 3v12" />
-                        <path d="M18 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
-                        <path d="M6 15a5 5 0 0 0 5 5h1a3 3 0 0 0 3-3v-1a3 3 0 0 0-3-3H6" />
-                        <path d="M3 3h6" />
-                      </svg>
-                    </ProcessStepIcon>
-                    <div className="text-left md:text-center">
-                      <h4 className="text-sm font-bold text-text-dark mb-1" style={outfit}>
-                        Careful Harvest
-                      </h4>
-                      <p className="text-text-muted text-xs">
-                        Handpicked at the right time
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Arrow */}
-                  <div className="flex items-center justify-center md:pt-7 text-olive opacity-40 rotate-90 md:rotate-0 my-1 md:my-0">
-                    <ArrowRightIcon />
-                  </div>
-
-                  {/* Step 3: Pure Process */}
-                  <div className="flex flex-row md:flex-col items-center md:text-center gap-4 md:gap-0 px-2">
-                    <ProcessStepIcon>
-                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-olive">
-                        <path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2" />
-                        <path d="M8.5 2h7" />
-                        <path d="M7 16h10" />
-                      </svg>
-                    </ProcessStepIcon>
-                    <div className="text-left md:text-center">
-                      <h4 className="text-sm font-bold text-text-dark mb-1" style={outfit}>
-                        Pure Process
-                      </h4>
-                      <p className="text-text-muted text-xs">
-                        Cleaned, sorted &amp; prepared with utmost care
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Arrow */}
-                  <div className="flex items-center justify-center md:pt-7 text-olive opacity-40 rotate-90 md:rotate-0 my-1 md:my-0">
-                    <ArrowRightIcon />
-                  </div>
-
-                  {/* Step 4: Pure Products */}
-                  <div className="flex flex-row md:flex-col items-center md:text-center gap-4 md:gap-0 px-2">
-                    <ProcessStepIcon>
-                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-olive">
-                        <path d="m7.5 4.27 9 5.15" />
-                        <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
-                        <path d="m3.3 7 8.7 5 8.7-5" />
-                        <path d="M12 22V12" />
-                      </svg>
-                    </ProcessStepIcon>
-                    <div className="text-left md:text-center">
-                      <h4 className="text-sm font-bold text-text-dark mb-1" style={outfit}>
-                        Pure Products
-                      </h4>
-                      <p className="text-text-muted text-xs">
-                        Delivered to you in their purest form
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            {/* ═══════════════ Trust Strip ═══════════════ */}
-            <section className="px-4 md:px-8 py-6 max-w-5xl mx-auto" id="about-trust">
-              <div className="flex flex-wrap justify-center gap-x-10 gap-y-6 py-7 border-t border-b border-olive/10">
-                {[
-                  { icon: <path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z" />, label: "100% Pure & Natural" },
-                  { icon: <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />, label: "Non-Preservative" },
-                  { icon: <path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z" />, label: "No Added Artificial Colour" },
-                  { icon: <><path d="M7 20h10" /><path d="M10 20c5.5-2.5.8-6.4 3-10" /><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z" /></>, label: "Sourced From Our Own Farm" },
-                  { icon: <path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z" />, label: "Ayurveda Inspired" },
-                  { icon: <><path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2" /><path d="M8.5 2h7" /></>, label: "Tested For Quality & Purity" },
-                ].map((item) => (
-                  <div
-                    key={item.label}
-                    className="flex items-center gap-2 text-[11px] font-semibold tracking-wider uppercase text-olive opacity-70 hover:opacity-100 transition-opacity"
-                  >
-                    <TrustIcon>{item.icon}</TrustIcon>
-                    {item.label}
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* ═══════════════ Closing CTA ═══════════════ */}
-            <section className="px-4 md:px-8 py-16" id="about-cta">
-              <div className="max-w-2xl mx-auto text-center">
-                <p
-                  className="text-olive font-bold text-lg md:text-xl tracking-wide mb-3"
-                  style={outfit}
-                >
-                  Pure by Nature. Trusted by You. Crafted with Love.
-                </p>
-                <p className="text-text-muted text-sm md:text-base mb-8">
-                  Choose wellness. Choose purity. Choose{" "}
-                  <strong className="text-olive">AAUSHADHI WELLNESS</strong>.
-                </p>
-
-                {/* CTA buttons */}
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                  <a
-                    href="/products"
-                    id="about-cta-products"
-                    className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-olive text-white text-sm font-bold uppercase tracking-wider hover:bg-olive-light active:scale-[0.97] transition-all duration-200 shadow-md"
-                  >
-                    Explore Our Products
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M5 12h14" />
-                      <path d="m12 5 7 7-7 7" />
-                    </svg>
-                  </a>
-                  <a
-                    href="https://wa.me/918269431640"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    id="about-cta-whatsapp"
-                    className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-[#25D366] text-white text-sm font-bold uppercase tracking-wider hover:bg-[#20BD5A] active:scale-[0.97] transition-all duration-200 shadow-md"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                    </svg>
-                    Chat with Us
-                  </a>
-                </div>
-              </div>
-            </section>
-          </main>
-        </div>
+      <div className="mx-auto flex h-28 w-28 items-center justify-center rounded-full border-2 border-[#556B2F] bg-white text-[#556B2F] transition-all duration-500 group-hover:scale-110 group-hover:bg-[#556B2F] group-hover:text-white">
+        <Icon size={42} strokeWidth={1.6} />
       </div>
 
-      <Footer />
-    </>
+      <h3
+        className="mt-8 text-2xl font-bold text-[#5C6B2E]"
+        style={{ fontFamily: "var(--font-playfair)" }}
+      >
+        {item.title}
+      </h3>
+
+      <p className="mt-4 text-base leading-7 text-[#4B4B4B]">
+        {item.desc}
+      </p>
+
+    </div>
+  );
+})}
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+{/* ================= FINAL CTA ================= */}
+
+<section
+  className="py-24"
+  style={{
+    background: "#F2DFC0",
+  }}
+>
+  <div className="mx-auto max-w-6xl px-6 text-center">
+
+    <h2
+      className="text-4xl md:text-5xl font-bold text-[#5C6B2E]"
+      style={{
+        fontFamily: "var(--font-playfair)",
+      }}
+    >
+      ✻ Rooted in Nature • Crafted with Care • Trusted by Families ✻
+    </h2>
+
+    <p className="mt-10 text-4xl leading-relaxed text-[#1F1F1F]">
+
+      Choose wellness.
+      Choose purity.
+      Choose{" "}
+
+      <span className="font-bold text-[#5C6B2E]">
+
+        AAUSHADHI WELLNESS.
+
+      </span>
+
+    </p>
+
+    <div className="mt-16 flex flex-col items-center justify-center gap-6 sm:flex-row">
+
+      {/* Products */}
+
+      <Link
+        href="/products"
+        className="
+          rounded-full
+          bg-[#5C6B2E]
+          px-12
+          py-5
+          text-lg
+          font-semibold
+          text-white
+          shadow-lg
+          transition
+          duration-300
+          hover:-translate-y-1
+          hover:bg-[#6B7B33]
+        "
+      >
+        EXPLORE OUR PRODUCTS
+      </Link>
+
+      {/* WhatsApp */}
+
+      <a
+        href="https://wa.me/919999999999"
+        target="_blank"
+        className="
+          rounded-full
+          bg-[#2ECC52]
+          px-12
+          py-5
+          text-lg
+          font-semibold
+          text-white
+          shadow-lg
+          transition
+          duration-300
+          hover:-translate-y-1
+          hover:bg-[#24c048]
+        "
+      >
+        💬 CHAT WITH US
+      </a>
+
+    </div>
+
+  </div>
+</section>
+</main>
+
+<Footer />
+</>
   );
 }

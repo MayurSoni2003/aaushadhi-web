@@ -1,81 +1,569 @@
+"use client";
+
+import Link from "next/link";
 import Image from "next/image";
+import { motion } from "framer-motion";
+import { Mail, ArrowRight, ShieldCheck } from "lucide-react";
+
+import {
+  FaFacebookF,
+  FaInstagram,
+  FaWhatsapp,
+} from "react-icons/fa";
+
+const quickLinks = [
+  {
+    title: "Home",
+    href: "/",
+  },
+  {
+    title: "Products",
+    href: "/products",
+  },
+  {
+    title: "About Us",
+    href: "/about",
+  },
+  {
+    title: "Contact",
+    href: "/contact",
+  },
+];
+
+const policies = [
+  {
+    title: "Terms of Use",
+    href: "/terms-of-use",
+  },
+  {
+    title: "Return Policy",
+    href: "/return-policy",
+  },
+  {
+    title: "Privacy Policy",
+    href: "/privacy-policy",
+  },
+  {
+    title: "Cancellation Policy",
+    href: "/cancellation-policy",
+  },
+];
+
+const enquire = [
+  "About Us",
+  "Contact Us",
+  "FAQs",
+];
 
 export default function Footer() {
   return (
-    <footer className="bg-parchment border-t border-earth/20 py-10 px-6">
-      <div className="max-w-7xl mx-auto flex flex-col items-center gap-6">
-        {/* Brand */}
-        <div className="text-center flex flex-col items-center">
-          <Image
-            src="/aaushadhi_logo.svg"
-            alt="Aaushadhi Logo"
-            width={120}
-            height={120}
-            className="mb-3 object-contain"
-          />
-          <p
-            className="text-olive font-bold text-xl"
-            style={{ fontFamily: "var(--font-outfit)" }}
-          >
-            Aaushadhi Wellness
-          </p>
-          <p className="text-text-muted text-sm mt-1">
-            Embrace natural healing with certified organic herbal remedies.
-          </p>
+    <footer className="relative overflow-hidden bg-[#ECD7B9] pt-24">
+
+      {/* Background */}
+
+      <div className="absolute inset-0 overflow-hidden">
+
+        <motion.div
+          animate={{
+            y: [-20, 20, -20],
+          }}
+          transition={{
+            duration: 12,
+            repeat: Infinity,
+          }}
+          className="absolute -left-44 top-0 h-[420px] w-[420px] rounded-full bg-[#ECD7B9] blur-[120px]"
+        />
+
+        <motion.div
+          animate={{
+            y: [20, -20, 20],
+          }}
+          transition={{
+            duration: 15,
+            repeat: Infinity,
+          }}
+          className="absolute bottom-0 right-0 h-[380px] w-[380px] rounded-full bg-[#ECD7B9] blur-[120px]"
+        />
+
+        {/* Leaf Emojis replacing images */}
+        <div className="pointer-events-none absolute left-0 top-10 hidden text-[180px] opacity-10 lg:block">
+          🌿
         </div>
+
+        <div className="pointer-events-none absolute bottom-10 right-0 hidden text-[180px] opacity-10 lg:block">
+          🌿
+        </div>
+
+      </div>
+
+
+      <div className="relative mx-auto max-w-7xl px-6">
+
+
+        {/* Newsletter */}
+
+        <motion.div
+          initial={{
+            opacity: 0,
+            y: 40,
+          }}
+          whileInView={{
+            opacity: 1,
+            y: 0,
+          }}
+          viewport={{
+            once: true,
+          }}
+          transition={{
+            duration: .7,
+          }}
+          className="mb-24 rounded-[40px] border border-white/60 bg-white/50 p-10 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,.08)]"
+        >
+
+          <div className="grid items-center gap-10 lg:grid-cols-2">
+
+            <div>
+
+              <span className="rounded-full border border-[#D7C6A5] bg-white px-5 py-2 text-sm font-semibold tracking-[4px] text-[#556B2F]">
+                NEWSLETTER
+              </span>
+
+              <h2 className="mt-6 text-5xl font-black text-black font-playfair">
+                Stay Connected
+              </h2>
+
+              <p className="mt-5 text-lg leading-8 text-[#6A645B]">
+                Subscribe to receive herbal wellness tips,
+                exclusive offers, seasonal updates,
+                and Ayurvedic knowledge directly in your inbox.
+              </p>
+
+            </div>
+
+
+            <div className="flex flex-col gap-4 sm:flex-row">
+
+              <div className="relative flex-1">
+
+                <Mail
+                  className="absolute left-5 top-1/2 -translate-y-1/2 text-[#556B2F]"
+                  size={20}
+                />
+
+                <input
+                  type="email"
+                  placeholder="Enter your email address"
+                  className="h-16 w-full rounded-full border border-[#D7C6A5] bg-white pl-14 pr-5 outline-none transition focus:border-[#556B2F]"
+                />
+
+              </div>
+
+
+              <button className="group flex h-16 items-center justify-center gap-3 rounded-full bg-[#355A29] px-8 font-semibold text-white transition hover:bg-[#405122]">
+
+                Subscribe
+
+                <ArrowRight
+                  size={20}
+                  className="transition group-hover:translate-x-1"
+                />
+
+              </button>
+
+            </div>
+
+          </div>
+
+        </motion.div>
+
+
+        {/* Main Footer */}
+
+        <div className="grid items-start gap-12 border-t border-[#D9C8A7]/60 py-20 md:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1.3fr]">
+
+
+          {/* Logo Section */}
+
+          <motion.div
+            initial={{
+              opacity:0,
+              y:30
+            }}
+            whileInView={{
+              opacity:1,
+              y:0
+            }}
+            viewport={{
+              once:true
+            }}
+          >
+
+            <div className="flex items-center gap-5">
+
+              <Image
+                src="/aaushadhi_logo.svg"
+                alt="Aaushadhi Wellness"
+                width={90}
+                height={90}
+                className="rounded-3xl shadow-xl"
+              />
+
+
+              <div>
+
+                <h3
+                  className="text-3xl font-bold text-[#556B2F]"
+                  style={{
+                    fontFamily:"var(--font-playfair)"
+                  }}
+                >
+                  Aaushadhi Wellness
+                </h3>
+
+                <p className="text-[#7C735F]">
+                  Connected To Nature & Health
+                </p>
+
+              </div>
+
+            </div>
+
+
+            <p className="mt-8 max-w-sm leading-8 text-[#6A645B]">
+
+              We create authentic Ayurvedic wellness products using
+              premium herbs, sustainable farming practices,
+              and centuries-old traditional formulations.
+
+            </p>
+
+
+            <div className="mt-8 flex gap-4">
+
+              {[
+                {
+                  icon:FaFacebookF,
+                  href:"https://www.facebook.com/share/1EL3uvziQP/?mibextid=wwXIfr"
+                },
+                {
+                  icon:FaInstagram,
+                  href:"https://www.instagram.com/aaushadhi_wellness/"
+                },
+                {
+                  icon:FaWhatsapp,
+                  href:"https://wa.me/918269431640"
+                }
+              ].map(({icon:Icon,href},i)=>(
+                <a
+                  key={i}
+                  href={href}
+                  target="_blank"
+                  className="text-[#6A645B] hover:text-black"
+                >
+                  <Icon/>
+                </a>
+              ))}
+
+            </div>
+
+
+          </motion.div>
+
+          {/* Quick Links */}
+
+          <motion.div
+            initial={{
+              opacity:0,
+              y:25
+            }}
+            whileInView={{
+              opacity:1,
+              y:0
+            }}
+            viewport={{
+              once:true
+            }}
+            transition={{
+              delay:.2
+            }}
+          >
+
+            <h4
+              className="mb-8 text-3xl font-bold text-[#556B2F]"
+              style={{
+                fontFamily:"var(--font-playfair)"
+              }}
+            >
+              Quick Links
+            </h4>
+
+
+            <ul className="space-y-5">
+
+              {quickLinks.map((item)=>(
+                <li key={item.title}>
+
+                  <Link
+                    href={item.href}
+                    className="group flex items-center gap-2 text-[#5F5B54] transition hover:text-[#556B2F]"
+                  >
+
+                    <ArrowRight
+                      size={15}
+                      className="opacity-0 transition group-hover:translate-x-1 group-hover:opacity-100"
+                    />
+
+                    {item.title}
+
+                  </Link>
+
+                </li>
+              ))}
+
+            </ul>
+
+
+          </motion.div>
+
+
+
+          {/* Policy */}
+
+          <motion.div
+            initial={{
+              opacity:0,
+              y:25
+            }}
+            whileInView={{
+              opacity:1,
+              y:0
+            }}
+            viewport={{
+              once:true
+            }}
+            transition={{
+              delay:.3
+            }}
+          >
+
+            
+
+
+            <ul className="space-y-5">
+
+
+              <h4
+              className="mb-8 text-3xl font-bold text-[#556B2F]"
+              style={{
+                fontFamily:"var(--font-playfair)"
+              }}
+            >
+              Privacy & Policies
+            </h4>
+
+              {policies.map((item) => (
+                <li key={item.title}>
+                  <Link
+                    href={item.href}
+                    className="group flex items-center gap-2 text-[#5F5B54] transition hover:text-[#556B2F]"
+                  >
+                    <ArrowRight
+                      size={15}
+                      className="opacity-0 transition group-hover:translate-x-1 group-hover:opacity-100"
+                    />
+                    {item.title}
+                  </Link>
+                </li>
+              ))}
+
+            </ul>
+
+
+          </motion.div>
+
+
+
+
+          {/* Enquire */}
+
+          <motion.div
+            initial={{
+              opacity:0,
+              y:25
+            }}
+            whileInView={{
+              opacity:1,
+              y:0
+            }}
+            viewport={{
+              once:true
+            }}
+            transition={{
+              delay:.4
+            }}
+          >
+
+            <h4
+              className="mb-8 text-3xl font-bold text-[#556B2F]"
+              style={{
+                fontFamily:"var(--font-playfair)"
+              }}
+            >
+              Enquire
+            </h4>
+
+
+            <ul className="space-y-5">
+
+              {enquire.map((item)=>(
+                <li key={item}>
+
+                  <Link
+                    href="#"
+                    className="group flex items-center gap-2 text-[#5F5B54] transition hover:text-[#556B2F]"
+                  >
+
+                    <ArrowRight
+                      size={15}
+                      className="opacity-0 transition group-hover:translate-x-1 group-hover:opacity-100"
+                    />
+
+                    {item}
+
+                  </Link>
+
+                </li>
+              ))}
+
+            </ul>
+
+
+
+            {/* Contact Card */}
+
+            <div className="mt-10 rounded-3xl border border-[#D7C6A5] bg-white/60 p-6 backdrop-blur-xl shadow-lg">
+
+              <h5 className="text-lg font-bold text-[#2F3E2D]">
+                Need Assistance?
+              </h5>
+
+
+              <p className="mt-3 text-sm leading-7 text-[#6A645B]">
+
+                Our wellness experts are available to help you choose
+                the right Ayurvedic products.
+
+              </p>
+
+
+
+              <Link href="/contact">
+
+                <button className="mt-6 inline-flex items-center gap-2 rounded-full bg-[#556B2F] px-6 py-3 font-semibold text-white transition hover:bg-[#405122]">
+
+                  Contact Us
+
+                  <ArrowRight size={18}/>
+
+                </button>
+
+              </Link>
+
+
+            </div>
+
+
+          </motion.div>
+
+
+        </div>
+
+
 
         {/* Divider */}
-        <div className="w-24 h-px bg-earth/30 rounded-full" />
 
-        {/* Social icons */}
-        <div className="flex items-center gap-5">
-          {/* Facebook */}
-          <a
-            href="https://www.facebook.com/share/1EL3uvziQP/?mibextid=wwXIfr"
-            target="_blank"
-            id="footer-facebook"
-            aria-label="Facebook"
-            className="w-10 h-10 rounded-full bg-olive/10 flex items-center justify-center text-olive hover:bg-olive hover:text-white transition-all duration-200"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-            </svg>
-          </a>
+        <div className="h-px w-full bg-[#D9C8A7]/60"/>
 
-          {/* Instagram */}
-          <a
-            href="https://www.instagram.com/aaushadhi_wellness/"
-            target="_blank"
-            id="footer-instagram"
-            aria-label="Instagram"
-            className="w-10 h-10 rounded-full bg-olive/10 flex items-center justify-center text-olive hover:bg-olive hover:text-white transition-all duration-200"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-            </svg>
-          </a>
 
-          {/* WhatsApp */}
-          <a
-            href="https://wa.me/918269431640"
-            target="_blank"
-            id="footer-whatsapp"
-            aria-label="WhatsApp"
-            className="w-10 h-10 rounded-full bg-olive/10 flex items-center justify-center text-olive hover:bg-olive hover:text-white transition-all duration-200"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-            </svg>
-          </a>
-        </div>
 
-        {/* Copyright */}
-        <p className="text-text-muted text-xs text-center">
-          © {new Date().getFullYear()} Aaushadhi Wellness. All rights reserved.
-        </p>
+        {/* Bottom Footer */}
+
+
+        <motion.div
+          initial={{
+            opacity:0,
+            y:20
+          }}
+          whileInView={{
+            opacity:1,
+            y:0
+          }}
+          viewport={{
+            once:true
+          }}
+          className="flex flex-col items-center justify-between gap-6 py-8 text-center lg:flex-row"
+        >
+
+
+          <p className="text-sm text-[#6A645B]">
+
+            © {new Date().getFullYear()}{" "}
+
+            <span className="font-semibold text-[#556B2F]">
+              Aaushadhi Wellness
+            </span>
+
+            . All Rights Reserved.
+
+          </p>
+
+
+
+          <div className="flex items-center gap-2 text-sm text-[#6A645B]">
+
+            <span>
+              Made with
+            </span>
+
+            <span className="text-lg text-red-500">
+              ❤️
+            </span>
+
+            <span>
+              in India
+            </span>
+
+          </div>
+
+
+
+
+          <div className="flex items-center gap-3 rounded-full border border-[#D7C6A5] bg-white/60 px-5 py-2 backdrop-blur-md">
+
+            <ShieldCheck
+              size={18}
+              className="text-[#556B2F]"
+            />
+
+            <span className="text-sm font-medium text-[#556B2F]">
+              100% Secure Payments
+            </span>
+
+          </div>
+
+
+        </motion.div>
+
+
       </div>
+
+
+
+      {/* Bottom Glow */}
+
+      <div className="pointer-events-none absolute bottom-0 left-1/2 h-40 w-[500px] -translate-x-1/2 rounded-full bg-[#FFF6E8]/60 blur-[120px]"/>
+
+
     </footer>
   );
 }
