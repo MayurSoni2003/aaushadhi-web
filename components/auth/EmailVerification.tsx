@@ -17,9 +17,6 @@ export default function EmailVerification({
 }: EmailVerificationProps) {
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [phoneError, setPhoneError] = useState("");
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
@@ -46,23 +43,12 @@ export default function EmailVerification({
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) {
-      setError("Please enter your name.");
-      return;
-    }
     
     if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
       setEmailError("Please enter a valid email address.");
       return;
     }
     setEmailError("");
-
-    const digitsOnly = phone.replace(/\D/g, "");
-    if (digitsOnly.length !== 10 || !/^[6-9]/.test(digitsOnly)) {
-      setPhoneError("Please enter a valid 10-digit Indian mobile number.");
-      return;
-    }
-    setPhoneError("");
 
     if (cooldown > 0) return;
 
@@ -77,7 +63,7 @@ export default function EmailVerification({
       // Focus first OTP input after short delay to allow DOM to render
       setTimeout(() => inputRefs[0].current?.focus(), 100);
     } catch (err: any) {
-      const msg = err.message || "Failed to send code. Please try again.";
+      const msg = err.message || "Failed to send OTP. Please try again.";
       if (msg.includes("wait 60 seconds")) {
         // OTP was already sent recently, transition to verification step
         setIsOtpSent(true);
@@ -102,7 +88,7 @@ export default function EmailVerification({
     setInfo("");
 
     try {
-      const customer = await authService.verifyOtp(email, code, name, phone);
+      const customer = await authService.verifyOtp(email, code, "", "");
       onVerified(customer);
     } catch (err: any) {
       setError(err.message || "Invalid or expired code.");
@@ -181,23 +167,6 @@ export default function EmailVerification({
         <form onSubmit={handleSendOtp} className="space-y-4">
           <div>
             <label
-              htmlFor="name"
-              className="block text-xs font-semibold uppercase tracking-wider text-text-muted mb-2"
-            >
-              Full Name
-            </label>
-            <input
-              id="name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Full Name"
-              className="w-full px-4 py-3 rounded-xl border border-olive/20 focus:border-olive focus:ring-1 focus:ring-olive outline-none transition-all duration-200 bg-white/50"
-              required
-            />
-          </div>
-          <div>
-            <label
               htmlFor="email"
               className="block text-xs font-semibold uppercase tracking-wider text-text-muted mb-2"
             >
@@ -223,44 +192,15 @@ export default function EmailVerification({
               <p className="text-red-500 text-xs mt-1">{emailError}</p>
             )}
           </div>
-          <div>
-            <label
-              htmlFor="phone"
-              className="block text-xs font-semibold uppercase tracking-wider text-text-muted mb-2"
-            >
-              Phone Number
-            </label>
-            <input
-              id="phone"
-              type="tel"
-              value={phone}
-              onChange={(e) => {
-                const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
-                setPhone(digits);
-                if (phoneError) setPhoneError("");
-              }}
-              placeholder="10-digit mobile number"
-              className={`w-full px-4 py-3 rounded-xl border outline-none transition-all duration-200 bg-white/50 ${
-                phoneError
-                  ? "border-red-400 focus:border-red-400 focus:ring-1 focus:ring-red-300"
-                  : "border-olive/20 focus:border-olive focus:ring-1 focus:ring-olive"
-              }`}
-              required
-              inputMode="numeric"
-            />
-            {phoneError && (
-              <p className="text-red-500 text-xs mt-1">{phoneError}</p>
-            )}
-          </div>
 
           {error && <p className="text-red-500 text-xs text-center">{error}</p>}
 
           <button
             type="submit"
-            disabled={isSendingOtp || !/^\S+@\S+\.\S+$/.test(email) || !name || phone.replace(/\D/g, "").length !== 10}
+            disabled={isSendingOtp || !/^\S+@\S+\.\S+$/.test(email)}
             className="w-full py-3.5 rounded-xl bg-olive text-white text-sm font-bold uppercase tracking-wider hover:bg-olive-light transition-all duration-200 shadow-md active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            {isSendingOtp ? "Sending..." : "Send Code"}
+            {isSendingOtp ? "Sending..." : "Send OTP"}
           </button>
         </form>
       ) : (

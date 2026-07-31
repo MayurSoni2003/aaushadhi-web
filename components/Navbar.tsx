@@ -457,10 +457,10 @@ export default function Navbar() {
 
                     {/* Dropdown (appears on hover) */}
                     <div className="absolute right-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                      <div className="bg-white rounded-xl shadow-lg border border-olive/10 py-1.5 min-w-[180px]">
+                      <div className="bg-white rounded-xl shadow-lg border border-olive/10 py-1.5 min-w-[200px]">
                         <Link
                           href="/account/profile"
-                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-dark hover:bg-olive/5 hover:text-olive transition-colors"
+                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-dark hover:bg-olive/5 hover:text-olive transition-colors whitespace-nowrap"
                         >
                           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -470,7 +470,7 @@ export default function Navbar() {
                         </Link>
                         <Link
                           href="/account/orders"
-                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-dark hover:bg-olive/5 hover:text-olive transition-colors"
+                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-dark hover:bg-olive/5 hover:text-olive transition-colors whitespace-nowrap"
                         >
                           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
@@ -481,7 +481,7 @@ export default function Navbar() {
                         </Link>
                         <Link
                           href="/account/addresses"
-                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-dark hover:bg-olive/5 hover:text-olive transition-colors"
+                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-dark hover:bg-olive/5 hover:text-olive transition-colors whitespace-nowrap"
                         >
                           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
@@ -492,7 +492,7 @@ export default function Navbar() {
                         <div className="mx-3 my-1 h-px bg-olive/10" />
                         <button
                           onClick={logout}
-                          className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
+                          className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors cursor-pointer whitespace-nowrap"
                         >
                           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
