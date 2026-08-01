@@ -124,3 +124,52 @@ export type StrapiOrder = {
   createdAt: string;
   updatedAt: string;
 };
+
+// ─── Razorpay: Create Order ──────────────────────────────────
+
+/**
+ * Client sends checkout context so the server can create a Razorpay order
+ * with a server-verified amount (prices re-fetched from Strapi).
+ */
+export type CreateRazorpayOrderRequest = {
+  customerName: string;
+  customerPhone: string;
+  customerEmail?: string;
+  shippingAddress: ShippingAddress;
+  /** Only product ID + quantity — prices are re-fetched from Strapi server-side */
+  items: Array<{ product: number; quantity: number }>;
+};
+
+export type CreateRazorpayOrderResponse = {
+  success: boolean;
+  data?: {
+    razorpayOrderId: string; // e.g. order_XXXXXXXX
+    amount: number;          // in paise (INR)
+    currency: string;        // "INR"
+    keyId: string;           // safe to expose to the client
+  };
+  error?: string;
+};
+
+// ─── Razorpay: Verify Payment ────────────────────────────────
+
+/**
+ * After the Razorpay modal closes successfully, the client sends the full
+ * checkout payload PLUS Razorpay payment details. The server re-verifies
+ * the signature, recalculates pricing from Strapi, then creates the Strapi Order.
+ */
+export type VerifyPaymentRequest = PlaceOrderRequest & {
+  razorpayOrderId: string;
+  razorpayPaymentId: string;
+  razorpaySignature: string;
+};
+
+export type VerifyPaymentResponse = {
+  success: boolean;
+  data?: {
+    orderId: string;
+    orderStatus: OrderStatus;
+    totalAmount: number;
+  };
+  error?: string;
+};

@@ -457,10 +457,10 @@ export default function Navbar() {
 
                     {/* Dropdown (appears on hover) */}
                     <div className="absolute right-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                      <div className="bg-white rounded-xl shadow-lg border border-olive/10 py-1.5 min-w-[180px]">
+                      <div className="bg-white rounded-xl shadow-lg border border-olive/10 py-1.5 min-w-[200px]">
                         <Link
                           href="/account/profile"
-                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-dark hover:bg-olive/5 hover:text-olive transition-colors"
+                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-dark hover:bg-olive/5 hover:text-olive transition-colors whitespace-nowrap"
                         >
                           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -470,7 +470,7 @@ export default function Navbar() {
                         </Link>
                         <Link
                           href="/account/orders"
-                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-dark hover:bg-olive/5 hover:text-olive transition-colors"
+                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-dark hover:bg-olive/5 hover:text-olive transition-colors whitespace-nowrap"
                         >
                           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
@@ -481,7 +481,7 @@ export default function Navbar() {
                         </Link>
                         <Link
                           href="/account/addresses"
-                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-dark hover:bg-olive/5 hover:text-olive transition-colors"
+                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-dark hover:bg-olive/5 hover:text-olive transition-colors whitespace-nowrap"
                         >
                           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
@@ -492,7 +492,7 @@ export default function Navbar() {
                         <div className="mx-3 my-1 h-px bg-olive/10" />
                         <button
                           onClick={logout}
-                          className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
+                          className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors cursor-pointer whitespace-nowrap"
                         >
                           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -518,27 +518,32 @@ export default function Navbar() {
             {/* Cart icon */}
             <Link
               href="/cart"
-              className="relative flex items-center gap-1.5 text-text-dark hover:text-olive transition-colors duration-200"
+              className="flex items-center gap-2 text-text-dark hover:text-olive transition-colors duration-200"
             >
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="9" cy="21" r="1" />
-                <circle cx="20" cy="21" r="1" />
-                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-              </svg>
-              {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-olive text-white text-[10px] font-bold flex items-center justify-center">
-                  {cartCount}
-                </span>
-              )}
+              <div className="relative">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="9" cy="21" r="1" />
+                  <circle cx="20" cy="21" r="1" />
+                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                </svg>
+                {cartCount > 0 && (
+                  <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-olive text-white text-[10px] font-bold flex items-center justify-center">
+                    {cartCount}
+                  </span>
+                )}
+              </div>
+              <span className="text-[13px] font-bold uppercase tracking-wider">
+                Cart
+              </span>
             </Link>
           </div>
 
@@ -550,8 +555,8 @@ export default function Navbar() {
               className="relative flex items-center text-text-dark hover:text-olive transition-colors"
             >
               <svg
-                width="22"
-                height="22"
+                width="18"
+                height="18"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
