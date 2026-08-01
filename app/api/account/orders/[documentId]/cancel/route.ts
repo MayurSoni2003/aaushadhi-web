@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { syncShipments, cancelShipment, mapIcarryStatus } from "@/lib/icarry";
 import { saveOrderWithHistory } from "@/lib/orders";
+import { createRefund } from "@/lib/razorpay";
 import { Resend } from "resend";
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
@@ -22,7 +23,7 @@ export async function POST(
 
     const { documentId } = await params;
 
-    // 1. Fetch order from Strapi
+    // 1. Fetch order from Strapi (include payment fields needed for refund)
     const orderRes = await fetch(
       `${STRAPI_URL}/api/orders/${documentId}?populate[customer]=true&populate[statusHistory]=true&populate[shippingAddress]=true`,
       {
@@ -51,20 +52,16 @@ export async function POST(
       return NextResponse.json({ error: "Forbidden: You do not own this order" }, { status: 403 });
     }
 
-    // 3. Verify iCarry shipment exists
-    // (Removed strict validation to allow cancellation before shipment is booked)
-
-    // 4. Early Idempotency Check
-    // If the database already knows the order is cancelled, short-circuit immediately.
+    // 3. Early Idempotency Check
     if (order.orderStatus === "cancelled") {
       return NextResponse.json({ error: "Order is already cancelled" }, { status: 400 });
     }
 
-    // 5. Perform a live Shipment Status Sync (Only if shipment exists)
+    // 4. Perform a live Shipment Status Sync (Only if shipment exists)
     let currentStatus = order.orderStatus;
     let syncedIcarryStatusCode = order.icarryStatusCode;
     let latestHistory = order.statusHistory;
-    
+
     if (order.icarryShipmentId) {
       try {
         const syncRes = await syncShipments([order.icarryShipmentId]);
@@ -81,14 +78,10 @@ export async function POST(
         }
       } catch (e) {
         console.error("Live sync failed during cancellation:", e);
-        // We proceed with the last known status if sync temporarily fails,
-        // or we could fail. Since the user requested "Perform a live Shipment Status Sync",
-        // we'll fail if we can't sync to strictly adhere to "Enforce these rules in your backend".
         return NextResponse.json({ error: "Failed to verify current shipment status with courier" }, { status: 502 });
       }
 
-      // Update Strapi with the live synced status first to ensure the database is perfectly up-to-date
-      // (even if cancellation is subsequently rejected)
+      // Update Strapi with the live synced status
       try {
         const updateRes = await saveOrderWithHistory(
           documentId,
@@ -97,7 +90,7 @@ export async function POST(
           currentStatus,
           "system",
           "Live sync before cancellation",
-          { 
+          {
             icarryStatusCode: syncedIcarryStatusCode,
             lastSyncedAt: new Date().toISOString()
           }
@@ -107,11 +100,10 @@ export async function POST(
         }
       } catch (e: any) {
         console.error("Failed to update pre-cancellation synced status in Strapi", e);
-        // We log but proceed with the live memory status
       }
     }
 
-    // 5. Enforce cancellation rules based on the newly synced status
+    // 5. Enforce cancellation rules
     const cancellableStatuses = ["confirmed", "processing"];
     if (!cancellableStatuses.includes(currentStatus)) {
       return NextResponse.json(
@@ -120,32 +112,86 @@ export async function POST(
       );
     }
 
-    // 6. Call iCarry Cancel API (Only if shipment exists)
+    // ─── 6. ONLINE ORDERS: Initiate Razorpay refund FIRST ──────────────
+    // The refund must be accepted by Razorpay before we proceed with
+    // cancelling iCarry and marking the order as cancelled in Strapi.
+    // This keeps the payment and order states consistent.
+    const isOnlinePaid =
+      order.paymentMethod === "online" &&
+      order.paymentStatus === "paid" &&
+      order.paymentGatewayPaymentId;
+
+    let refundResult: { id: string; amount: number } | null = null;
+    let refundError: string | null = null;
+
+    if (isOnlinePaid) {
+      const amountInPaise = Math.round((order.totalAmount || 0) * 100);
+      try {
+        refundResult = await createRefund(
+          order.paymentGatewayPaymentId,
+          amountInPaise,
+          order.orderId || documentId  // acts as idempotency receipt
+        );
+        console.log(
+          `[cancel] Refund initiated: ${refundResult.id} for ₹${order.totalAmount} on order ${order.orderId}`
+        );
+      } catch (e: any) {
+        refundError = e.message || "Razorpay refund request failed";
+        console.error("[cancel] Refund initiation failed:", e);
+        // Refund failed — do NOT proceed with cancellation.
+        // Return a clear error so the customer knows to contact support.
+        return NextResponse.json(
+          {
+            error: `We could not initiate your refund at this time (${refundError}). Please contact support to cancel this order.`,
+          },
+          { status: 502 }
+        );
+      }
+    }
+
+    // ─── 7. Cancel iCarry shipment (if one exists) ──────────────────────
     if (order.icarryShipmentId) {
       try {
         await cancelShipment(order.icarryShipmentId);
       } catch (e: any) {
         console.error("Failed to cancel shipment with iCarry:", e);
-        // If iCarry returns "Shipment id not found", it usually means the shipment is still a Draft
-        // (not yet booked with a courier) or was deleted. We should proceed to cancel it locally anyway.
         if (e.message && e.message.toLowerCase().includes("not found")) {
           console.warn(`iCarry could not find shipment ${order.icarryShipmentId} (likely a draft). Proceeding with local cancellation.`);
         } else {
-          return NextResponse.json({ error: e.message || "Courier cancellation failed" }, { status: 502 });
+          // If a refund was already initiated but iCarry cancellation fails,
+          // we log for manual review but still proceed — refund is already with Razorpay.
+          if (refundResult) {
+            console.error(`[cancel] iCarry cancel failed AFTER refund ${refundResult.id} was initiated. Manual iCarry action required.`);
+          } else {
+            return NextResponse.json({ error: e.message || "Courier cancellation failed" }, { status: 502 });
+          }
         }
       }
     }
 
-    // 7. Update Strapi orderStatus to cancelled
+    // ─── 8. Update Strapi: mark order cancelled + payment status ────────
+    const extraPayload: Record<string, any> = {
+      lastSyncedAt: new Date().toISOString(),
+    };
+
+    if (refundResult) {
+      // Refund was successfully initiated — update paymentStatus and store refund details.
+      // paymentStatus = "refunded" reflects that refund has been initiated with Razorpay.
+      // The actual settlement to the customer takes 2–10 days depending on payment method.
+      extraPayload.paymentStatus = "refunded";
+      extraPayload.refundId = refundResult.id;
+      extraPayload.refundedAt = new Date().toISOString();
+    }
+
     try {
       await saveOrderWithHistory(
         documentId,
-        currentStatus, // this is the status from before this cancellation step
+        currentStatus,
         latestHistory,
         "cancelled",
         "customer",
         "Cancelled by customer",
-        { lastSyncedAt: new Date().toISOString() },
+        extraPayload,
         true // allowRegression
       );
     } catch (e: any) {
@@ -153,8 +199,14 @@ export async function POST(
       return NextResponse.json({ error: "Order was cancelled but failed to update local database" }, { status: 500 });
     }
 
-    // 8. Notify admin of cancellation (fire-and-forget)
+    // ─── 9. Notify admin ─────────────────────────────────────────────────
     if (adminEmail) {
+      const refundRow = refundResult
+        ? `<tr><td style="padding:6px 12px;color:#888">Refund</td><td style="padding:6px 12px;color:#16a34a;font-weight:bold">₹${(order.totalAmount || 0).toLocaleString("en-IN")} initiated (${refundResult.id})</td></tr>`
+        : order.paymentMethod === "online"
+        ? `<tr><td style="padding:6px 12px;color:#888">Refund</td><td style="padding:6px 12px;color:#dc2626">COD order — no refund needed</td></tr>`
+        : "";
+
       resend.emails.send({
         from: `Aaushadhi Wellness <${fromEmail}>`,
         to: [adminEmail],
@@ -170,7 +222,9 @@ export async function POST(
               <tr><td style="padding:6px 12px;color:#888">Email</td><td style="padding:6px 12px">${order.customerEmail || order.customer?.email || ""}</td></tr>
               <tr><td style="padding:6px 12px;color:#888">Phone</td><td style="padding:6px 12px">${order.shippingAddress?.mobile || ""}</td></tr>
               <tr><td style="padding:6px 12px;color:#888">Total</td><td style="padding:6px 12px;font-weight:bold">₹${(order.totalAmount || 0).toLocaleString("en-IN")}</td></tr>
+              <tr><td style="padding:6px 12px;color:#888">Payment</td><td style="padding:6px 12px;text-transform:uppercase">${order.paymentMethod || "cod"}</td></tr>
               <tr><td style="padding:6px 12px;color:#888">Status Before</td><td style="padding:6px 12px;text-transform:capitalize">${currentStatus}</td></tr>
+              ${refundRow}
               ${order.icarryShipmentId ? `<tr><td style="padding:6px 12px;color:#888">iCarry ID</td><td style="padding:6px 12px">${order.icarryShipmentId}</td></tr>` : ""}
             </table>
 
@@ -180,7 +234,17 @@ export async function POST(
       }).catch((err: Error) => console.error("Admin cancellation notification email failed:", err));
     }
 
-    return NextResponse.json({ success: true, message: "Order successfully cancelled" });
+    return NextResponse.json({
+      success: true,
+      message: "Order successfully cancelled",
+      ...(refundResult && {
+        refund: {
+          id: refundResult.id,
+          amount: order.totalAmount,
+          note: "Your refund has been initiated and will be credited within 5–10 business days depending on your payment method.",
+        },
+      }),
+    });
 
   } catch (error: any) {
     console.error("Order Cancellation Error:", error);
