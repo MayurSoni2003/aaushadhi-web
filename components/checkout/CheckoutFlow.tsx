@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
@@ -15,10 +15,32 @@ import type {
   OrderItemData,
 } from "@/lib/checkout-types";
 
+// Declare the global Razorpay type so TypeScript doesn't complain.
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
+
+/** Dynamically load the Razorpay checkout script if not already present. */
+function loadRazorpayScript(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (typeof window.Razorpay !== "undefined") {
+      resolve();
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Failed to load Razorpay checkout script."));
+    document.body.appendChild(script);
+  });
+}
+
 export default function CheckoutFlow() {
   const router = useRouter();
   const { cartItems, cartTotal, clearCart } = useCart();
-  const { customer, isLoading } = useAuth();
+  const { customer } = useAuth();
 
   // Step state defaults to 1 since auth is handled before checkout
   const [step, setStep] = useState<CheckoutStep>(1);
@@ -42,8 +64,7 @@ export default function CheckoutFlow() {
   const [placing, setPlacing] = useState(false);
   const [orderError, setOrderError] = useState("");
 
-
-  // ─── Step 1: Address complete ───
+  // ─── Step 1: Address complete ─────────────────────────────────────────
   const handleAddressComplete = useCallback(
     (data: NonNullable<typeof addressData>) => {
       setAddressData(data);
@@ -52,22 +73,32 @@ export default function CheckoutFlow() {
     []
   );
 
-  // ─── Step 2: Place order ───
-  const handlePlaceOrder = async () => {
+  // ─── Shared: build common checkout payload ────────────────────────────
+  const buildCheckoutPayload = () => {
+    if (!addressData) return null;
+    return {
+      customerName: addressData.fullName,
+      customerPhone: addressData.mobile || "",
+      customerEmail: addressData.email || customer?.email || undefined,
+      shippingAddress: {
+        addressLine1: addressData.addressLine1,
+        addressLine2: addressData.addressLine2 || undefined,
+        city: addressData.city,
+        state: addressData.state,
+        pincode: addressData.pincode,
+        country: addressData.country,
+      },
+      shippingCost: addressData.deliveryEstimate.shippingCost,
+    };
+  };
+
+  // ─── Step 2: Place COD order ──────────────────────────────────────────
+  const handleCodOrder = async () => {
     if (!addressData) return;
-
-    if (paymentMethod === "online") {
-      setOrderError(
-        "Online payment is coming soon. Please select Cash on Delivery."
-      );
-      return;
-    }
-
     setPlacing(true);
     setOrderError("");
 
     try {
-      // Build order items with product snapshots
       const items: OrderItemData[] = cartItems.map((item) => ({
         product: item.product.id,
         productName: item.product.productName,
@@ -77,25 +108,13 @@ export default function CheckoutFlow() {
         imageUrl: item.product.mainImageUrl,
       }));
 
+      const payload = buildCheckoutPayload();
+      if (!payload) return;
+
       const res = await fetch("/api/checkout/place-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          customerName: addressData.fullName,
-          customerPhone: addressData.mobile || "", // Pass mobile from address form
-          customerEmail: addressData.email || customer?.email || undefined,
-          shippingAddress: {
-            addressLine1: addressData.addressLine1,
-            addressLine2: addressData.addressLine2 || undefined,
-            city: addressData.city,
-            state: addressData.state,
-            pincode: addressData.pincode,
-            country: addressData.country,
-          },
-          items,
-          paymentMethod,
-          shippingCost: addressData.deliveryEstimate.shippingCost,
-        }),
+        body: JSON.stringify({ ...payload, items, paymentMethod: "cod" }),
       });
 
       const data = await res.json();
@@ -113,7 +132,140 @@ export default function CheckoutFlow() {
     }
   };
 
-  // ─── Empty cart guard ───
+  // ─── Step 2: Place Online order via Razorpay ──────────────────────────
+  const handleOnlineOrder = async () => {
+    if (!addressData) return;
+    setPlacing(true);
+    setOrderError("");
+
+    try {
+      // 1. Load Razorpay script
+      await loadRazorpayScript();
+
+      // 2. Create Razorpay order on the server (server recalculates the amount)
+      const items = cartItems.map((item) => ({
+        product: item.product.id,
+        quantity: item.quantity,
+      }));
+
+      const payload = buildCheckoutPayload();
+      if (!payload) return;
+
+      const createRes = await fetch("/api/checkout/create-razorpay-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...payload, items }),
+      });
+
+      const createData = await createRes.json();
+
+      if (!createData.success || !createData.data) {
+        setOrderError(createData.error || "Failed to initiate payment. Please try again.");
+        setPlacing(false);
+        return;
+      }
+
+      const { razorpayOrderId, amount, currency, keyId } = createData.data;
+
+      // 3. Open Razorpay checkout modal
+      await new Promise<void>((resolve, reject) => {
+        const options = {
+          key: keyId,
+          amount,
+          currency,
+          order_id: razorpayOrderId,
+          name: "Aaushadhi Wellness",
+          description: "Order Payment",
+          prefill: {
+            name: addressData.fullName,
+            email: addressData.email || customer?.email || "",
+            contact: addressData.mobile || "",
+          },
+          theme: { color: "#5C6B2E" },
+          handler: async (response: {
+            razorpay_payment_id: string;
+            razorpay_order_id: string;
+            razorpay_signature: string;
+          }) => {
+            // 4. Payment successful — verify on the server with the full payload
+            try {
+              const enrichedItems: OrderItemData[] = cartItems.map((item) => ({
+                product: item.product.id,
+                productName: item.product.productName,
+                slug: item.product.slug,
+                price: item.product.price,
+                quantity: item.quantity,
+                imageUrl: item.product.mainImageUrl,
+              }));
+
+              const verifyRes = await fetch("/api/checkout/payment-verify", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  ...payload,
+                  items: enrichedItems,
+                  paymentMethod: "online",
+                  razorpayOrderId: response.razorpay_order_id,
+                  razorpayPaymentId: response.razorpay_payment_id,
+                  razorpaySignature: response.razorpay_signature,
+                }),
+              });
+
+              const verifyData = await verifyRes.json();
+
+              if (verifyData.success && verifyData.data) {
+                clearCart();
+                router.push(
+                  `/checkout/confirmation?orderId=${verifyData.data.orderId}`
+                );
+                resolve();
+              } else {
+                reject(
+                  new Error(
+                    verifyData.error ||
+                      "Payment verification failed. Please contact support."
+                  )
+                );
+              }
+            } catch (err: any) {
+              reject(err);
+            }
+          },
+          modal: {
+            ondismiss: () => {
+              // User closed the modal without paying — treat as cancellation
+              reject(new Error("DISMISSED"));
+            },
+          },
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+      });
+    } catch (err: any) {
+      if (err?.message === "DISMISSED") {
+        // User intentionally closed modal — reset, no error message needed
+        setPlacing(false);
+        return;
+      }
+      setOrderError(
+        err?.message || "Something went wrong. Please try again."
+      );
+    } finally {
+      setPlacing(false);
+    }
+  };
+
+  // ─── Unified place order handler ──────────────────────────────────────
+  const handlePlaceOrder = () => {
+    if (paymentMethod === "online") {
+      handleOnlineOrder();
+    } else {
+      handleCodOrder();
+    }
+  };
+
+  // ─── Empty cart guard ─────────────────────────────────────────────────
   if (cartItems.length === 0 && step === 1) {
     return (
       <div className="text-center py-16">
@@ -164,8 +316,6 @@ export default function CheckoutFlow() {
               boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
             }}
           >
-
-
             {step === 1 && (
               <AddressForm
                 cartTotal={cartTotal}
@@ -192,14 +342,7 @@ export default function CheckoutFlow() {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     >
-                      <rect
-                        x="1"
-                        y="4"
-                        width="22"
-                        height="16"
-                        rx="2"
-                        ry="2"
-                      />
+                      <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
                       <line x1="1" y1="10" x2="23" y2="10" />
                     </svg>
                   </div>
@@ -209,7 +352,7 @@ export default function CheckoutFlow() {
                   className="text-xl md:text-2xl font-bold text-text-dark text-center mb-2"
                   style={{ fontFamily: "var(--font-outfit)" }}
                 >
-                  Payment & Checkout
+                  Payment &amp; Checkout
                 </h2>
                 <p className="text-text-muted text-sm text-center mb-4">
                   Choose your preferred payment method
@@ -258,16 +401,16 @@ export default function CheckoutFlow() {
                   </p>
                 )}
 
-                {/* Place Order button */}
+                {/* Place Order / Pay button */}
                 <button
                   type="button"
                   onClick={handlePlaceOrder}
-                  disabled={placing || paymentMethod === "online"}
+                  disabled={placing}
                   className={`
                     w-full py-4 rounded-xl text-sm font-bold uppercase tracking-wider
                     transition-all duration-200 cursor-pointer
                     ${
-                      placing || paymentMethod === "online"
+                      placing
                         ? "bg-olive/40 text-white/60 cursor-not-allowed"
                         : "bg-olive text-white hover:bg-olive-light active:scale-[0.98] shadow-lg"
                     }
@@ -295,12 +438,14 @@ export default function CheckoutFlow() {
                           strokeLinecap="round"
                         />
                       </svg>
-                      Placing Order...
+                      {paymentMethod === "online"
+                        ? "Processing Payment..."
+                        : "Placing Order..."}
                     </span>
                   ) : paymentMethod === "online" ? (
-                    "Online Payment Coming Soon"
+                    `Pay ₹${(cartTotal + (shippingCost || 0)).toLocaleString("en-IN")}`
                   ) : (
-                    `Place Order `
+                    "Place Order"
                   )}
                 </button>
 
@@ -309,6 +454,12 @@ export default function CheckoutFlow() {
                     You will pay ₹
                     {(cartTotal + (shippingCost || 0)).toLocaleString("en-IN")}{" "}
                     to the delivery partner when your order arrives.
+                  </p>
+                )}
+
+                {paymentMethod === "online" && (
+                  <p className="text-text-muted text-[11px] text-center">
+                    You will be redirected to the Razorpay secure payment page.
                   </p>
                 )}
               </div>

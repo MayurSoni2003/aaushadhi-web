@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -28,17 +27,6 @@ export default function CatalogCard({ product, priority = false }: Props) {
   const { addToCart, updateQuantity, getQuantity } = useCart();
   const router = useRouter();
   const qty = getQuantity(product.id);
-  const [isBuyingNow, setIsBuyingNow] = useState(false);
-
-  const handleBuyNow = () => {
-    setIsBuyingNow(true);
-    if (qty === 0) {
-      addToCart(toCartProduct(product));
-    }
-    router.push("/cart");
-  };
-
-  const displayQty = isBuyingNow ? 0 : qty;
 
   const discount = Math.round(
     ((product.comparePrice - product.price) / product.comparePrice) * 100
@@ -92,7 +80,7 @@ export default function CatalogCard({ product, priority = false }: Props) {
         <Link href={`/products/${product.slug}`} className="hover:text-olive transition-colors duration-200">
           <h3
             className="text-text-dark font-bold text-[12px] md:text-[15px] leading-snug hover:text-olive transition-colors line-clamp-2"
-            style={{ fontFamily: "var(--font-outfit)" }}
+            style={{ fontFamily: "var(--font-playfair)" }}
           >
             {product.productName}
           </h3>
@@ -132,7 +120,7 @@ export default function CatalogCard({ product, priority = false }: Props) {
         </div>
 
         {/* Add to Cart / Quantity controls */}
-        {displayQty === 0 ? (
+        {qty === 0 ? (
           <div className="mt-1.5 md:mt-2 flex flex-col sm:flex-row gap-1.5 md:gap-2">
             <button
               type="button"
@@ -151,15 +139,21 @@ export default function CatalogCard({ product, priority = false }: Props) {
             </button>
             <button
               type="button"
-              onClick={handleBuyNow}
-              disabled={isBuyingNow}
-              className={`
+              onClick={() => {
+                addToCart(toCartProduct(product));
+                router.push("/checkout");
+              }}
+              className="
                 flex-1 py-1.5 md:py-2.5 rounded-full text-[9px] md:text-[11px] font-semibold uppercase tracking-wider
-                text-white shadow-sm transition-all duration-200
-                ${isBuyingNow ? "bg-earth/70 cursor-wait" : "bg-earth hover:bg-earth/90 active:scale-[0.97] cursor-pointer"}
-              `}
+                bg-earth text-white
+                hover:bg-earth/90
+                active:scale-[0.97]
+                transition-all duration-200
+                cursor-pointer
+                shadow-sm
+              "
             >
-              {isBuyingNow ? "..." : "Buy Now"}
+              Buy Now
             </button>
           </div>
         ) : (
@@ -174,7 +168,7 @@ export default function CatalogCard({ product, priority = false }: Props) {
                 −
               </button>
               <span className="text-text-dark font-semibold text-xs md:text-sm">
-                {qty}
+                {qty} × 100g
               </span>
               <button
                 type="button"
@@ -187,15 +181,18 @@ export default function CatalogCard({ product, priority = false }: Props) {
             </div>
             <button
               type="button"
-              onClick={handleBuyNow}
-              disabled={isBuyingNow}
-              className={`
+              onClick={() => router.push("/checkout")}
+              className="
                 w-full py-1.5 md:py-2.5 rounded-full text-[9px] md:text-[11px] font-semibold uppercase tracking-wider
-                text-white shadow-sm transition-all duration-200
-                ${isBuyingNow ? "bg-earth/70 cursor-wait" : "bg-earth hover:bg-earth/90 active:scale-[0.97] cursor-pointer"}
-              `}
+                bg-earth text-white
+                hover:bg-earth/90
+                active:scale-[0.97]
+                transition-all duration-200
+                cursor-pointer
+                shadow-sm
+              "
             >
-              {isBuyingNow ? "..." : "Go to Cart"}
+              Buy Now
             </button>
           </div>
         )}

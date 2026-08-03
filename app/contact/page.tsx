@@ -81,7 +81,7 @@ function ChannelCard({
       {/* Value */}
       <p
         className="text-lg md:text-xl font-bold text-text-dark mb-2 group-hover:text-olive transition-colors duration-300"
-        style={{ fontFamily: "var(--font-outfit)" }}
+        style={{ fontFamily: "var(--font-playfair)" }}
       >
         {value}
       </p>
@@ -105,7 +105,7 @@ function ChannelCard({
 
 /* ── Main Page Component ── */
 export default function ContactPage() {
-  const outfit = { fontFamily: "var(--font-outfit)" };
+  const playfair = { fontFamily: "var(--font-playfair)" };
   const [formState, setFormState] = useState<"idle" | "sending" | "sent">("idle");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -141,10 +141,14 @@ export default function ContactPage() {
     <>
       <div
         className="relative min-h-screen overflow-clip"
-        style={{
-          background:
-            "linear-gradient(170deg, #EDE3CA 0%, #F5EAD6 12%, #EFE0C8 28%, #E8D5C0 40%, #E4D0C2 50%, #DDD0CE 62%, #D4CEDB 72%, #CCD4E0 85%, #D0DBE6 100%)",
-        }}
+        
+          style={{
+  backgroundImage: "url('/products/bg.png')",
+  backgroundSize: "contain",
+  backgroundPosition: "center",
+  backgroundRepeat: "repeat",
+}}
+        
       >
         {/* ── Decorative elements ── */}
         <FloatingLeaf className="absolute -top-8 -right-8 w-80 md:w-[420px] h-80 md:h-[420px] opacity-20 pointer-events-none select-none z-0" />
@@ -164,41 +168,170 @@ export default function ContactPage() {
         <div className="relative z-10">
           <Navbar />
 
-          <main className="pb-20">
-            {/* ═══════════════ Hero ═══════════════ */}
-            <section className="px-4 md:px-8 pt-10 pb-6" id="contact-hero">
-              <div className="max-w-3xl mx-auto text-center">
-                {/* Logo mark */}
-                <div className="flex justify-center mb-5">
-                  <div className="w-16 h-16 rounded-full bg-olive/8 border border-olive/15 flex items-center justify-center">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#5C6B2E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                    </svg>
-                  </div>
-                </div>
+          <main
+  className="relative overflow-hidden"
+  style={{
+    backgroundImage: "url('/images/paper-bg.jpg')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+  }}
+>
+  {/* Left Leaves */}
+  <img
+    src="/images/leaf-left.png"
+    alt=""
+    className="absolute left-0 top-0 h-full w-36 object-cover opacity-30 pointer-events-none"
+  />
 
-                {/* Headline — poetic, not generic */}
-                <h1
-                  className="text-3xl md:text-5xl lg:text-[3.4rem] font-bold text-olive leading-[1.12] mb-4"
-                  style={{ ...outfit, fontStyle: "italic" }}
-                >
-                  Every Wellness Journey
-                  <br />
-                  <span className="text-text-dark not-italic">Starts with a Conversation</span>
-                </h1>
+  {/* Right Leaves */}
+  <img
+    src="/images/leaf-right.png"
+    alt=""
+    className="absolute right-0 top-0 h-full w-36 object-cover opacity-30 pointer-events-none"
+  />
 
-                <p className="text-text-muted text-sm md:text-base max-w-lg mx-auto leading-relaxed">
-                  Whether you have a question about our herbs, need guidance choosing the right
-                  product, or just want to say hello — we&apos;re here, rooted and ready.
-                </p>
-              </div>
-            </section>
+  {/* Center Hanging Leaf */}
+  <img
+    src="/images/leaf-center.png"
+    alt=""
+    className="absolute left-1/2 top-0 -translate-x-1/2 w-24 opacity-40 pointer-events-none"
+  />
+  {/* ================= PAGE HEADING ================= */}
+<section className="pt-12 md:pt-16 pb-6">
+  <div className="max-w-7xl mx-auto px-6 text-center">
+    <p className="text-sm uppercase tracking-[0.3em] text-[#7A8C3A] font-semibold mb-3">
+      Get In Touch
+    </p>
 
-            {/* ═══════════════ Contact Channels ═══════════════ */}
-            <section className="px-4 md:px-8 py-10" id="contact-channels">
-              <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
-                {/* WhatsApp — primary channel */}
-                <ChannelCard
+    <h1
+      className="text-4xl md:text-6xl font-bold text-[#1F1F1F]"
+      style={{ fontFamily: "var(--font-playfair)" }}
+    >
+      Contact Us
+    </h1>
+
+    <div className="mt-5 flex justify-center">
+      <div className="h-[3px] w-20 rounded-full bg-[#7A8C3A]" />
+    </div>
+  </div>
+</section>
+
+{/* ================= CONTACT HERO ================= */}
+
+<section
+  className="relative overflow-hidden bg-[#ECD7B9] py-28 md:py-36"
+>
+  {/* Soft Glow */}
+  <div className="absolute left-1/2 top-24 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-white/25 blur-[140px]" />
+
+  {/* Left Leaf */}
+<div
+  className="
+    pointer-events-none
+    absolute
+    left-8
+    bottom-10
+    text-7xl
+    opacity-30
+  "
+>
+  🌿
+</div>
+
+
+{/* Right Leaf */}
+<div
+  className="
+    pointer-events-none
+    absolute
+    right-10
+    top-10
+    text-6xl
+    opacity-30
+  "
+>
+  🍃
+</div>
+
+
+{/* Bottom Border Plants */}
+<div
+  className="
+    pointer-events-none
+    absolute
+    bottom-4
+    left-0
+    flex
+    w-full
+    justify-around
+    text-4xl
+    opacity-25
+  "
+>
+  <span>🌱</span>
+  <span>🌿</span>
+  <span>🍃</span>
+  <span>🌱</span>
+  <span>☘️</span>
+</div>
+  <div className="relative mx-auto max-w-7xl px-6">
+
+    <div className="text-center">
+
+      {/* Green Heading */}
+
+      <h2
+        className="text-[52px] md:text-[72px] font-bold leading-none text-[#5B6E2F]"
+        style={{
+          fontFamily: "var(--font-playfair)",
+        }}
+      >
+        Every Wellness Journey
+      </h2>
+
+      {/* Black Heading */}
+
+      <h1
+        className="mt-3 text-[58px] md:text-[82px] font-bold leading-none text-[#111111]"
+        style={{
+          fontFamily: "var(--font-playfair)",
+        }}
+      >
+        Starts with a Conversation
+      </h1>
+
+      {/* Description */}
+
+      <p
+        className="
+          mx-auto
+          mt-12
+          max-w-6xl
+          text-xl
+          md:text-[26px]
+          leading-[2.2]
+          text-[#4F4F4F]
+        "
+      >
+        Whether you have a question about our herbs,
+        need guidance choosing the right product,
+        or just want to say hello —
+        we're here, rooted and ready.
+      </p>
+
+    </div>
+
+  </div>
+</section>
+{/* ================= CONTACT CARDS ================= */}
+
+<section className="relative max-w-6xl mx-auto px-6 pb-24">
+
+  <div className="space-y-8">
+
+    
+
+    <ChannelCard
                   icon={
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="#25D366">
                       <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
@@ -274,11 +407,14 @@ export default function ContactPage() {
                   accentColor="#E1306C"
                   delay="320ms"
                 />
-              </div>
-            </section>
+
+  </div>
+
+</section>
+            
 
             
-            {/*═══════════════ The Letter — Contact Form ═══════════════*/}
+      
             
 
             {/* ═══════════════ Bottom Assurance ═══════════════ */}
@@ -319,7 +455,7 @@ export default function ContactPage() {
 
                   <p
                     className="text-olive font-bold text-lg md:text-xl mb-2"
-                    style={outfit}
+                    style={playfair}
                   >
                     Your trust is our most valued herb.
                   </p>
