@@ -185,9 +185,9 @@ function OrderProgressTimeline({ status, history }: { status: OrderStatus; histo
 
       <div className={isCancelled ? "max-w-md mx-auto sm:mx-0" : ""}>
         {/* Dots row — line is relative to this row only */}
-        <div className="relative flex items-center justify-between">
-          {/* Track wrapper to offset by half the dot container width (72px / 2 = 36px) */}
-          <div className="absolute left-[36px] right-[36px] top-1/2 -translate-y-1/2 h-[3px]">
+        <div className="relative flex items-center">
+          {/* Track: sits behind dots, offset by half dot size on each side */}
+          <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[3px] mx-[6px]">
             {/* Base grey track */}
             <div className="absolute inset-0 bg-olive/12 rounded-full w-full h-full" />
 
@@ -220,7 +220,7 @@ function OrderProgressTimeline({ status, history }: { status: OrderStatus; histo
           const isDone = i < activeIdx;
           const isActive = i === activeIdx;
           return (
-            <div key={m.key} className="relative z-10 flex-shrink-0 flex justify-center" style={{ width: 72 }}>
+            <div key={m.key} className="relative z-10 flex-1 flex justify-center">
               <div
                 className={`
                   w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full ring-2 ring-white shadow-sm transition-colors
@@ -241,14 +241,18 @@ function OrderProgressTimeline({ status, history }: { status: OrderStatus; histo
       </div>
 
       {/* Labels row — completely separate from the track */}
-      <div className="flex justify-between mt-2.5">
+      <div className="flex mt-2.5">
         {milestones.map((m, i) => {
           const isDone = i < activeIdx;
           const isActive = i === activeIdx;
+          const isFirst = i === 0;
+          const isLast = i === milestones.length - 1;
           return (
             <div
               key={m.key}
-              className={`text-center leading-tight flex-shrink-0 flex flex-col items-center justify-start ${
+              className={`flex-1 min-w-0 leading-tight flex flex-col ${
+                isFirst ? "items-start" : isLast ? "items-end" : "items-center"
+              } justify-start ${
                 (isCancelled && isActive) || (isReturned && m.key === "returned")
                   ? "text-red-600 font-semibold"
                   : isActive
@@ -257,11 +261,10 @@ function OrderProgressTimeline({ status, history }: { status: OrderStatus; histo
                   ? "text-olive/70 font-medium"
                   : "text-text-muted"
               } text-[9px] sm:text-[11px]`}
-              style={{ width: 72 }}
             >
-              <span>{m.label}</span>
+              <span className="text-center">{m.label}</span>
               {milestoneDates[m.key] && (
-                <span className="mt-1 opacity-90">{milestoneDates[m.key]}</span>
+                <span className="mt-1 opacity-90 text-center">{milestoneDates[m.key]}</span>
               )}
             </div>
           );
