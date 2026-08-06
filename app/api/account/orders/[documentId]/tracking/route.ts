@@ -38,6 +38,13 @@ export async function GET(
   { params }: { params: Promise<{ documentId: string }> }
 ) {
   try {
+    if (process.env.NEXT_PUBLIC_HIDE_LIVE_TRACKING === "true") {
+      return NextResponse.json(
+        { error: "Live tracking is currently disabled" },
+        { status: 403 }
+      );
+    }
+
     const session = await getSession();
     if (!session || !session.customerDocumentId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

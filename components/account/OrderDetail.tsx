@@ -800,7 +800,7 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
       </div>
 
       {/* ── Order Timeline (Track Live Shipment only when icarry linked) ── */}
-      {order.icarryShipmentId && (
+      {order.icarryShipmentId && process.env.NEXT_PUBLIC_HIDE_LIVE_TRACKING !== "true" && (
         <Section title={["cancelled", "delivered", "returned"].includes(order.orderStatus) ? "Tracking History" : "Live Tracking"}>
           {!isTrackingExpanded ? (
             <button
