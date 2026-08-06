@@ -322,11 +322,23 @@ export async function POST(request: NextRequest) {
         }).catch(() => {});
       }
     } catch (bookingError) {
-      // Non-fatal — order is already paid. Shipment can be booked manually.
+      // Non-fatal — order is already paid. Flag for the cron job's orphan recovery pass.
       console.error(
         "[payment-verify] iCarry draft booking failed (order still created):",
         bookingError
       );
+      if (documentId) {
+        await fetch(`${STRAPI_URL}/api/orders/${documentId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${STRAPI_TOKEN}`,
+          },
+          body: JSON.stringify({ data: { needsManualReview: true } }),
+        }).catch((err) =>
+          console.error("[payment-verify] Failed to set needsManualReview:", err)
+        );
+      }
     }
 
     // ─── 8. Notify admin ────────────────────────────────────────────────

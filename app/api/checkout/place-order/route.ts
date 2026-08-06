@@ -186,8 +186,18 @@ export async function POST(request: NextRequest) {
           }
         }
       } catch (bookingError) {
-        // Log but don't fail the order — shipment can be booked manually
+        // Non-fatal — order is still confirmed. Flag for the cron job's orphan recovery pass.
         console.error("iCarry booking failed (order still created):", bookingError);
+        await fetch(`${STRAPI_URL}/api/orders/${documentId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${STRAPI_TOKEN}`,
+          },
+          body: JSON.stringify({ data: { needsManualReview: true } }),
+        }).catch((err) =>
+          console.error("Failed to set needsManualReview after iCarry booking failure:", err)
+        );
       }
     }
 
