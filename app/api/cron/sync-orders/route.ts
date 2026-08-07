@@ -123,14 +123,9 @@ async function runStatusSync(): Promise<Record<string, any>> {
     }
 
     const mapping = mapIcarryStatus(item.status);
-    let newStatus = mapping.status || order.orderStatus;
-    let newNeedsManualReview = mapping.needsManualReview || false;
+    const newStatus = mapping.status || order.orderStatus;
+    const newNeedsManualReview = mapping.needsManualReview || false;
 
-    // Contextual override: If shipment was cancelled out-of-band by admin (order is still processing/confirmed)
-    if (newStatus === "cancelled" && (order.orderStatus === "processing" || order.orderStatus === "confirmed")) {
-      newStatus = order.orderStatus; // Refuse to cancel the order
-      newNeedsManualReview = true; // Alert the admin instead
-    }
 
     const updates: Record<string, any> = {};
 
