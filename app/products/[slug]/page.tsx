@@ -167,8 +167,6 @@ export default async function ProductPage({ params }: Props) {
   }));
 
   // Check which optional sections have data
-  const hasAyurvedicProfile = product.ayurvedicProfile &&
-    (product.ayurvedicProfile.rasa || product.ayurvedicProfile.guna || product.ayurvedicProfile.virya || product.ayurvedicProfile.vipaka || product.ayurvedicProfile.doshaKarma);
   const hasUsageInfo = product.usageInfo &&
     (product.usageInfo.howToUse || product.usageInfo.servingMethod || product.usageInfo.dailyDosage || product.usageInfo.bestTimeToConsume || product.usageInfo.lifestylePairing);
   const hasBenefitsTable = product.benefitsTable && product.benefitsTable.length > 0;
@@ -325,34 +323,7 @@ export default async function ProductPage({ params }: Props) {
           </Section>
         )}
 
-        {/* ── Ayurvedic Profile ────────────────────────────── */}
-        {hasAyurvedicProfile && (
-          <Section title="Traditional Ayurvedic Profile" icon={SparklesIcon}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[
-                { label: "Rasa (Taste)", value: product.ayurvedicProfile!.rasa },
-                { label: "Guna (Qualities)", value: product.ayurvedicProfile!.guna },
-                { label: "Virya (Potency)", value: product.ayurvedicProfile!.virya },
-                { label: "Vipaka (Post-Digestive)", value: product.ayurvedicProfile!.vipaka },
-                { label: "Dosha Karma", value: product.ayurvedicProfile!.doshaKarma },
-              ]
-                .filter((item) => item.value)
-                .map((item) => (
-                  <div
-                    key={item.label}
-                    className="p-4 rounded-xl bg-white/60 border border-olive/8 hover:border-olive/20 transition-colors"
-                  >
-                    <p className="text-[11px] uppercase tracking-[0.15em] text-olive/70 font-semibold mb-1.5">
-                      {item.label}
-                    </p>
-                    <p className="text-text-dark text-sm font-medium leading-snug">
-                      {item.value}
-                    </p>
-                  </div>
-                ))}
-            </div>
-          </Section>
-        )}
+
 
         {/* ── Ingredients & Purity ─────────────────────────── */}
         {(product.ingredients || product.purityInformation) && (

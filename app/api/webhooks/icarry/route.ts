@@ -64,7 +64,14 @@ export async function POST(request: NextRequest) {
     let hasChanges = false;
 
     const mapping = mapIcarryStatus(status);
-    const newStatus = mapping.status || order.orderStatus;
+    let newStatus = mapping.status || order.orderStatus;
+    let newNeedsManualReview = mapping.needsManualReview || false;
+
+    // Contextual override: If shipment was cancelled out-of-band by admin (order is still processing/confirmed)
+    if (newStatus === "cancelled" && (order.orderStatus === "processing" || order.orderStatus === "confirmed")) {
+      newStatus = order.orderStatus; // Refuse to cancel the order
+      newNeedsManualReview = true; // Alert the admin instead
+    }
 
     const parsedStatusCode = parseInt(String(status), 10);
     if (!isNaN(parsedStatusCode) && order.icarryStatusCode !== parsedStatusCode) {
@@ -72,7 +79,6 @@ export async function POST(request: NextRequest) {
       hasChanges = true;
     }
 
-    const newNeedsManualReview = mapping.needsManualReview || false;
     if (order.needsManualReview !== newNeedsManualReview && newNeedsManualReview) {
       updates.needsManualReview = true;
       hasChanges = true;
